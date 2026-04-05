@@ -8,153 +8,52 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet"/>
 <style>
 :root{
-  --bg:#06090c;
-  --bg2:#0a0e14;
-  --bg3:#0e1520;
-  --card:#101820;
-  --card2:#141f2a;
-  --border:#182030;
-  --border2:#1e2d3d;
-  --red:#e84057;
-  --red2:#ff6b7a;
-  --orange:#ff7043;
-  --gold:#ffc107;
-  --gold2:#ffe082;
-  --green:#00e5a0;
-  --green2:#69ffcb;
-  --blue:#4fc3f7;
-  --cyan:#00bcd4;
-  --purple:#b39ddb;
-  --text:#c8dce8;
-  --text2:#6b8fa8;
-  --text3:#2d4558;
+  --bg:#06090c;--bg2:#0a0e14;--bg3:#0e1520;
+  --card:#101820;--card2:#141f2a;
+  --border:#182030;--border2:#1e2d3d;
+  --red:#e84057;--red2:#ff6b7a;--orange:#ff7043;
+  --gold:#ffc107;--gold2:#ffe082;
+  --green:#00e5a0;--green2:#69ffcb;
+  --blue:#4fc3f7;--cyan:#00bcd4;--purple:#b39ddb;
+  --text:#c8dce8;--text2:#6b8fa8;--text3:#2d4558;
   --white:#eef4f8;
-  --r:8px;
-  --r2:5px;
-  --glow-red:0 0 20px rgba(232,64,87,.2);
-  --glow-green:0 0 20px rgba(0,229,160,.2);
+  --r:8px;--r2:5px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Exo 2',sans-serif;
-  min-height:100vh;
-  font-size:14px;
-  overflow-x:hidden;
-}
-
-/* scanline overlay */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
-}
-
-/* grid bg */
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:
-    linear-gradient(rgba(0,229,160,.03) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,229,160,.03) 1px,transparent 1px);
-  background-size:40px 40px;
-}
-
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;min-height:100vh;font-size:14px;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,229,160,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,.025) 1px,transparent 1px);background-size:40px 40px}
 .wrap{max-width:640px;margin:0 auto;padding:10px 10px 48px;position:relative;z-index:1}
 
-/* ── HEADER ── */
-.hdr{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 0 14px;margin-bottom:14px;
-  border-bottom:1px solid var(--border);
-  position:relative;
-}
-.hdr::after{
-  content:'';position:absolute;bottom:-1px;left:0;width:120px;height:1px;
-  background:linear-gradient(90deg,var(--green),transparent);
-}
-.hdr-logo{
-  width:38px;height:38px;flex-shrink:0;
-  border:1px solid rgba(0,229,160,.3);border-radius:6px;
-  display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,rgba(0,229,160,.05),transparent);
-  position:relative;
-  box-shadow:0 0 12px rgba(0,229,160,.1);
-}
-.hdr-logo::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,var(--green),transparent);
-}
-.hdr-em{font-size:20px}
+/* HEADER */
+.hdr{display:flex;align-items:center;gap:12px;padding:12px 0 14px;margin-bottom:14px;border-bottom:1px solid var(--border);position:relative}
+.hdr::after{content:'';position:absolute;bottom:-1px;left:0;width:120px;height:1px;background:linear-gradient(90deg,var(--green),transparent)}
+.hdr-logo{width:36px;height:36px;flex-shrink:0;border:1px solid rgba(0,229,160,.3);border-radius:6px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(0,229,160,.05),transparent);box-shadow:0 0 12px rgba(0,229,160,.1)}
+.hdr-em{font-size:18px}
 .hdr-title{flex:1}
-.hdr-title h1{
-  font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;
-  letter-spacing:4px;text-transform:uppercase;color:var(--white);line-height:1;
-}
-.hdr-title p{
-  font-family:'Share Tech Mono',monospace;font-size:9px;
-  color:var(--text3);margin-top:3px;letter-spacing:2px;
-}
-.hdr-live{
-  display:flex;align-items:center;gap:5px;
-  font-family:'Share Tech Mono',monospace;font-size:9px;
-  color:var(--green);letter-spacing:2px;
-  border:1px solid rgba(0,229,160,.2);border-radius:3px;
-  padding:4px 8px;
-  background:rgba(0,229,160,.05);
-}
+.hdr-title h1{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--white);line-height:1}
+.hdr-title p{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:3px;letter-spacing:2px}
+.hdr-live{display:flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;border:1px solid rgba(0,229,160,.2);border-radius:3px;padding:4px 8px;background:rgba(0,229,160,.05)}
 .live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-/* ── SEARCH ── */
+/* SEARCH */
 .search-wrap{position:relative;margin-bottom:12px}
-.search-box{
-  background:var(--card);
-  border:1px solid var(--border2);
-  border-radius:var(--r);
-  padding:0 12px;
-  display:flex;align-items:center;gap:10px;
-  transition:border-color .2s,box-shadow .2s;
-}
-.search-box:focus-within{
-  border-color:var(--green);
-  box-shadow:0 0 0 2px rgba(0,229,160,.08),var(--glow-green);
-}
+.search-box{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:0 12px;display:flex;align-items:center;gap:10px;transition:border-color .2s,box-shadow .2s}
+.search-box:focus-within{border-color:var(--green);box-shadow:0 0 0 2px rgba(0,229,160,.08)}
 .s-icon{color:var(--text3);font-size:14px;flex-shrink:0}
-.search-input{
-  flex:1;background:none;border:none;
-  padding:12px 0;color:var(--white);
-  font-size:15px;font-family:'Exo 2',sans-serif;font-weight:500;
-  outline:none;
-}
+.search-input{flex:1;background:none;border:none;padding:12px 0;color:var(--white);font-size:15px;font-family:'Exo 2',sans-serif;font-weight:500;outline:none}
 .search-input::placeholder{color:var(--text3)}
-.search-btn{
-  background:linear-gradient(135deg,var(--green),var(--cyan));
-  border:none;border-radius:var(--r2);
-  padding:7px 16px;color:#06090c;
-  font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;
-  letter-spacing:2px;cursor:pointer;
-  transition:opacity .2s,transform .1s;
-  white-space:nowrap;flex-shrink:0;
-}
+.search-btn{background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:var(--r2);padding:7px 16px;color:#06090c;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:opacity .2s,transform .1s;white-space:nowrap;flex-shrink:0}
 .search-btn:hover{opacity:.85}
 .search-btn:active{transform:scale(.96)}
 .search-btn:disabled{opacity:.3;cursor:not-allowed}
 
 /* SUGGEST */
-.suggest-list{
-  position:absolute;top:calc(100% + 4px);left:0;right:0;
-  background:var(--card2);border:1px solid var(--border2);
-  border-radius:var(--r);overflow:hidden;z-index:100;
-  box-shadow:0 8px 32px rgba(0,0,0,.7);display:none;
-}
+.suggest-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.7);display:none}
 .suggest-list.open{display:block}
-.suggest-item{
-  padding:8px 14px;cursor:pointer;
-  display:flex;align-items:center;gap:10px;
-  transition:background .15s;font-size:13px;
-  border-bottom:1px solid var(--border);
-}
+.suggest-item{padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .15s;font-size:13px;border-bottom:1px solid var(--border)}
 .suggest-item:last-child{border-bottom:none}
 .suggest-item:hover{background:var(--bg3)}
 .sug-av{width:26px;height:26px;border-radius:3px;object-fit:cover;background:var(--bg3);flex-shrink:0}
@@ -164,11 +63,7 @@ body::after{
 /* SKELETON */
 .skel-block{display:none;margin-bottom:14px}
 .skel-block.active{display:block}
-.sk{
-  background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);
-  background-size:200% 100%;animation:shimmer 1.4s infinite;
-  border-radius:var(--r2);
-}
+.sk{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:var(--r2)}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .sk-profile{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;gap:14px;margin-bottom:10px}
 .sk-av{width:56px;height:56px;flex-shrink:0}
@@ -178,148 +73,61 @@ body::after{
 .sk-stat{height:68px}
 
 /* ERROR */
-.err{
-  display:none;
-  background:rgba(232,64,87,.07);
-  border:1px solid rgba(232,64,87,.2);
-  border-left:3px solid var(--red);
-  border-radius:var(--r);padding:11px 14px;
-  margin-bottom:12px;font-size:12px;
-  color:var(--red2);gap:8px;align-items:center;
-  font-family:'Share Tech Mono',monospace;
-}
+.err{display:none;background:rgba(232,64,87,.07);border:1px solid rgba(232,64,87,.2);border-left:3px solid var(--red);border-radius:var(--r);padding:11px 14px;margin-bottom:12px;font-size:12px;color:var(--red2);gap:8px;align-items:center;font-family:'Share Tech Mono',monospace}
 .err.active{display:flex}
 
-/* RESULTS */
 .results{display:none}
 .results.active{display:block}
 
 /* PROFILE CARD */
-.profile-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r);overflow:hidden;margin-bottom:10px;
-  position:relative;
-}
-.profile-glow{
-  position:absolute;top:0;right:0;width:200px;height:200px;
-  background:radial-gradient(circle at top right,rgba(0,229,160,.06),transparent 60%);
-  pointer-events:none;
-}
-.profile-banner{
-  height:48px;
-  background:linear-gradient(135deg,#060c10,#0a1820 50%,#060c10);
-  position:relative;overflow:hidden;
-}
-.profile-banner::before{
-  content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(45deg,transparent,transparent 14px,rgba(0,229,160,.03) 14px,rgba(0,229,160,.03) 28px);
-}
-.profile-banner::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,var(--green),var(--cyan),transparent 60%);
-}
-.profile-body{
-  padding:0 14px 14px;display:flex;gap:12px;
-  align-items:flex-end;margin-top:-26px;
-}
-.profile-av{
-  width:54px;height:54px;border-radius:5px;
-  border:2px solid var(--bg);object-fit:cover;
-  background:var(--bg3);flex-shrink:0;position:relative;z-index:1;
-}
-.profile-info{flex:1;min-width:0;padding-top:6px}
-.profile-name{
-  font-family:'Rajdhani',sans-serif;font-size:21px;font-weight:700;
-  color:var(--white);letter-spacing:.5px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1;
-}
-.profile-sub{
-  font-family:'Share Tech Mono',monospace;font-size:9px;
-  color:var(--text3);margin-top:3px;letter-spacing:1px;
-}
-.source-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  font-family:'Share Tech Mono',monospace;font-size:8px;
-  color:var(--cyan);border:1px solid rgba(0,188,212,.2);
-  border-radius:3px;padding:2px 6px;margin-top:4px;letter-spacing:1px;
-}
-.rank-pill{
-  flex-shrink:0;
-  background:var(--bg3);border:1px solid var(--border2);
-  border-radius:var(--r2);padding:7px 10px;text-align:center;margin-top:6px;
-}
-.rank-em{font-size:22px;line-height:1}
-.rank-lbl{
-  font-family:'Share Tech Mono',monospace;font-size:8px;
-  color:var(--text3);letter-spacing:1px;margin-top:2px;text-transform:uppercase;
-}
-.rank-name{
-  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;
-  color:var(--text);margin-top:1px;
-}
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px;position:relative}
+.profile-glow{position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle at top right,rgba(0,229,160,.05),transparent 60%);pointer-events:none}
+.profile-banner{height:44px;background:linear-gradient(135deg,#060c10,#0a1820 50%,#060c10);position:relative;overflow:hidden}
+.profile-banner::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 14px,rgba(0,229,160,.03) 14px,rgba(0,229,160,.03) 28px)}
+.profile-banner::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--green),var(--cyan),transparent 60%)}
+/* profile-body: flex row, avatar + info + right block */
+.profile-body{padding:0 14px 14px;display:flex;flex-direction:row;gap:10px;align-items:flex-end;margin-top:-24px}
+.profile-av{width:52px;height:52px;border-radius:5px;border:2px solid var(--bg);object-fit:cover;background:var(--bg3);flex-shrink:0;position:relative;z-index:1}
+.profile-center{flex:1;min-width:0;padding-top:28px}
+.profile-name{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--white);letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.profile-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.profile-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px}
+.source-badge{display:inline-flex;align-items:center;gap:3px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--cyan);border:1px solid rgba(0,188,212,.2);border-radius:3px;padding:2px 5px;letter-spacing:1px}
+
+/* RIGHT column: rank + MMR */
+.profile-right{flex-shrink:0;display:flex;flex-direction:column;gap:5px;padding-top:28px;align-items:stretch;min-width:74px}
+.rank-pill{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:5px 8px;text-align:center}
+.rank-em{font-size:18px;line-height:1}
+.rank-name{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;color:var(--text);margin-top:2px;white-space:nowrap}
+.mmr-pill{background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.2);border-radius:var(--r2);padding:4px 8px;text-align:center}
+.mmr-val{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--gold);line-height:1}
+.mmr-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text3);letter-spacing:1px;margin-top:1px}
 
 /* TABS */
-.tabs{
-  display:flex;gap:3px;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r);padding:3px;margin-bottom:12px;
-}
-.tab{
-  flex:1;padding:7px 4px;text-align:center;
-  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;
-  letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--text3);border-radius:5px;cursor:pointer;
-  transition:all .2s;border:none;background:none;
-}
-.tab.active{
-  background:var(--bg3);color:var(--green);
-  border:1px solid rgba(0,229,160,.2);
-  box-shadow:0 0 10px rgba(0,229,160,.08);
-}
+.tabs{display:flex;gap:3px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:3px;margin-bottom:12px}
+.tab{flex:1;padding:7px 4px;text-align:center;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-radius:5px;cursor:pointer;transition:all .2s;border:none;background:none}
+.tab.active{background:var(--bg3);color:var(--green);border:1px solid rgba(0,229,160,.2);box-shadow:0 0 10px rgba(0,229,160,.08)}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 
-/* SEC LABEL */
-.sec{
-  font-family:'Share Tech Mono',monospace;font-size:9px;
-  font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
-  color:var(--text3);margin-bottom:8px;
-  display:flex;align-items:center;gap:8px;
-}
+/* SEC */
+.sec{font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px}
 .sec::after{content:'';flex:1;height:1px;background:var(--border)}
 .sec-icon{color:var(--green);font-size:10px}
 
 /* WINRATE */
-.wr-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r);padding:14px;margin-bottom:10px;
-  position:relative;overflow:hidden;
-}
-.wr-card::before{
-  content:'';position:absolute;top:0;left:0;bottom:0;width:2px;
-  background:linear-gradient(180deg,var(--green),transparent);
-}
+.wr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;position:relative;overflow:hidden}
+.wr-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--green),transparent)}
 .wr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-.wr-num{
-  font-family:'Rajdhani',sans-serif;font-size:54px;font-weight:700;
-  line-height:.9;letter-spacing:-1px;
-}
-.wr-num.good{color:var(--green);text-shadow:0 0 30px rgba(0,229,160,.3)}
-.wr-num.ok{color:var(--gold);text-shadow:0 0 30px rgba(255,193,7,.2)}
-.wr-num.bad{color:var(--red);text-shadow:0 0 30px rgba(232,64,87,.2)}
-.wr-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;margin-top:6px}
+.wr-num{font-family:'Rajdhani',sans-serif;font-size:52px;font-weight:700;line-height:.9;letter-spacing:-1px}
+.wr-num.good{color:var(--green)}.wr-num.ok{color:var(--gold)}.wr-num.bad{color:var(--red)}
+.wr-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;margin-top:5px}
 .wr-wl{text-align:right}
-.wr-wl-row{font-size:13px;font-family:'Share Tech Mono',monospace;margin-bottom:3px;letter-spacing:.5px}
-.wr-wl-row .w{color:var(--green)}
-.wr-wl-row .l{color:var(--red)}
+.wr-wl-row{font-size:12px;font-family:'Share Tech Mono',monospace;margin-bottom:3px;letter-spacing:.5px}
+.wr-wl-row .w{color:var(--green)}.wr-wl-row .l{color:var(--red)}
 .wr-total{font-size:10px;color:var(--text3);margin-top:4px;font-family:'Share Tech Mono',monospace}
 .wr-recent{display:flex;gap:2px;flex-wrap:wrap;margin-bottom:10px}
-.wr-dot{
-  width:18px;height:18px;border-radius:2px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:7px;font-weight:700;font-family:'Rajdhani',sans-serif;
-  letter-spacing:.5px;
-}
+.wr-dot{width:18px;height:18px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;font-family:'Rajdhani',sans-serif}
 .wr-dot.w{background:rgba(0,229,160,.12);color:var(--green);border:1px solid rgba(0,229,160,.25)}
 .wr-dot.l{background:rgba(232,64,87,.1);color:var(--red);border:1px solid rgba(232,64,87,.2)}
 .wr-bar-bg{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
@@ -329,65 +137,32 @@ body::after{
 .wr-bar-fill.bad{background:linear-gradient(90deg,var(--red),var(--red2))}
 
 /* STREAK */
-.streak-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  border-radius:4px;padding:6px 12px;
-  font-size:11px;font-family:'Rajdhani',sans-serif;
-  font-weight:700;letter-spacing:2px;margin-bottom:10px;
-}
+.streak-badge{display:inline-flex;align-items:center;gap:6px;border-radius:4px;padding:6px 12px;font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:2px;margin-bottom:10px}
 .streak-badge.win{background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);color:var(--green)}
 .streak-badge.loss{background:rgba(232,64,87,.08);border:1px solid rgba(232,64,87,.2);color:var(--red)}
 
-/* TREND BLOCK */
+/* TREND */
 .trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.trend-c{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r);padding:11px 12px;
-}
+.trend-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px}
 .trend-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
 .trend-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
-.trend-key{font-size:11px;color:var(--text2);font-family:'Share Tech Mono',monospace}
-.trend-val{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--white)}
-.trend-val.green{color:var(--green)}
-.trend-val.gold{color:var(--gold)}
-.trend-val.red{color:var(--red)}
+.trend-key{font-size:10px;color:var(--text2);font-family:'Share Tech Mono',monospace}
+.trend-val{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--white)}
+.trend-val.green{color:var(--green)}.trend-val.gold{color:var(--gold)}.trend-val.red{color:var(--red)}
 
-/* STATS GRID */
+/* STAT GRID */
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
-.stat-c{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r);padding:11px 8px;text-align:center;
-  transition:border-color .2s,transform .2s;
-  position:relative;overflow:hidden;
-}
-.stat-c::before{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  opacity:0;transition:opacity .2s;
-}
+.stat-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 8px;text-align:center;transition:border-color .2s,transform .2s}
 .stat-c:hover{border-color:var(--border2);transform:translateY(-1px)}
-.stat-c:hover::before{opacity:1}
-.stat-val{
-  font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;
-  line-height:1;color:var(--white);
-}
-.stat-val.green{color:var(--green)}
-.stat-val.red{color:var(--red)}
-.stat-val.gold{color:var(--gold)}
-.stat-val.blue{color:var(--blue)}
-.stat-val.purple{color:var(--purple)}
-.stat-val.orange{color:var(--orange)}
+.stat-val{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;line-height:1;color:var(--white)}
+.stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}.stat-val.gold{color:var(--gold)}
+.stat-val.blue{color:var(--blue)}.stat-val.purple{color:var(--purple)}
 .stat-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
 
 /* CHART */
-.chart-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r);padding:13px;margin-bottom:10px;
-}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:10px}
 .chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.chart-title{
-  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;
-  letter-spacing:2px;text-transform:uppercase;color:var(--text2);
-}
+.chart-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text2)}
 .chart-legend{display:flex;gap:10px}
 .leg-i{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace}
 .leg-d{width:8px;height:3px;border-radius:2px}
@@ -395,96 +170,71 @@ body::after{
 
 /* HEROES */
 .hero-list{display:flex;flex-direction:column;gap:6px}
-.hero-row{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r);padding:9px 12px;
-  display:flex;align-items:center;gap:10px;
-  transition:border-color .2s,transform .15s;
-}
+.hero-row{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;display:flex;align-items:center;gap:8px;transition:border-color .2s,transform .15s}
 .hero-row:hover{border-color:var(--border2);transform:translateX(2px)}
-.hero-img{
-  width:44px;height:25px;border-radius:3px;
-  object-fit:cover;background:var(--bg3);
-  border:1px solid var(--border);flex-shrink:0;
-}
-.hero-rank{
-  font-family:'Share Tech Mono',monospace;font-size:9px;
-  color:var(--text3);width:14px;text-align:center;flex-shrink:0;
-}
+.hero-img{width:60px;height:34px;border-radius:3px;object-fit:cover;background:var(--bg3);border:1px solid var(--border);flex-shrink:0}
+.hero-rank{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);width:14px;text-align:center;flex-shrink:0}
 .hero-name{flex:1;font-weight:600;font-size:13px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hero-stats{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .hero-games{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3)}
-.hero-kda{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text2)}
+.hero-kda-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text2)}
 .hero-bar{width:40px;height:3px;background:var(--bg);border-radius:2px;overflow:hidden;flex-shrink:0}
 .hero-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
-.hero-wr{
-  font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;
-  min-width:42px;text-align:right;
-}
-.hero-wr.good{color:var(--green)}
-.hero-wr.ok{color:var(--gold)}
-.hero-wr.bad{color:var(--red)}
+.hero-wr{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;min-width:40px;text-align:right}
+.hero-wr.good{color:var(--green)}.hero-wr.ok{color:var(--gold)}.hero-wr.bad{color:var(--red)}
 
 /* MATCHES */
 .match-list{display:flex;flex-direction:column;gap:5px}
-.match-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r);padding:9px 12px;
-  display:grid;grid-template-columns:34px 1fr auto auto;
-  align-items:center;gap:9px;
-  transition:border-color .15s;position:relative;overflow:hidden;
-}
-.match-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px}
-.match-card.win::before{background:var(--green);box-shadow:2px 0 8px rgba(0,229,160,.3)}
-.match-card.loss::before{background:var(--red);box-shadow:2px 0 8px rgba(232,64,87,.2)}
+.match-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .15s}
 .match-card:hover{border-color:var(--border2)}
-.match-himg{
-  width:34px;height:34px;border-radius:4px;
-  object-fit:cover;background:var(--bg3);
-  border:1px solid var(--border);
-}
+.match-main{padding:9px 12px;display:grid;grid-template-columns:44px 1fr auto auto;align-items:center;gap:8px;position:relative}
+.match-main::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px}
+.match-card.win .match-main::before{background:var(--green);box-shadow:2px 0 8px rgba(0,229,160,.3)}
+.match-card.loss .match-main::before{background:var(--red);box-shadow:2px 0 8px rgba(232,64,87,.2)}
+.match-himg{width:44px;height:25px;border-radius:3px;object-fit:cover;background:var(--bg3);border:1px solid var(--border);display:block}
 .match-kda-str{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2)}
-.match-hero{font-size:11px;color:var(--text3);margin-top:2px;font-family:'Share Tech Mono',monospace}
-.match-dur{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace}
-.match-kda-val{
-  font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;text-align:center;
-}
-.match-kda-val.good{color:var(--green)}
-.match-kda-val.ok{color:var(--gold)}
-.match-kda-val.bad{color:var(--red)}
-.match-pill{
-  font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;
-  letter-spacing:1.5px;padding:3px 8px;border-radius:3px;
-}
+.match-hero-name{font-size:10px;color:var(--text3);margin-top:2px;font-family:'Share Tech Mono',monospace}
+.match-dur{font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace}
+.match-kda-val{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;text-align:center}
+.match-kda-val.good{color:var(--green)}.match-kda-val.ok{color:var(--gold)}.match-kda-val.bad{color:var(--red)}
+.match-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.match-pill{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:3px 8px;border-radius:3px}
 .match-pill.win{background:rgba(0,229,160,.1);color:var(--green);border:1px solid rgba(0,229,160,.2)}
 .match-pill.loss{background:rgba(232,64,87,.08);color:var(--red);border:1px solid rgba(232,64,87,.18)}
+.match-chevron{font-size:10px;color:var(--text3);transition:transform .2s;line-height:1}
+.match-card.expanded .match-chevron{transform:rotate(180deg)}
+
+/* MATCH EXPAND */
+.match-expand{display:none;border-top:1px solid var(--border);padding:10px 12px;background:var(--bg3)}
+.match-expand.open{display:block}
+.match-expand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.mex-cell{text-align:center}
+.mex-val{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--white)}
+.mex-val.green{color:var(--green)}.mex-val.gold{color:var(--gold)}.mex-val.red{color:var(--red)}
+.mex-val.blue{color:var(--blue)}.mex-val.purple{color:var(--purple)}
+.mex-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.match-links{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.match-open-link{display:block;text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:1px;padding:6px;border:1px solid rgba(0,188,212,.15);border-radius:4px;text-decoration:none;transition:background .2s}
+.match-open-link:hover{background:rgba(0,188,212,.07)}
 
 /* ANIMATIONS */
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fu{animation:fadeUp .35s ease both}
 .d1{animation-delay:.04s}.d2{animation-delay:.08s}.d3{animation-delay:.12s}
-.d4{animation-delay:.16s}.d5{animation-delay:.2s}.d6{animation-delay:.24s}
+.d4{animation-delay:.16s}.d5{animation-delay:.2s}
 
-/* FOOTER */
-.footer{
-  text-align:center;padding:18px 0 6px;
-  font-family:'Share Tech Mono',monospace;font-size:9px;
-  color:var(--text3);letter-spacing:2px;
-  border-top:1px solid var(--border);margin-top:8px;
-}
+.footer{text-align:center;padding:18px 0 6px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:2px;border-top:1px solid var(--border);margin-top:8px}
 
 @media(max-width:380px){
-  .stat-val{font-size:21px}
-  .wr-num{font-size:42px}
+  .stat-val{font-size:20px}.wr-num{font-size:40px}
   .tab{font-size:10px;padding:6px 2px}
-  .match-card{grid-template-columns:28px 1fr auto auto;gap:6px}
+  .match-main{grid-template-columns:38px 1fr auto auto;gap:6px}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<!-- HEADER -->
 <div class="hdr">
   <div class="hdr-logo"><span class="hdr-em">⚔️</span></div>
   <div class="hdr-title">
@@ -494,21 +244,17 @@ body::after{
   <div class="hdr-live"><div class="live-dot"></div>LIVE</div>
 </div>
 
-<!-- SEARCH -->
 <div class="search-wrap">
   <div class="search-box">
     <span class="s-icon">🔍</span>
-    <input class="search-input" id="si" type="text"
-      placeholder="Ник или Steam ID..." autocomplete="off" spellcheck="false"/>
+    <input class="search-input" id="si" type="text" placeholder="Ник или Steam ID..." autocomplete="off" spellcheck="false"/>
     <button class="search-btn" id="sb" onclick="doSearch()">НАЙТИ</button>
   </div>
   <div class="suggest-list" id="sugList"></div>
 </div>
 
-<!-- ERROR -->
 <div class="err" id="errBlock"><span>⚠</span><span id="errText"></span></div>
 
-<!-- SKELETON -->
 <div class="skel-block" id="skelBlock">
   <div class="sk-profile">
     <div class="sk-av sk"></div>
@@ -519,29 +265,55 @@ body::after{
     </div>
   </div>
   <div class="sk-grid">
-    <div class="sk-stat sk"></div>
-    <div class="sk-stat sk"></div>
-    <div class="sk-stat sk"></div>
+    <div class="sk-stat sk"></div><div class="sk-stat sk"></div><div class="sk-stat sk"></div>
   </div>
 </div>
 
-<!-- RESULTS -->
 <div class="results" id="results"></div>
-
 <div class="footer">DOTA 2 ANALYZER · STRATZ · OPENDOTA · v2.0</div>
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// !! ЗАМЕНИ НА СВОЙ URL С RAILWAY !!
+// ════════════════════════════════════════════
+// ЗАМЕНИ НА СВОЙ RAILWAY URL
 const API = "https://dota2-analyzer-production.up.railway.app";
-// ─────────────────────────────────────────────
+// ════════════════════════════════════════════
 
 let tg = null;
 try{ tg = window.Telegram?.WebApp; if(tg){ tg.ready(); tg.expand(); } }catch(e){}
 
-// ── HERO DATA ────────────────────────────────
-const HEROES = {
+// ── HERO SHORT NAMES (Steam CDN) ─────────────
+const HERO_SHORT = {
+  1:"antimage",2:"axe",3:"bane",4:"bloodseeker",5:"crystal_maiden",
+  6:"drow_ranger",7:"earthshaker",8:"juggernaut",9:"mirana",10:"morphling",
+  11:"nevermore",12:"phantom_lancer",13:"puck",14:"pudge",15:"razor",
+  16:"sand_king",17:"storm_spirit",18:"sven",19:"tiny",20:"vengefulspirit",
+  21:"windrunner",22:"zuus",23:"kunkka",25:"lina",26:"lion",
+  27:"shadow_shaman",28:"slardar",29:"tidehunter",30:"witch_doctor",31:"lich",
+  32:"riki",33:"enigma",34:"tinker",35:"sniper",36:"necrolyte",
+  37:"warlock",38:"beastmaster",39:"queenofpain",40:"venomancer",
+  41:"faceless_void",42:"skeleton_king",43:"death_prophet",44:"phantom_assassin",
+  45:"pugna",46:"templar_assassin",47:"viper",48:"luna",49:"dragon_knight",
+  50:"dazzle",51:"rattletrap",52:"leshrac",53:"furion",54:"life_stealer",
+  55:"dark_seer",56:"clinkz",57:"omniknight",58:"enchantress",59:"huskar",
+  60:"night_stalker",61:"broodmother",62:"bounty_hunter",63:"weaver",
+  64:"jakiro",65:"batrider",66:"chen",67:"spectre",68:"ancient_apparition",
+  69:"doom_bringer",70:"ursa",71:"spirit_breaker",72:"gyrocopter",73:"alchemist",
+  74:"invoker",75:"silencer",76:"obsidian_destroyer",77:"lycan",78:"brewmaster",
+  79:"shadow_demon",80:"lone_druid",81:"chaos_knight",82:"meepo",
+  83:"treant",84:"ogre_magi",85:"undying",86:"rubick",
+  87:"disruptor",88:"nyx_assassin",89:"naga_siren",90:"keeper_of_the_light",
+  91:"wisp",92:"visage",93:"slark",94:"medusa",95:"troll_warlord",
+  96:"centaur",97:"magnataur",98:"shredder",99:"bristleback",
+  100:"tusk",101:"skywrath_mage",102:"abaddon",103:"elder_titan",
+  104:"legion_commander",106:"ember_spirit",107:"earth_spirit",
+  109:"terrorblade",110:"phoenix",111:"oracle",112:"winter_wyvern",
+  113:"arc_warden",120:"pangolier",121:"dark_willow",123:"grimstroke",
+  126:"void_spirit",128:"snapfire",129:"mars",135:"dawnbreaker",
+  136:"marci",137:"primal_beast",138:"muerta"
+};
+
+const HERO_NAMES = {
   1:"Anti-Mage",2:"Axe",3:"Bane",4:"Bloodseeker",5:"Crystal Maiden",
   6:"Drow Ranger",7:"Earthshaker",8:"Juggernaut",9:"Mirana",10:"Morphling",
   11:"Shadow Fiend",12:"Phantom Lancer",13:"Puck",14:"Pudge",15:"Razor",
@@ -571,141 +343,157 @@ const HEROES = {
   136:"Marci",137:"Primal Beast",138:"Muerta"
 };
 
-const RANKS = [
-  [10,'🪵','Herald'],[20,'🛡️','Guardian'],[30,'⚒️','Crusader'],
-  [40,'🗡️','Archon'],[50,'⚔️','Legend'],[60,'🏅','Ancient'],
-  [70,'💎','Divine'],[80,'🌟','Immortal'],[90,'👑','Иммортал']
-];
+// ── RANKS (правильные английские) ────────────
+const RANK_MAP = {
+  1:{em:"🪵",name:"Herald"},
+  2:{em:"🛡️",name:"Guardian"},
+  3:{em:"⚒️",name:"Crusader"},
+  4:{em:"🗡️",name:"Archon"},
+  5:{em:"⚔️",name:"Legend"},
+  6:{em:"🏅",name:"Ancient"},
+  7:{em:"💎",name:"Divine"},
+  8:{em:"🌟",name:"Immortal"},
+};
 
-function getRankDisplay(rankName){
-  if(!rankName || rankName==='Не откалиброван') return {em:'❓',name:'Некалиброван'};
-  const n = rankName.toLowerCase();
-  if(n.includes('герольд')||n.includes('herald'))   return {em:'🪵',name:rankName};
-  if(n.includes('страж')||n.includes('guardian'))   return {em:'🛡️',name:rankName};
-  if(n.includes('рыцарь')||n.includes('crusader'))  return {em:'⚒️',name:rankName};
-  if(n.includes('витязь')||n.includes('archon'))    return {em:'🗡️',name:rankName};
-  if(n.includes('лорд')||n.includes('legend'))      return {em:'⚔️',name:rankName};
-  if(n.includes('легенда')||n.includes('ancient'))  return {em:'🏅',name:rankName};
-  if(n.includes('древний')||n.includes('divine'))   return {em:'💎',name:rankName};
-  if(n.includes('божество')||n.includes('immortal'))return {em:'🌟',name:rankName};
-  if(n.includes('иммортал'))                        return {em:'👑',name:rankName};
-  return {em:'🎮',name:rankName};
+function getRank(rankTierNum, rankStr){
+  // rank_tier число — самый точный источник (например 45 = Archon 5★)
+  if(rankTierNum){
+    const s = String(rankTierNum);
+    const tier  = parseInt(s[0])||0;
+    const stars = s.length>1 ? parseInt(s[1])||0 : 0;
+    const r = RANK_MAP[tier]||{em:"❓",name:"Unknown"};
+    return {em:r.em, name:r.name, stars};
+  }
+  // Fallback: парсим строку (Stratz может вернуть "Archon ⭐⭐⭐")
+  if(!rankStr||rankStr==='Не откалиброван') return {em:"❓",name:"Uncalibrated",stars:0};
+  const n=rankStr.toLowerCase();
+  let tier=0;
+  if(n.includes('herald')||n.includes('герольд'))     tier=1;
+  else if(n.includes('guardian')||n.includes('страж'))tier=2;
+  else if(n.includes('crusader')||n.includes('рыцарь'))tier=3;
+  else if(n.includes('archon')||n.includes('витязь')) tier=4;
+  else if(n.includes('legend')||n.includes('лорд'))   tier=5;
+  else if(n.includes('ancient')||n.includes('легенда'))tier=6;
+  else if(n.includes('divine')||n.includes('древний'))tier=7;
+  else if(n.includes('immortal')||n.includes('иммортал')||n.includes('божество'))tier=8;
+  const stars=(rankStr.match(/⭐/g)||[]).length;
+  const r=RANK_MAP[tier]||{em:"❓",name:"Unknown"};
+  return {em:r.em, name:r.name, stars};
 }
 
-const heroName  = id => HEROES[id] || `Hero #${id}`;
-const wrc       = w => w>=55?'good':w>=50?'ok':'bad';
-const kdaC      = k => k>=4?'good':k>=2?'ok':'bad';
-const escH      = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const heroImg   = shortName => shortName
-  ? `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${shortName}.png`
-  : '';
-const heroImgFallback = id => `https://api.opendota.com/apps/dota2/images/heroes/${id}_sb.png`;
+function starsHtml(n){
+  if(!n)return'';
+  return`<span style="font-size:9px;color:var(--gold);letter-spacing:1px"> ${'★'.repeat(Math.min(n,5))}</span>`;
+}
+
+// ── HERO HELPERS ─────────────────────────────
+function getHeroImg(heroId, heroShort){
+  const short = heroShort || HERO_SHORT[heroId];
+  if(short) return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${short}.png`;
+  return `https://api.opendota.com/apps/dota2/images/heroes/${heroId}_sb.png`;
+}
+function getHeroFallback(heroId){
+  return `https://api.opendota.com/apps/dota2/images/heroes/${heroId}_sb.png`;
+}
+function getHeroName(heroId, nameStr){
+  if(nameStr && nameStr!=='Unknown' && !nameStr.startsWith('Hero #')) return nameStr;
+  return HERO_NAMES[heroId] || (heroId?`Hero #${heroId}`:'Unknown');
+}
+
+// ── UTILS ────────────────────────────────────
+const wrc  = w => w>=55?'good':w>=50?'ok':'bad';
+const kdaC = k => k>=4?'good':k>=2?'ok':'bad';
+const escH = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fnum = n => (n!=null&&n!=='—') ? Number(n).toLocaleString('en') : '—';
 
 // ── EVENTS ───────────────────────────────────
-document.getElementById('si').addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
-
-let sugTimer = null;
-document.getElementById('si').addEventListener('input', e => {
-  const v = e.target.value.trim();
+document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+let sugTimer=null;
+document.getElementById('si').addEventListener('input',e=>{
+  const v=e.target.value.trim();
   clearTimeout(sugTimer);
-  if(v.length < 2 || /^\d+$/.test(v)){ closeSug(); return; }
-  sugTimer = setTimeout(() => fetchSug(v), 380);
+  if(v.length<2||/^\d+$/.test(v)){closeSug();return;}
+  sugTimer=setTimeout(()=>fetchSug(v),380);
 });
-document.addEventListener('click', e => { if(!e.target.closest('.search-wrap')) closeSug(); });
+document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))closeSug();});
 
 // ── SUGGEST ──────────────────────────────────
 async function fetchSug(q){
-  try{
-    const r = await fetch(`${API}/search?q=${encodeURIComponent(q)}`);
-    renderSug(await r.json());
-  }catch{ closeSug(); }
+  try{const r=await fetch(`${API}/search?q=${encodeURIComponent(q)}`);renderSug(await r.json());}
+  catch{closeSug();}
 }
-
 function renderSug(list){
-  const el = document.getElementById('sugList');
-  if(!list.length){ closeSug(); return; }
-  el.innerHTML = list.map(p=>`
+  const el=document.getElementById('sugList');
+  if(!list.length){closeSug();return;}
+  el.innerHTML=list.map(p=>`
     <div class="suggest-item" onclick="pickSug('${p.account_id}')">
       <img class="sug-av" src="${escH(p.avatarfull||'')}" onerror="this.style.visibility='hidden'" alt="">
-      <div>
-        <div class="sug-name">${escH(p.personaname||'Unknown')}</div>
-        <div class="sug-id">#${p.account_id}</div>
-      </div>
+      <div><div class="sug-name">${escH(p.personaname||'Unknown')}</div><div class="sug-id">#${p.account_id}</div></div>
     </div>`).join('');
   el.classList.add('open');
 }
-
-function pickSug(id){ document.getElementById('si').value=id; closeSug(); doSearch(); }
-function closeSug(){ document.getElementById('sugList').classList.remove('open'); }
+function pickSug(id){document.getElementById('si').value=id;closeSug();doSearch();}
+function closeSug(){document.getElementById('sugList').classList.remove('open');}
 
 // ── SEARCH ───────────────────────────────────
 async function doSearch(){
-  const q = document.getElementById('si').value.trim();
-  if(!q) return;
-  closeSug();
-  setLoad(true); hideErr(); hideRes();
+  const q=document.getElementById('si').value.trim();
+  if(!q)return;
+  closeSug();setLoad(true);hideErr();hideRes();
   try{
-    const r = await fetch(`${API}/player?query=${encodeURIComponent(q)}`);
-    if(!r.ok){ const e=await r.json().catch(()=>{}); throw new Error(e?.detail||`Ошибка ${r.status}`); }
+    const r=await fetch(`${API}/player?query=${encodeURIComponent(q)}`);
+    if(!r.ok){const e=await r.json().catch(()=>{});throw new Error(e?.detail||`Error ${r.status}`);}
     renderAll(await r.json());
   }catch(e){
-    showErr(e.message||'Не удалось загрузить данные. Проверь ник или ID.');
-  }finally{
-    setLoad(false);
-  }
+    showErr(e.message||'Failed to load. Check nickname or ID.');
+  }finally{setLoad(false);}
 }
-
 function setLoad(on){
   document.getElementById('skelBlock').classList.toggle('active',on);
-  const btn=document.getElementById('sb');
-  btn.disabled=on; btn.textContent=on?'...':'НАЙТИ';
+  const b=document.getElementById('sb');b.disabled=on;b.textContent=on?'...':'НАЙТИ';
 }
-function showErr(m){ document.getElementById('errText').textContent=m; document.getElementById('errBlock').classList.add('active'); }
-function hideErr(){ document.getElementById('errBlock').classList.remove('active'); }
-function hideRes(){ const r=document.getElementById('results'); r.classList.remove('active'); r.innerHTML=''; }
+function showErr(m){document.getElementById('errText').textContent=m;document.getElementById('errBlock').classList.add('active');}
+function hideErr(){document.getElementById('errBlock').classList.remove('active');}
+function hideRes(){const r=document.getElementById('results');r.classList.remove('active');r.innerHTML='';}
 
 // ── RENDER ───────────────────────────────────
-let chartInst = null;
+let chartInst=null;
 
 function renderAll(data){
-  // Новый API возвращает: profile, stats, top_heroes, recent_matches, trend, source
-  const {profile, stats, top_heroes, recent_matches, trend, source, account_id} = data;
+  const {profile,stats,top_heroes,recent_matches,trend,source,account_id}=data;
 
-  const rankDisp = getRankDisplay(profile.rank);
-  const wClass   = wrc(stats.winrate);
-  const streak   = trend?.streak;
-  const srcLabel = source === 'stratz' ? '⚡ STRATZ' : '📊 OPENDOTA';
+  const rank   = getRank(profile.rank_tier, profile.rank);
+  const mmr    = profile.mmr_estimate||profile.mmr||null;
+  const wClass = wrc(stats.winrate);
+  const streak = trend?.streak;
+  const srcLbl = source==='stratz'?'⚡ STRATZ':'📊 OPENDOTA';
 
-  // Средние по последним матчам (считаем из recent_matches)
-  const recentValid = (recent_matches||[]).slice(0,20);
-  const avg = key => {
-    const vals = recentValid.map(m=>m[key]||0).filter(v=>v>0);
-    return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '—';
-  };
-  const avgKda  = avg('kda');
-  const avgKill = avg('kills');
-  const avgDeath= avg('deaths');
-  const avgAss  = avg('assists');
-  const avgGpm  = Math.round(recentValid.reduce((s,m)=>s+(m.gpm||0),0)/Math.max(recentValid.length,1));
-  const avgXpm  = Math.round(recentValid.reduce((s,m)=>s+(m.xpm||0),0)/Math.max(recentValid.length,1));
+  const rm=(recent_matches||[]).slice(0,20);
+  const avgF=key=>{const v=rm.map(m=>+(m[key]||0)).filter(x=>x>0);return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1):'—';};
+  const avgGpm=Math.round(rm.reduce((s,m)=>s+(m.gpm||0),0)/Math.max(rm.length,1));
+  const avgXpm=Math.round(rm.reduce((s,m)=>s+(m.xpm||0),0)/Math.max(rm.length,1));
 
-  document.getElementById('results').innerHTML = `
-
+  document.getElementById('results').innerHTML=`
   <div class="profile-card fu d1">
     <div class="profile-glow"></div>
     <div class="profile-banner"></div>
     <div class="profile-body">
       <img class="profile-av"
         src="${escH(profile.avatar||'')}"
-        onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'54\\' height=\\'54\\'><rect width=\\'54\\' height=\\'54\\' fill=\\'%230e1520\\'/><text y=\\'38\\' x=\\'9\\' font-size=\\'30\\'>🎮</text></svg>'" alt=""/>
-      <div class="profile-info">
+        onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'52\\' height=\\'52\\'><rect width=\\'52\\' height=\\'52\\' fill=\\'%230e1520\\'/><text y=\\'36\\' x=\\'8\\' font-size=\\'28\\'>🎮</text></svg>'" alt=""/>
+      <div class="profile-center">
         <div class="profile-name">${escH(profile.name)}</div>
-        <div class="profile-sub">ID · ${escH(String(account_id))}</div>
-        <div class="source-badge">${srcLabel}${profile.is_anonymous?' · 🔒 PRIVATE':''}</div>
+        <div class="profile-meta">
+          <span class="profile-sub">ID · ${escH(String(account_id))}</span>
+          <span class="source-badge">${srcLbl}${profile.is_anonymous?' · 🔒':''}</span>
+        </div>
       </div>
-      <div class="rank-pill">
-        <div class="rank-em">${rankDisp.em}</div>
-        <div class="rank-name">${escH(rankDisp.name)}</div>
+      <div class="profile-right">
+        <div class="rank-pill">
+          <div class="rank-em">${rank.em}</div>
+          <div class="rank-name">${escH(rank.name)}${starsHtml(rank.stars)}</div>
+        </div>
+        ${mmr?`<div class="mmr-pill"><div class="mmr-val">${fnum(mmr)}</div><div class="mmr-lbl">MMR</div></div>`:''}
       </div>
     </div>
   </div>
@@ -716,15 +504,8 @@ function renderAll(data){
     <button class="tab" onclick="swTab('heroes',this)">Герои</button>
   </div>
 
-  <!-- OVERVIEW -->
   <div class="tab-panel active" id="tab-overview">
-
-    ${streak && streak.count>=2 ? `
-    <div class="streak-badge ${streak.type} fu d2">
-      ${streak.type==='win'?'🔥':'❄️'} 
-      ${streak.count} ${streak.type==='win'?'ПОБЕД':'ПОРАЖЕНИЙ'} ПОДРЯД
-    </div>` : ''}
-
+    ${streak&&streak.count>=2?`<div class="streak-badge ${streak.type} fu d2">${streak.type==='win'?'🔥':'❄️'} ${streak.count} ${streak.type==='win'?'WIN':'LOSS'} STREAK</div>`:''}
     <div class="wr-card fu d3">
       <div class="wr-top">
         <div>
@@ -734,64 +515,44 @@ function renderAll(data){
         <div class="wr-wl">
           <div class="wr-wl-row"><span class="w">▲ ${stats.wins}W</span></div>
           <div class="wr-wl-row"><span class="l">▼ ${stats.losses}L</span></div>
-          <div class="wr-total">${stats.total_matches} игр</div>
+          <div class="wr-total">${stats.total_matches} games</div>
         </div>
       </div>
-      <div class="sec"><span class="sec-icon">◈</span>Последние ${recentValid.length} матчей</div>
+      <div class="sec"><span class="sec-icon">◈</span>Last ${rm.length} matches</div>
       <div class="wr-recent" id="wrDots"></div>
-      <div class="wr-bar-bg">
-        <div class="wr-bar-fill ${wClass}" id="wrFill" style="width:0%"></div>
-      </div>
+      <div class="wr-bar-bg"><div class="wr-bar-fill ${wClass}" id="wrFill" style="width:0%"></div></div>
     </div>
 
-    ${trend ? `
-    <div class="sec fu d3"><span class="sec-icon">◈</span>Тренды</div>
+    ${trend?`
+    <div class="sec fu d3"><span class="sec-icon">◈</span>Trends</div>
     <div class="trend-grid fu d3">
       <div class="trend-c">
-        <div class="trend-label">Последние 5</div>
-        <div class="trend-row">
-          <span class="trend-key">WR</span>
-          <span class="trend-val ${wrc(trend.last5_winrate)}">${trend.last5_winrate}%</span>
-        </div>
-        <div class="trend-row">
-          <span class="trend-key">KDA</span>
-          <span class="trend-val ${kdaC(trend.last5_avg_kda)}">${trend.last5_avg_kda}</span>
-        </div>
-        <div class="trend-row">
-          <span class="trend-key">GPM</span>
-          <span class="trend-val">${trend.last5_avg_gpm}</span>
-        </div>
+        <div class="trend-label">Last 5</div>
+        <div class="trend-row"><span class="trend-key">WR</span><span class="trend-val ${wrc(trend.last5_winrate)}">${trend.last5_winrate}%</span></div>
+        <div class="trend-row"><span class="trend-key">KDA</span><span class="trend-val ${kdaC(trend.last5_avg_kda)}">${trend.last5_avg_kda}</span></div>
+        <div class="trend-row"><span class="trend-key">GPM</span><span class="trend-val">${trend.last5_avg_gpm}</span></div>
       </div>
       <div class="trend-c">
-        <div class="trend-label">Последние 20</div>
-        <div class="trend-row">
-          <span class="trend-key">WR</span>
-          <span class="trend-val ${wrc(trend.last20_winrate)}">${trend.last20_winrate}%</span>
-        </div>
-        <div class="trend-row">
-          <span class="trend-key">KDA</span>
-          <span class="trend-val ${kdaC(trend.last20_avg_kda)}">${trend.last20_avg_kda}</span>
-        </div>
-        <div class="trend-row">
-          <span class="trend-key">GPM</span>
-          <span class="trend-val">${trend.last20_avg_gpm}</span>
-        </div>
+        <div class="trend-label">Last 20</div>
+        <div class="trend-row"><span class="trend-key">WR</span><span class="trend-val ${wrc(trend.last20_winrate)}">${trend.last20_winrate}%</span></div>
+        <div class="trend-row"><span class="trend-key">KDA</span><span class="trend-val ${kdaC(trend.last20_avg_kda)}">${trend.last20_avg_kda}</span></div>
+        <div class="trend-row"><span class="trend-key">GPM</span><span class="trend-val">${trend.last20_avg_gpm}</span></div>
       </div>
-    </div>` : ''}
+    </div>`:''}
 
-    <div class="sec fu d4"><span class="sec-icon">◈</span>Средние за 20 матчей</div>
+    <div class="sec fu d4"><span class="sec-icon">◈</span>Averages (20 matches)</div>
     <div class="stat-grid fu d4">
-      <div class="stat-c"><div class="stat-val ${kdaC(avgKda)}">${avgKda}</div><div class="stat-lbl">KDA</div></div>
-      <div class="stat-c"><div class="stat-val gold">${avgKill}</div><div class="stat-lbl">Kills</div></div>
-      <div class="stat-c"><div class="stat-val red">${avgDeath}</div><div class="stat-lbl">Deaths</div></div>
-      <div class="stat-c"><div class="stat-val blue">${avgAss}</div><div class="stat-lbl">Assists</div></div>
+      <div class="stat-c"><div class="stat-val ${kdaC(avgF('kda'))}">${avgF('kda')}</div><div class="stat-lbl">KDA</div></div>
+      <div class="stat-c"><div class="stat-val gold">${avgF('kills')}</div><div class="stat-lbl">Kills</div></div>
+      <div class="stat-c"><div class="stat-val red">${avgF('deaths')}</div><div class="stat-lbl">Deaths</div></div>
+      <div class="stat-c"><div class="stat-val blue">${avgF('assists')}</div><div class="stat-lbl">Assists</div></div>
       <div class="stat-c"><div class="stat-val green">${avgGpm}</div><div class="stat-lbl">GPM</div></div>
       <div class="stat-c"><div class="stat-val purple">${avgXpm}</div><div class="stat-lbl">XPM</div></div>
     </div>
 
     <div class="chart-card fu d5">
       <div class="chart-head">
-        <div class="chart-title">KDA по матчам</div>
+        <div class="chart-title">KDA by match</div>
         <div class="chart-legend">
           <div class="leg-i"><div class="leg-d" style="background:var(--green)"></div>WIN</div>
           <div class="leg-i"><div class="leg-d" style="background:var(--red)"></div>LOSS</div>
@@ -799,39 +560,28 @@ function renderAll(data){
       </div>
       <div class="chart-wrap"><canvas id="kdaChart"></canvas></div>
     </div>
-
   </div>
 
-  <!-- MATCHES -->
   <div class="tab-panel" id="tab-matches">
     <div class="match-list" id="matchList"></div>
   </div>
 
-  <!-- HEROES -->
   <div class="tab-panel" id="tab-heroes">
     <div class="hero-list" id="heroList">
-      <div style="text-align:center;padding:24px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:10px">ЗАГРУЗКА...</div>
+      <div style="text-align:center;padding:24px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:10px">LOADING...</div>
     </div>
   </div>
   `;
 
   document.getElementById('results').classList.add('active');
+  setTimeout(()=>{const f=document.getElementById('wrFill');if(f)f.style.width=stats.winrate+'%';},150);
 
-  // WR bar animate
-  setTimeout(()=>{ document.getElementById('wrFill').style.width = stats.winrate+'%'; },150);
+  const dots=document.getElementById('wrDots');
+  rm.forEach(m=>{const d=document.createElement('div');d.className=`wr-dot ${m.win?'w':'l'}`;d.textContent=m.win?'W':'L';dots.appendChild(d);});
 
-  // WR dots
-  const dots = document.getElementById('wrDots');
-  recentValid.forEach(m=>{
-    const d=document.createElement('div');
-    d.className=`wr-dot ${m.win?'w':'l'}`;
-    d.textContent=m.win?'W':'L';
-    dots.appendChild(d);
-  });
-
-  drawChart(recentValid);
-  renderMatches(recentValid, source);
-  renderHeroes(top_heroes||[], source);
+  drawChart(rm);
+  renderMatches(rm);
+  renderHeroes(top_heroes||[]);
 }
 
 // ── TABS ─────────────────────────────────────
@@ -843,64 +593,96 @@ function swTab(id,btn){
 }
 
 // ── MATCHES ──────────────────────────────────
-function renderMatches(matches, source){
-  document.getElementById('matchList').innerHTML = matches.slice(0,20).map(m=>{
-    // Изображение героя
-    let imgSrc = '';
-    if(m.hero_short) imgSrc = heroImg(m.hero_short);
-    else if(m.hero_id) imgSrc = heroImgFallback(m.hero_id);
-
-    const heroDisplay = m.hero || (m.hero_id ? heroName(m.hero_id) : 'Unknown');
-    const dur = m.duration_min != null
-      ? `${m.duration_min}:${String(m.duration_sec||0).padStart(2,'0')}`
-      : '';
-
+function renderMatches(matches){
+  document.getElementById('matchList').innerHTML=matches.slice(0,20).map((m,i)=>{
+    const hid   = m.hero_id;
+    const hshort= m.hero_short;
+    const img   = getHeroImg(hid, hshort);
+    const fb    = getHeroFallback(hid);
+    const hname = getHeroName(hid, m.hero);
+    const dur   = m.duration_min!=null?`${m.duration_min}:${String(m.duration_sec||0).padStart(2,'0')}`:'';
+    const kda   = m.kda??0;
+    const wc    = m.win?'win':'loss';
+    const net   = fnum(m.networth);
+    const hdmg  = fnum(m.hero_damage);
+    const tdmg  = fnum(m.tower_damage);
+    const heal  = fnum(m.healing);
+    const lh    = m.last_hits!=null?m.last_hits:'—';
+    const dn    = m.denies!=null?m.denies:'—';
+    const gpm   = m.gpm||'—';
+    const xpm   = m.xpm||'—';
     return `
-    <div class="match-card ${m.win?'win':'loss'}">
-      <img class="match-himg"
-        src="${escH(imgSrc)}"
-        onerror="this.src='${heroImgFallback(m.hero_id||0)}';this.onerror=null" alt=""/>
-      <div>
-        <div class="match-kda-str">${m.kills}/<span style="color:var(--red)">${m.deaths}</span>/${m.assists}</div>
-        <div class="match-hero">${escH(heroDisplay)}</div>
-        ${dur?`<div class="match-dur">⏱ ${dur}</div>`:''}
+    <div class="match-card ${wc}" id="mc${i}">
+      <div class="match-main" onclick="toggleMatch(${i})">
+        <img class="match-himg" src="${escH(img)}"
+          onerror="this.src='${escH(fb)}';this.onerror=null" alt="${escH(hname)}"/>
+        <div>
+          <div class="match-kda-str">${m.kills}/<span style="color:var(--red)">${m.deaths}</span>/${m.assists}</div>
+          <div class="match-hero-name">${escH(hname)}</div>
+          ${dur?`<div class="match-dur">⏱ ${dur}</div>`:''}
+        </div>
+        <div class="match-kda-val ${kdaC(kda)}">${kda}</div>
+        <div class="match-right">
+          <div class="match-pill ${wc}">${m.win?'WIN':'LOSS'}</div>
+          <span class="match-chevron">▼</span>
+        </div>
       </div>
-      <div class="match-kda-val ${kdaC(m.kda)}">${m.kda}</div>
-      <div class="match-pill ${m.win?'win':'loss'}">${m.win?'WIN':'LOSS'}</div>
+      <div class="match-expand" id="me${i}">
+        <div class="match-expand-grid">
+          <div class="mex-cell"><div class="mex-val gold">${net}</div><div class="mex-lbl">Networth</div></div>
+          <div class="mex-cell"><div class="mex-val red">${hdmg}</div><div class="mex-lbl">Hero DMG</div></div>
+          <div class="mex-cell"><div class="mex-val purple">${tdmg}</div><div class="mex-lbl">Tower DMG</div></div>
+          <div class="mex-cell"><div class="mex-val green">${heal}</div><div class="mex-lbl">Healing</div></div>
+          <div class="mex-cell"><div class="mex-val blue">${lh}</div><div class="mex-lbl">Last Hits</div></div>
+          <div class="mex-cell"><div class="mex-val">${dn}</div><div class="mex-lbl">Denies</div></div>
+          <div class="mex-cell"><div class="mex-val green">${gpm}</div><div class="mex-lbl">GPM</div></div>
+          <div class="mex-cell"><div class="mex-val purple">${xpm}</div><div class="mex-lbl">XPM</div></div>
+          <div class="mex-cell"><div class="mex-val">${m.match_id?'#'+String(m.match_id).slice(-6):''}</div><div class="mex-lbl">Match ID</div></div>
+        </div>
+        <div class="match-links">
+          <a class="match-open-link" href="https://www.dotabuff.com/matches/${m.match_id}" target="_blank">📊 Dotabuff</a>
+          <a class="match-open-link" href="https://stratz.com/matches/${m.match_id}" target="_blank">⚡ Stratz</a>
+        </div>
+      </div>
     </div>`;
   }).join('');
 }
 
+function toggleMatch(i){
+  const card=document.getElementById(`mc${i}`);
+  const exp =document.getElementById(`me${i}`);
+  if(!card||!exp)return;
+  const open=exp.classList.contains('open');
+  exp.classList.toggle('open',!open);
+  card.classList.toggle('expanded',!open);
+}
+
 // ── HEROES ───────────────────────────────────
-function renderHeroes(list, source){
-  const el = document.getElementById('heroList');
-  if(!list || !list.length){
-    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:11px;font-family:Share Tech Mono,monospace">НЕТ ДАННЫХ</div>';
+function renderHeroes(list){
+  const el=document.getElementById('heroList');
+  if(!list||!list.length){
+    el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:11px;font-family:Share Tech Mono,monospace">NO DATA</div>';
     return;
   }
-  el.innerHTML = list.slice(0,10).map((h,i)=>{
-    const wr   = h.winrate ?? (h.wins && h.matches ? Math.round(h.wins/h.matches*100) : 0);
-    const wc   = wrc(wr);
-    const clr  = wc==='good'?'var(--green)':wc==='ok'?'var(--gold)':'var(--red)';
-    const games= h.matches || 0;
-    const kda  = h.kda != null ? h.kda : '—';
-
-    // Картинка: stratz даёт hero_short, opendota — hero_id
-    let imgSrc = h.hero_short
-      ? heroImg(h.hero_short)
-      : (h.hero_id ? heroImgFallback(h.hero_id) : '');
-
-    const name = h.hero_name || (h.hero_id ? heroName(h.hero_id) : 'Unknown');
-
+  el.innerHTML=list.slice(0,10).map((h,i)=>{
+    const hid  =h.hero_id;
+    const img  =getHeroImg(hid,h.hero_short);
+    const fb   =getHeroFallback(hid);
+    const name =getHeroName(hid,h.hero_name);
+    const wr   =h.winrate??(h.wins&&h.matches?Math.round(h.wins/h.matches*100):0);
+    const wc   =wrc(wr);
+    const clr  =wc==='good'?'var(--green)':wc==='ok'?'var(--gold)':'var(--red)';
+    const kda  =h.kda??'—';
+    const gpm  =h.avg_gpm?` · ${h.avg_gpm}GPM`:'';
     return `
     <div class="hero-row">
       <div class="hero-rank">${i+1}</div>
-      <img class="hero-img" src="${escH(imgSrc)}"
-        onerror="this.style.opacity='.2'" alt="${escH(name)}"/>
+      <img class="hero-img" src="${escH(img)}"
+        onerror="this.src='${escH(fb)}';this.onerror=null" alt="${escH(name)}"/>
       <div class="hero-name">${escH(name)}</div>
       <div class="hero-stats">
-        <div class="hero-games">${games} игр</div>
-        ${kda!=='—'?`<div class="hero-kda">KDA ${kda}</div>`:''}
+        <div class="hero-games">${h.matches||0} games</div>
+        <div class="hero-kda-lbl">KDA ${kda}${gpm}</div>
       </div>
       <div class="hero-bar"><div class="hero-bar-fill" style="width:${wr}%;background:${clr}"></div></div>
       <div class="hero-wr ${wc}">${wr}%</div>
@@ -910,22 +692,19 @@ function renderHeroes(list, source){
 
 // ── CHART ────────────────────────────────────
 function drawChart(matches){
-  if(chartInst){ chartInst.destroy(); chartInst=null; }
-  const ctx = document.getElementById('kdaChart')?.getContext('2d');
-  if(!ctx) return;
-  const rev = [...matches.slice(0,15)].reverse();
-
-  chartInst = new Chart(ctx,{
+  if(chartInst){chartInst.destroy();chartInst=null;}
+  const ctx=document.getElementById('kdaChart')?.getContext('2d');
+  if(!ctx)return;
+  const rev=[...matches.slice(0,15)].reverse();
+  chartInst=new Chart(ctx,{
     type:'bar',
     data:{
-      labels: rev.map((_,i)=>`#${i+1}`),
+      labels:rev.map((_,i)=>`#${i+1}`),
       datasets:[{
-        data: rev.map(m=>m.kda||0),
-        backgroundColor: rev.map(m=>m.win?'rgba(0,229,160,.6)':'rgba(232,64,87,.6)'),
-        borderColor: rev.map(m=>m.win?'#00e5a0':'#e84057'),
-        borderWidth:1,
-        borderRadius:3,
-        borderSkipped:false,
+        data:rev.map(m=>m.kda||0),
+        backgroundColor:rev.map(m=>m.win?'rgba(0,229,160,.6)':'rgba(232,64,87,.6)'),
+        borderColor:rev.map(m=>m.win?'#00e5a0':'#e84057'),
+        borderWidth:1,borderRadius:3,borderSkipped:false,
       }]
     },
     options:{
@@ -933,11 +712,8 @@ function drawChart(matches){
       animation:{duration:600,easing:'easeOutQuart'},
       plugins:{
         legend:{display:false},
-        tooltip:{
-          backgroundColor:'#101820',borderColor:'#182030',borderWidth:1,
-          titleColor:'#6b8fa8',bodyColor:'#c8dce8',padding:9,
-          callbacks:{title:c=>`Матч ${c[0].label}`,label:c=>` KDA: ${c.raw}`}
-        }
+        tooltip:{backgroundColor:'#101820',borderColor:'#182030',borderWidth:1,titleColor:'#6b8fa8',bodyColor:'#c8dce8',padding:9,
+          callbacks:{title:c=>`Match ${c[0].label}`,label:c=>` KDA: ${c.raw}`}}
       },
       scales:{
         x:{grid:{color:'rgba(24,32,48,.8)'},ticks:{color:'#2d4558',font:{family:'Share Tech Mono',size:8}}},
