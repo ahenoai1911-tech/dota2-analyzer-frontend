@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Dota 2 Analyzer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#080b0f;
+  --bg2:#0d1117;
+  --bg3:#111820;
+  --card:#13191f;
+  --card2:#171f28;
+  --border:#1c2530;
+  --border2:#243040;
+  --red:#e84057;
+  --red2:#ff6b7a;
+  --orange:#ff7043;
+  --gold:#ffc107;
+  --gold2:#ffecb3;
+  --green:#00e5a0;
+  --green2:#69ffcb;
+  --blue:#4fc3f7;
+  --purple:#b39ddb;
+  --text:#d0dde8;
+  --text2:#7b93a8;
+  --text3:#3a5068;
+  --white:#f0f4f8;
+  --r:10px;
+  --r2:6px;
+  --shadow:0 4px 24px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;font-size:14px;overflow-x:hidden}
+
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:.4}
+
+.wrap{max-width:640px;margin:0 auto;padding:12px 12px 40px;position:relative;z-index:1}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;gap:10px;padding:14px 0 16px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.hdr-logo{width:40px;height:40px;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center}
+.hdr-ring{position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--red);animation:spin 6s linear infinite;opacity:.6}
+.hdr-ring::before{content:'';position:absolute;top:-2px;left:50%;width:6px;height:6px;background:var(--red);border-radius:50%;transform:translateX(-50%);box-shadow:0 0 8px var(--red)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hdr-em{font-size:22px;position:relative;z-index:1}
+.hdr-title{flex:1}
+.hdr-title h1{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--white);line-height:1}
+.hdr-title p{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:3px}
+.hdr-live{display:flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);letter-spacing:1px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:14px}
+.search-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:0 14px;display:flex;align-items:center;gap:10px;transition:border-color .2s,box-shadow .2s}
+.search-box:focus-within{border-color:var(--red);box-shadow:0 0 0 3px rgba(232,64,87,.1)}
+.s-icon{color:var(--text3);font-size:15px;flex-shrink:0}
+.search-input{flex:1;background:none;border:none;padding:13px 0;color:var(--white);font-size:15px;font-family:'Barlow',sans-serif;font-weight:500;outline:none}
+.search-input::placeholder{color:var(--text3)}
+.search-btn{background:linear-gradient(135deg,var(--red),var(--orange));border:none;border-radius:var(--r2);padding:8px 18px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1.5px;cursor:pointer;transition:opacity .2s,transform .1s;white-space:nowrap;flex-shrink:0}
+.search-btn:hover{opacity:.88}
+.search-btn:active{transform:scale(.96)}
+.search-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* SUGGEST */
+.suggest-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;z-index:100;box-shadow:var(--shadow);display:none}
+.suggest-list.open{display:block}
+.suggest-item{padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .15s;font-size:13px;border-bottom:1px solid var(--border)}
+.suggest-item:last-child{border-bottom:none}
+.suggest-item:hover{background:var(--bg3)}
+.sug-av{width:28px;height:28px;border-radius:4px;object-fit:cover;background:var(--bg3);flex-shrink:0}
+.sug-name{color:var(--white);font-weight:500}
+.sug-id{color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:10px}
+
+/* SKELETON */
+.skel-block{display:none;margin-bottom:14px}
+.skel-block.active{display:block}
+.sk{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:var(--r2)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-profile{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;gap:14px;margin-bottom:10px}
+.sk-av{width:60px;height:60px;flex-shrink:0}
+.sk-lines{flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px}
+.sk-line{height:12px}
+.sk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sk-stat{height:70px}
+
+/* ERROR */
+.err{display:none;background:rgba(232,64,87,.08);border:1px solid rgba(232,64,87,.25);border-radius:var(--r);padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--red2);gap:8px;align-items:flex-start}
+.err.active{display:flex}
+
+/* RESULTS */
+.results{display:none}
+.results.active{display:block}
+
+/* PROFILE CARD */
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.profile-banner{height:56px;background:linear-gradient(135deg,#0d1117,#1a0a10 60%,#0a0d17);position:relative;overflow:hidden}
+.profile-banner::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(232,64,87,.04) 12px,rgba(232,64,87,.04) 24px)}
+.profile-banner::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--orange),transparent 70%)}
+.profile-body{padding:0 16px 16px;display:flex;gap:14px;align-items:flex-end;margin-top:-30px}
+.profile-av{width:60px;height:60px;border-radius:var(--r2);border:3px solid var(--bg);object-fit:cover;background:var(--bg3);flex-shrink:0;position:relative;z-index:1}
+.profile-info{flex:1;min-width:0;padding-top:8px}
+.profile-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--white);letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.profile-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:3px}
+.rank-pill{flex-shrink:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:8px 12px;text-align:center;margin-top:8px}
+.rank-em{font-size:24px;line-height:1}
+.rank-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;margin-top:2px;text-transform:uppercase}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:4px;margin-bottom:14px}
+.tab{flex:1;padding:8px 4px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border-radius:var(--r2);cursor:pointer;transition:all .2s;border:none;background:none}
+.tab.active{background:linear-gradient(135deg,var(--red),var(--orange));color:#fff;box-shadow:0 2px 12px rgba(232,64,87,.25)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* SEC TITLE */
+.sec{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* WINRATE */
+.wr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px}
+.wr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.wr-num{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;line-height:1;letter-spacing:-2px}
+.wr-num.good{color:var(--green)}
+.wr-num.ok{color:var(--gold)}
+.wr-num.bad{color:var(--red)}
+.wr-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:4px}
+.wr-wl{text-align:right}
+.wr-wl-row{font-size:13px;font-family:'JetBrains Mono',monospace;margin-bottom:3px}
+.wr-wl-row .w{color:var(--green)}
+.wr-wl-row .l{color:var(--red)}
+.wr-total{font-size:11px;color:var(--text3);margin-top:4px}
+.wr-recent{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:10px}
+.wr-dot{width:20px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;font-family:'Barlow Condensed',sans-serif}
+.wr-dot.w{background:rgba(0,229,160,.15);color:var(--green);border:1px solid rgba(0,229,160,.3)}
+.wr-dot.l{background:rgba(232,64,87,.12);color:var(--red);border:1px solid rgba(232,64,87,.25)}
+.wr-bar-bg{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.wr-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.wr-bar-fill.good{background:linear-gradient(90deg,var(--green),var(--green2))}
+.wr-bar-fill.ok{background:linear-gradient(90deg,var(--gold),#ffe082)}
+.wr-bar-fill.bad{background:linear-gradient(90deg,var(--red),var(--red2))}
+
+/* STREAK */
+.streak-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.2);border-radius:20px;padding:5px 14px;font-size:12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;color:var(--gold);margin-bottom:10px}
+
+/* STATS GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;text-align:center;transition:border-color .2s,transform .2s}
+.stat-c:hover{border-color:var(--border2);transform:translateY(-1px)}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;line-height:1;color:var(--white)}
+.stat-val.green{color:var(--green)}
+.stat-val.red{color:var(--red)}
+.stat-val.gold{color:var(--gold)}
+.stat-val.blue{color:var(--blue)}
+.stat-val.purple{color:var(--purple)}
+.stat-val.orange{color:var(--orange)}
+.stat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+
+/* CHART */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.chart-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2)}
+.chart-legend{display:flex;gap:10px}
+.leg-i{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.leg-d{width:8px;height:8px;border-radius:2px}
+.chart-wrap{position:relative;height:150px}
+
+/* HEROES */
+.hero-list{display:flex;flex-direction:column;gap:7px}
+.hero-row{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:12px;transition:border-color .2s}
+.hero-row:hover{border-color:var(--border2)}
+.hero-img{width:48px;height:27px;border-radius:4px;object-fit:cover;background:var(--bg3);border:1px solid var(--border);flex-shrink:0}
+.hero-name{flex:1;font-weight:600;font-size:14px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-games{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);white-space:nowrap}
+.hero-bar{width:50px;height:4px;background:var(--bg);border-radius:2px;overflow:hidden;flex-shrink:0}
+.hero-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.hero-wr{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;min-width:44px;text-align:right}
+.hero-wr.good{color:var(--green)}
+.hero-wr.ok{color:var(--gold)}
+.hero-wr.bad{color:var(--red)}
+
+/* MATCHES */
+.match-list{display:flex;flex-direction:column;gap:6px}
+.match-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;display:grid;grid-template-columns:36px 1fr auto auto;align-items:center;gap:10px;transition:border-color .15s;position:relative;overflow:hidden}
+.match-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.match-card.win::before{background:var(--green)}
+.match-card.loss::before{background:var(--red)}
+.match-card:hover{border-color:var(--border2)}
+.match-himg{width:36px;height:36px;border-radius:4px;object-fit:cover;background:var(--bg3);border:1px solid var(--border)}
+.match-kda-str{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2)}
+.match-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.match-kda-val{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-align:center}
+.match-kda-val.good{color:var(--green)}
+.match-kda-val.ok{color:var(--gold)}
+.match-kda-val.bad{color:var(--red)}
+.match-pill{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:4px}
+.match-pill.win{background:rgba(0,229,160,.12);color:var(--green);border:1px solid rgba(0,229,160,.25)}
+.match-pill.loss{background:rgba(232,64,87,.1);color:var(--red);border:1px solid rgba(232,64,87,.2)}
+
+/* ADVICE */
+.advice-list{display:flex;flex-direction:column;gap:8px}
+.adv{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.55;transition:transform .2s}
+.adv:hover{transform:translateX(2px)}
+.adv.danger{border-left:3px solid var(--red);background:rgba(232,64,87,.05)}
+.adv.warning{border-left:3px solid var(--gold);background:rgba(255,193,7,.04)}
+.adv.success{border-left:3px solid var(--green);background:rgba(0,229,160,.04)}
+.adv.info{border-left:3px solid var(--blue);background:rgba(79,195,247,.04)}
+.adv-icon{font-size:20px;line-height:1.2;flex-shrink:0}
+.adv-text{color:var(--text2);font-size:13px}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .4s ease both}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}
+.d4{animation-delay:.2s}.d5{animation-delay:.25s}.d6{animation-delay:.3s}
+
+/* FOOTER */
+.footer{text-align:center;padding:20px 0 8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;border-top:1px solid var(--border);margin-top:8px}
+
+@media(max-width:380px){
+  .stat-val{font-size:22px}
+  .wr-num{font-size:40px}
+  .tab{font-size:11px;padding:7px 2px}
+  .match-card{grid-template-columns:30px 1fr auto auto;gap:7px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo">
+    <div class="hdr-ring"></div>
+    <span class="hdr-em">⚔️</span>
+  </div>
+  <div class="hdr-title">
+    <h1>Dota 2 Analyzer</h1>
+    <p>powered by opendota api</p>
+  </div>
+  <div class="hdr-live"><div class="live-dot"></div>LIVE</div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="s-icon">🔍</span>
+    <input class="search-input" id="si" type="text" placeholder="Ник или Steam ID..." autocomplete="off" spellcheck="false"/>
+    <button class="search-btn" id="sb" onclick="doSearch()">НАЙТИ</button>
+  </div>
+  <div class="suggest-list" id="sugList"></div>
+</div>
+
+<!-- ERROR -->
+<div class="err" id="errBlock"><span>⚠️</span><span id="errText"></span></div>
+
+<!-- SKELETON -->
+<div class="skel-block" id="skelBlock">
+  <div class="sk-profile">
+    <div class="sk-av sk"></div>
+    <div class="sk-lines">
+      <div class="sk-line sk" style="width:70%"></div>
+      <div class="sk-line sk" style="width:40%"></div>
+      <div class="sk-line sk" style="width:55%"></div>
+    </div>
+  </div>
+  <div class="sk-grid">
+    <div class="sk-stat sk"></div>
+    <div class="sk-stat sk"></div>
+    <div class="sk-stat sk"></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results" id="results"></div>
+
+<div class="footer">DOTA 2 ANALYZER · OPENDOTA API · v2.0</div>
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────────
+const API = "https://dota2-analyzer-xxx.railway.app";
+
+// Telegram Web App init
+let tg = null;
+try{ tg = window.Telegram?.WebApp; if(tg){ tg.ready(); tg.expand(); } }catch(e){}
+
+// ── HERO NAMES ───────────────────────────────────────────────────────────
+const HEROES = {
+  1:"Anti-Mage",2:"Axe",3:"Bane",4:"Bloodseeker",5:"Crystal Maiden",
+  6:"Drow Ranger",7:"Earthshaker",8:"Juggernaut",9:"Mirana",10:"Morphling",
+  11:"Shadow Fiend",12:"Phantom Lancer",13:"Puck",14:"Pudge",15:"Razor",
+  16:"Sand King",17:"Storm Spirit",18:"Sven",19:"Tiny",20:"Vengeful Spirit",
+  21:"Windranger",22:"Zeus",23:"Kunkka",25:"Lina",26:"Lion",
+  27:"Shadow Shaman",28:"Slardar",29:"Tidehunter",30:"Witch Doctor",31:"Lich",
+  32:"Riki",33:"Enigma",34:"Tinker",35:"Sniper",36:"Necrophos",
+  37:"Warlock",38:"Beastmaster",39:"Queen of Pain",40:"Venomancer",
+  41:"Faceless Void",42:"Wraith King",43:"Death Prophet",44:"Phantom Assassin",
+  45:"Pugna",46:"Templar Assassin",47:"Viper",48:"Luna",49:"Dragon Knight",
+  50:"Dazzle",51:"Clockwerk",52:"Leshrac",53:"Nature's Prophet",54:"Lifestealer",
+  55:"Dark Seer",56:"Clinkz",57:"Omniknight",58:"Enchantress",59:"Huskar",
+  60:"Night Stalker",61:"Broodmother",62:"Bounty Hunter",63:"Weaver",
+  64:"Jakiro",65:"Batrider",66:"Chen",67:"Spectre",68:"Ancient Apparition",
+  69:"Doom",70:"Ursa",71:"Spirit Breaker",72:"Gyrocopter",73:"Alchemist",
+  74:"Invoker",75:"Silencer",76:"Outworld Destroyer",77:"Lycan",78:"Brewmaster",
+  79:"Shadow Demon",80:"Lone Druid",81:"Chaos Knight",82:"Meepo",
+  83:"Treant Protector",84:"Ogre Magi",85:"Undying",86:"Rubick",
+  87:"Disruptor",88:"Nyx Assassin",89:"Naga Siren",90:"Keeper of the Light",
+  91:"Io",92:"Visage",93:"Slark",94:"Medusa",95:"Troll Warlord",
+  96:"Centaur Warrunner",97:"Magnus",98:"Timbersaw",99:"Bristleback",
+  100:"Tusk",101:"Skywrath Mage",102:"Abaddon",103:"Elder Titan",
+  104:"Legion Commander",106:"Ember Spirit",107:"Earth Spirit",
+  109:"Terrorblade",110:"Phoenix",111:"Oracle",112:"Winter Wyvern",
+  113:"Arc Warden",120:"Pangolier",121:"Dark Willow",123:"Grimstroke",
+  126:"Void Spirit",128:"Snapfire",129:"Mars",135:"Dawnbreaker",
+  136:"Marci",137:"Primal Beast",138:"Muerta"
+};
+
+const heroName = id => HEROES[id] || `Hero #${id}`;
+
+// ── EVENTS ───────────────────────────────────────────────────────────────
+document.getElementById('si').addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+
+let sugTimer = null;
+document.getElementById('si').addEventListener('input', e => {
+  const v = e.target.value.trim();
+  clearTimeout(sugTimer);
+  if(v.length < 2 || /^\d+$/.test(v)){ closeSug(); return; }
+  sugTimer = setTimeout(() => fetchSug(v), 380);
+});
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('.search-wrap')) closeSug();
+});
+
+// ── SUGGEST ──────────────────────────────────────────────────────────────
+async function fetchSug(q) {
+  try{
+    const r = await fetch(`${API}/search?q=${encodeURIComponent(q)}`);
+    const data = await r.json();
+    renderSug(data.slice(0,5));
+  }catch{ closeSug(); }
+}
+
+function renderSug(list){
+  const el = document.getElementById('sugList');
+  if(!list.length){ closeSug(); return; }
+  el.innerHTML = list.map(p=>`
+    <div class="suggest-item" onclick="pickSug('${p.account_id}')">
+      <img class="sug-av" src="${p.avatarfull||''}" onerror="this.style.visibility='hidden'" alt="">
+      <div>
+        <div class="sug-name">${escH(p.personaname)}</div>
+        <div class="sug-id">#${p.account_id}</div>
+      </div>
+    </div>`).join('');
+  el.classList.add('open');
+}
+
+function pickSug(id){ document.getElementById('si').value=id; closeSug(); doSearch(); }
+function closeSug(){ document.getElementById('sugList').classList.remove('open'); }
+
+// ── SEARCH ───────────────────────────────────────────────────────────────
+async function doSearch(){
+  const q = document.getElementById('si').value.trim();
+  if(!q) return;
+  closeSug();
+  setLoad(true); hideErr(); hideRes();
+
+  try{
+    const r = await fetch(`${API}/player?query=${encodeURIComponent(q)}`);
+    if(!r.ok){ const e=await r.json().catch(()=>{}); throw new Error(e?.detail||`Ошибка ${r.status}`); }
+    renderAll(await r.json());
+  }catch(e){
+    showErr(e.message||'Не удалось загрузить данные');
+  }finally{
+    setLoad(false);
+  }
+}
+
+function setLoad(on){
+  document.getElementById('skelBlock').classList.toggle('active',on);
+  const btn = document.getElementById('sb');
+  btn.disabled=on; btn.textContent=on?'...':'НАЙТИ';
+}
+function showErr(m){ document.getElementById('errText').textContent=m; document.getElementById('errBlock').classList.add('active'); }
+function hideErr(){ document.getElementById('errBlock').classList.remove('active'); }
+function hideRes(){ const r=document.getElementById('results'); r.classList.remove('active'); r.innerHTML=''; }
+
+// ── HELPERS ──────────────────────────────────────────────────────────────
+const RANKS = {10:['🪵','Herald'],20:['🛡️','Guardian'],30:['⚒️','Crusader'],40:['🗡️','Archon'],50:['⚔️','Legend'],60:['🏅','Ancient'],70:['💎','Divine'],80:['🌟','Immortal']};
+function getRank(t){ if(!t)return['❓','Unknown']; return RANKS[Math.floor(t/10)*10]||['❓','Unknown']; }
+function wrc(w){ return w>=55?'good':w>=50?'ok':'bad'; }
+function kdaC(k){ return k>=4?'good':k>=2?'ok':'bad'; }
+function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function calcStreak(h){
+  if(!h.length)return null;
+  let n=1,t=h[0].won;
+  for(let i=1;i<h.length;i++){ if(h[i].won===t)n++; else break; }
+  return n>=2?{count:n,win:t}:null;
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────
+let chartInst = null;
+
+function renderAll(data){
+  const {profile,stats,kda_history,advice} = data;
+  const [ri,rn] = getRank(profile.rank);
+  const wClass = wrc(stats.winrate);
+  const streak = calcStreak(kda_history);
+
+  document.getElementById('results').innerHTML = `
+
+  <div class="profile-card fu d1">
+    <div class="profile-banner"></div>
+    <div class="profile-body">
+      <img class="profile-av" src="${profile.avatar||''}"
+        onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'60\\' height=\\'60\\'><rect width=\\'60\\' height=\\'60\\' fill=\\'%23111820\\'/><text y=\\'42\\' x=\\'12\\' font-size=\\'32\\'>🎮</text></svg>'" alt=""/>
+      <div class="profile-info">
+        <div class="profile-name">${escH(profile.name)}</div>
+        <div class="profile-sub">STEAM ID · ${profile.account_id||'—'}</div>
+      </div>
+      <div class="rank-pill">
+        <div class="rank-em">${ri}</div>
+        <div class="rank-lbl">${rn}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs fu d2">
+    <button class="tab active" onclick="swTab('overview',this)">Обзор</button>
+    <button class="tab" onclick="swTab('matches',this)">Матчи</button>
+    <button class="tab" onclick="swTab('heroes',this)">Герои</button>
+    <button class="tab" onclick="swTab('advice',this)">Советы</button>
+  </div>
+
+  <!-- TAB OVERVIEW -->
+  <div class="tab-panel active" id="tab-overview">
+
+    ${streak?`<div class="streak-badge fu d3">${streak.win?'🔥':'❄️'} ${streak.count}-${streak.win?'WIN':'LOSS'} STREAK</div>`:''}
+
+    <div class="wr-card fu d3">
+      <div class="wr-top">
+        <div>
+          <div class="wr-num ${wClass}">${stats.winrate}%</div>
+          <div class="wr-lbl">Win Rate · All Time</div>
+        </div>
+        <div class="wr-wl">
+          <div class="wr-wl-row"><span class="w">▲ ${stats.wins} W</span></div>
+          <div class="wr-wl-row"><span class="l">▼ ${stats.losses} L</span></div>
+          <div class="wr-total">${stats.total_games} игр всего</div>
+        </div>
+      </div>
+      <div class="sec" style="margin-bottom:6px">Последние ${Math.min(kda_history.length,20)} матчей</div>
+      <div class="wr-recent" id="wrDots"></div>
+      <div class="wr-bar-bg" style="margin-top:8px">
+        <div class="wr-bar-fill ${wClass}" id="wrFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="sec fu d4">Средние показатели (20 матчей)</div>
+    <div class="stat-grid fu d4">
+      <div class="stat-c"><div class="stat-val ${kdaC(stats.avg_kda)}">${stats.avg_kda}</div><div class="stat-lbl">KDA</div></div>
+      <div class="stat-c"><div class="stat-val gold">${stats.avg_kills}</div><div class="stat-lbl">Kills</div></div>
+      <div class="stat-c"><div class="stat-val red">${stats.avg_deaths}</div><div class="stat-lbl">Deaths</div></div>
+      <div class="stat-c"><div class="stat-val blue">${stats.avg_assists}</div><div class="stat-lbl">Assists</div></div>
+      <div class="stat-c"><div class="stat-val green">${stats.avg_gpm}</div><div class="stat-lbl">GPM</div></div>
+      <div class="stat-c"><div class="stat-val purple">${stats.avg_xpm}</div><div class="stat-lbl">XPM</div></div>
+    </div>
+
+    <div class="chart-card fu d5">
+      <div class="chart-head">
+        <div class="chart-title">KDA по матчам</div>
+        <div class="chart-legend">
+          <div class="leg-i"><div class="leg-d" style="background:var(--green)"></div>WIN</div>
+          <div class="leg-i"><div class="leg-d" style="background:var(--red)"></div>LOSS</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="kdaChart"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- TAB MATCHES -->
+  <div class="tab-panel" id="tab-matches">
+    <div class="match-list" id="matchList"></div>
+  </div>
+
+  <!-- TAB HEROES -->
+  <div class="tab-panel" id="tab-heroes">
+    <div class="hero-list" id="heroList">
+      <div style="text-align:center;padding:24px;color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px">ЗАГРУЗКА...</div>
+    </div>
+  </div>
+
+  <!-- TAB ADVICE -->
+  <div class="tab-panel" id="tab-advice">
+    <div class="advice-list">
+      ${advice.map(a=>`
+        <div class="adv ${a.type} fu">
+          <div class="adv-icon">${a.icon}</div>
+          <div class="adv-text">${escH(a.text)}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+  `;
+
+  document.getElementById('results').classList.add('active');
+
+  // Animate WR bar
+  setTimeout(()=>{ document.getElementById('wrFill').style.width = stats.winrate+'%'; }, 150);
+
+  // WR dots
+  const dots = document.getElementById('wrDots');
+  kda_history.slice(0,20).forEach(m=>{
+    const d=document.createElement('div');
+    d.className=`wr-dot ${m.won?'w':'l'}`;
+    d.textContent=m.won?'W':'L';
+    dots.appendChild(d);
+  });
+
+  drawChart(kda_history);
+  renderMatches(kda_history);
+  loadHeroes(profile.account_id);
+
+  if(tg){ try{ tg.sendData(JSON.stringify({player:profile.name,wr:stats.winrate,kda:stats.avg_kda})); }catch(e){} }
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────
+function swTab(id, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── MATCHES ──────────────────────────────────────────────────────────────
+function renderMatches(history){
+  document.getElementById('matchList').innerHTML = history.slice(0,20).map(m=>`
+    <div class="match-card ${m.won?'win':'loss'}">
+      <img class="match-himg"
+        src="https://api.opendota.com/apps/dota2/images/heroes/${m.hero_id}_sb.png"
+        onerror="this.style.opacity='.3'" alt=""/>
+      <div>
+        <div class="match-kda-str">${m.kills} / <span style="color:var(--red)">${m.deaths}</span> / ${m.assists}</div>
+        <div class="match-meta">${escH(heroName(m.hero_id))} · #${String(m.match_id).slice(-7)}</div>
+      </div>
+      <div class="match-kda-val ${kdaC(m.kda)}">${m.kda}</div>
+      <div class="match-pill ${m.won?'win':'loss'}">${m.won?'WIN':'LOSS'}</div>
+    </div>`).join('');
+}
+
+// ── HEROES ───────────────────────────────────────────────────────────────
+async function loadHeroes(pid){
+  try{
+    const r = await fetch(`${API}/heroes?player_id=${pid}`);
+    const data = await r.json();
+    renderHeroes(data);
+  }catch{
+    document.getElementById('heroList').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Не удалось загрузить</div>';
+  }
+}
+
+function renderHeroes(list){
+  const el = document.getElementById('heroList');
+  if(!list.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Нет данных</div>'; return; }
+  el.innerHTML = list.slice(0,8).map(h=>{
+    const g=h.games||0, w=h.win||0;
+    const wr = g ? Math.round(w/g*100) : 0;
+    const wc = wr>=55?'good':wr>=50?'ok':'bad';
+    const clr = wc==='good'?'var(--green)':wc==='ok'?'var(--gold)':'var(--red)';
+    return `
+    <div class="hero-row">
+      <img class="hero-img"
+        src="https://api.opendota.com/apps/dota2/images/heroes/${h.hero_id}_sb.png"
+        onerror="this.style.opacity='.2'" alt="${heroName(h.hero_id)}"/>
+      <div class="hero-name">${heroName(h.hero_id)}</div>
+      <div class="hero-games">${g} игр</div>
+      <div class="hero-bar"><div class="hero-bar-fill" style="width:${wr}%;background:${clr}"></div></div>
+      <div class="hero-wr ${wc}">${wr}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ── CHART ────────────────────────────────────────────────────────────────
+function drawChart(history){
+  if(chartInst){ chartInst.destroy(); chartInst=null; }
+  const ctx = document.getElementById('kdaChart').getContext('2d');
+  const rev = [...history.slice(0,15)].reverse();
+
+  chartInst = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels: rev.map((_,i)=>`#${i+1}`),
+      datasets:[{
+        data: rev.map(m=>m.kda),
+        backgroundColor: rev.map(m=>m.won?'rgba(0,229,160,.7)':'rgba(232,64,87,.7)'),
+        borderColor: rev.map(m=>m.won?'#00e5a0':'#e84057'),
+        borderWidth:1.5,
+        borderRadius:4,
+        borderSkipped:false,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      animation:{duration:700,easing:'easeOutQuart'},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#13191f',borderColor:'#1c2530',borderWidth:1,
+          titleColor:'#7b93a8',bodyColor:'#d0dde8',padding:10,
+          callbacks:{title:c=>`Матч ${c[0].label}`,label:c=>` KDA: ${c.raw}`}
+        }
+      },
+      scales:{
+        x:{grid:{color:'rgba(28,37,48,.6)'},ticks:{color:'#3a5068',font:{family:'JetBrains Mono',size:9}}},
+        y:{grid:{color:'rgba(28,37,48,.6)'},ticks:{color:'#3a5068',font:{family:'JetBrains Mono',size:9}},beginAtZero:true}
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
