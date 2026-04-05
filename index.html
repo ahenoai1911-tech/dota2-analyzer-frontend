@@ -85,7 +85,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .profile-banner{height:44px;background:linear-gradient(135deg,#060c10,#0a1820 50%,#060c10);position:relative;overflow:hidden}
 .profile-banner::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 14px,rgba(0,229,160,.03) 14px,rgba(0,229,160,.03) 28px)}
 .profile-banner::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--green),var(--cyan),transparent 60%)}
-/* profile-body: flex row, avatar + info + right block */
 .profile-body{padding:0 14px 14px;display:flex;flex-direction:row;gap:10px;align-items:flex-end;margin-top:-24px}
 .profile-av{width:52px;height:52px;border-radius:5px;border:2px solid var(--bg);object-fit:cover;background:var(--bg3);flex-shrink:0;position:relative;z-index:1}
 .profile-center{flex:1;min-width:0;padding-top:28px}
@@ -93,8 +92,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .profile-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px}
 .profile-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px}
 .source-badge{display:inline-flex;align-items:center;gap:3px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--cyan);border:1px solid rgba(0,188,212,.2);border-radius:3px;padding:2px 5px;letter-spacing:1px}
-
-/* RIGHT column: rank + MMR */
 .profile-right{flex-shrink:0;display:flex;flex-direction:column;gap:5px;padding-top:28px;align-items:stretch;min-width:74px}
 .rank-pill{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:5px 8px;text-align:center}
 .rank-em{font-size:18px;line-height:1}
@@ -274,10 +271,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 </div>
 
 <script>
-// ════════════════════════════════════════════
-// ЗАМЕНИ НА СВОЙ RAILWAY URL
-const API = "dota2-analyzer-production.up.railway.app";
-// ════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// ⚠️ ЗАМЕНИ НА СВОЙ RAILWAY URL (с https://)
+const API = "https://ВАШ-ПРОЕКТ.up.railway.app";
+// ══════════════════════════════════════════════════════
 
 let tg = null;
 try{ tg = window.Telegram?.WebApp; if(tg){ tg.ready(); tg.expand(); } }catch(e){}
@@ -343,7 +340,7 @@ const HERO_NAMES = {
   136:"Marci",137:"Primal Beast",138:"Muerta"
 };
 
-// ── RANKS (правильные английские) ────────────
+// ── RANKS (English only) ─────────────────────
 const RANK_MAP = {
   1:{em:"🪵",name:"Herald"},
   2:{em:"🛡️",name:"Guardian"},
@@ -356,7 +353,6 @@ const RANK_MAP = {
 };
 
 function getRank(rankTierNum, rankStr){
-  // rank_tier число — самый точный источник (например 45 = Archon 5★)
   if(rankTierNum){
     const s = String(rankTierNum);
     const tier  = parseInt(s[0])||0;
@@ -364,18 +360,19 @@ function getRank(rankTierNum, rankStr){
     const r = RANK_MAP[tier]||{em:"❓",name:"Unknown"};
     return {em:r.em, name:r.name, stars};
   }
-  // Fallback: парсим строку (Stratz может вернуть "Archon ⭐⭐⭐")
-  if(!rankStr||rankStr==='Не откалиброван') return {em:"❓",name:"Uncalibrated",stars:0};
+  if(!rankStr||rankStr==='Не откалиброван'||rankStr==='Uncalibrated'){
+    return {em:"❓",name:"Uncalibrated",stars:0};
+  }
   const n=rankStr.toLowerCase();
   let tier=0;
-  if(n.includes('herald')||n.includes('герольд'))     tier=1;
-  else if(n.includes('guardian')||n.includes('страж'))tier=2;
-  else if(n.includes('crusader')||n.includes('рыцарь'))tier=3;
-  else if(n.includes('archon')||n.includes('витязь')) tier=4;
-  else if(n.includes('legend')||n.includes('лорд'))   tier=5;
-  else if(n.includes('ancient')||n.includes('легенда'))tier=6;
-  else if(n.includes('divine')||n.includes('древний'))tier=7;
-  else if(n.includes('immortal')||n.includes('иммортал')||n.includes('божество'))tier=8;
+  if(n.includes('herald'))     tier=1;
+  else if(n.includes('guardian'))tier=2;
+  else if(n.includes('crusader'))tier=3;
+  else if(n.includes('archon')) tier=4;
+  else if(n.includes('legend')) tier=5;
+  else if(n.includes('ancient'))tier=6;
+  else if(n.includes('divine')) tier=7;
+  else if(n.includes('immortal'))tier=8;
   const stars=(rankStr.match(/⭐/g)||[]).length;
   const r=RANK_MAP[tier]||{em:"❓",name:"Unknown"};
   return {em:r.em, name:r.name, stars};
@@ -390,9 +387,11 @@ function starsHtml(n){
 function getHeroImg(heroId, heroShort){
   const short = heroShort || HERO_SHORT[heroId];
   if(short) return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${short}.png`;
-  return `https://api.opendota.com/apps/dota2/images/heroes/${heroId}_sb.png`;
+  if(heroId) return `https://api.opendota.com/apps/dota2/images/heroes/${heroId}_sb.png`;
+  return '';
 }
 function getHeroFallback(heroId){
+  if(!heroId) return '';
   return `https://api.opendota.com/apps/dota2/images/heroes/${heroId}_sb.png`;
 }
 function getHeroName(heroId, nameStr){
@@ -404,7 +403,7 @@ function getHeroName(heroId, nameStr){
 const wrc  = w => w>=55?'good':w>=50?'ok':'bad';
 const kdaC = k => k>=4?'good':k>=2?'ok':'bad';
 const escH = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const fnum = n => (n!=null&&n!=='—') ? Number(n).toLocaleString('en') : '—';
+const fnum = n => (n!=null && n!==undefined && n!=='—' && n!==0) ? Number(n).toLocaleString('en') : '—';
 
 // ── EVENTS ───────────────────────────────────
 document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
@@ -419,12 +418,14 @@ document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))close
 
 // ── SUGGEST ──────────────────────────────────
 async function fetchSug(q){
-  try{const r=await fetch(`${API}/search?q=${encodeURIComponent(q)}`);renderSug(await r.json());}
-  catch{closeSug();}
+  try{
+    const r=await fetch(`${API}/search?q=${encodeURIComponent(q)}`);
+    renderSug(await r.json());
+  }catch{closeSug();}
 }
 function renderSug(list){
   const el=document.getElementById('sugList');
-  if(!list.length){closeSug();return;}
+  if(!list||!list.length){closeSug();return;}
   el.innerHTML=list.map(p=>`
     <div class="suggest-item" onclick="pickSug('${p.account_id}')">
       <img class="sug-av" src="${escH(p.avatarfull||'')}" onerror="this.style.visibility='hidden'" alt="">
@@ -456,7 +457,7 @@ function showErr(m){document.getElementById('errText').textContent=m;document.ge
 function hideErr(){document.getElementById('errBlock').classList.remove('active');}
 function hideRes(){const r=document.getElementById('results');r.classList.remove('active');r.innerHTML='';}
 
-// ── RENDER ───────────────────────────────────
+// ── RENDER ALL ────────────────────────────────
 let chartInst=null;
 
 function renderAll(data){
@@ -484,7 +485,7 @@ function renderAll(data){
       <div class="profile-center">
         <div class="profile-name">${escH(profile.name)}</div>
         <div class="profile-meta">
-          <span class="profile-sub">ID · ${escH(String(account_id))}</span>
+          <span class="profile-sub">ID · ${escH(String(account_id||''))}</span>
           <span class="source-badge">${srcLbl}${profile.is_anonymous?' · 🔒':''}</span>
         </div>
       </div>
@@ -506,6 +507,7 @@ function renderAll(data){
 
   <div class="tab-panel active" id="tab-overview">
     ${streak&&streak.count>=2?`<div class="streak-badge ${streak.type} fu d2">${streak.type==='win'?'🔥':'❄️'} ${streak.count} ${streak.type==='win'?'WIN':'LOSS'} STREAK</div>`:''}
+
     <div class="wr-card fu d3">
       <div class="wr-top">
         <div>
@@ -542,7 +544,7 @@ function renderAll(data){
 
     <div class="sec fu d4"><span class="sec-icon">◈</span>Averages (20 matches)</div>
     <div class="stat-grid fu d4">
-      <div class="stat-c"><div class="stat-val ${kdaC(avgF('kda'))}">${avgF('kda')}</div><div class="stat-lbl">KDA</div></div>
+      <div class="stat-c"><div class="stat-val ${kdaC(parseFloat(avgF('kda'))||0)}">${avgF('kda')}</div><div class="stat-lbl">KDA</div></div>
       <div class="stat-c"><div class="stat-val gold">${avgF('kills')}</div><div class="stat-lbl">Kills</div></div>
       <div class="stat-c"><div class="stat-val red">${avgF('deaths')}</div><div class="stat-lbl">Deaths</div></div>
       <div class="stat-c"><div class="stat-val blue">${avgF('assists')}</div><div class="stat-lbl">Assists</div></div>
@@ -603,14 +605,6 @@ function renderMatches(matches){
     const dur   = m.duration_min!=null?`${m.duration_min}:${String(m.duration_sec||0).padStart(2,'0')}`:'';
     const kda   = m.kda??0;
     const wc    = m.win?'win':'loss';
-    const net   = fnum(m.networth);
-    const hdmg  = fnum(m.hero_damage);
-    const tdmg  = fnum(m.tower_damage);
-    const heal  = fnum(m.healing);
-    const lh    = m.last_hits!=null?m.last_hits:'—';
-    const dn    = m.denies!=null?m.denies:'—';
-    const gpm   = m.gpm||'—';
-    const xpm   = m.xpm||'—';
     return `
     <div class="match-card ${wc}" id="mc${i}">
       <div class="match-main" onclick="toggleMatch(${i})">
@@ -629,14 +623,14 @@ function renderMatches(matches){
       </div>
       <div class="match-expand" id="me${i}">
         <div class="match-expand-grid">
-          <div class="mex-cell"><div class="mex-val gold">${net}</div><div class="mex-lbl">Networth</div></div>
-          <div class="mex-cell"><div class="mex-val red">${hdmg}</div><div class="mex-lbl">Hero DMG</div></div>
-          <div class="mex-cell"><div class="mex-val purple">${tdmg}</div><div class="mex-lbl">Tower DMG</div></div>
-          <div class="mex-cell"><div class="mex-val green">${heal}</div><div class="mex-lbl">Healing</div></div>
-          <div class="mex-cell"><div class="mex-val blue">${lh}</div><div class="mex-lbl">Last Hits</div></div>
-          <div class="mex-cell"><div class="mex-val">${dn}</div><div class="mex-lbl">Denies</div></div>
-          <div class="mex-cell"><div class="mex-val green">${gpm}</div><div class="mex-lbl">GPM</div></div>
-          <div class="mex-cell"><div class="mex-val purple">${xpm}</div><div class="mex-lbl">XPM</div></div>
+          <div class="mex-cell"><div class="mex-val gold">${fnum(m.networth)}</div><div class="mex-lbl">Networth</div></div>
+          <div class="mex-cell"><div class="mex-val red">${fnum(m.hero_damage)}</div><div class="mex-lbl">Hero DMG</div></div>
+          <div class="mex-cell"><div class="mex-val purple">${fnum(m.tower_damage)}</div><div class="mex-lbl">Tower DMG</div></div>
+          <div class="mex-cell"><div class="mex-val green">${fnum(m.healing)}</div><div class="mex-lbl">Healing</div></div>
+          <div class="mex-cell"><div class="mex-val blue">${m.last_hits??'—'}</div><div class="mex-lbl">Last Hits</div></div>
+          <div class="mex-cell"><div class="mex-val">${m.denies??'—'}</div><div class="mex-lbl">Denies</div></div>
+          <div class="mex-cell"><div class="mex-val green">${m.gpm||'—'}</div><div class="mex-lbl">GPM</div></div>
+          <div class="mex-cell"><div class="mex-val purple">${m.xpm||'—'}</div><div class="mex-lbl">XPM</div></div>
           <div class="mex-cell"><div class="mex-val">${m.match_id?'#'+String(m.match_id).slice(-6):''}</div><div class="mex-lbl">Match ID</div></div>
         </div>
         <div class="match-links">
@@ -665,15 +659,15 @@ function renderHeroes(list){
     return;
   }
   el.innerHTML=list.slice(0,10).map((h,i)=>{
-    const hid  =h.hero_id;
-    const img  =getHeroImg(hid,h.hero_short);
-    const fb   =getHeroFallback(hid);
-    const name =getHeroName(hid,h.hero_name);
-    const wr   =h.winrate??(h.wins&&h.matches?Math.round(h.wins/h.matches*100):0);
-    const wc   =wrc(wr);
-    const clr  =wc==='good'?'var(--green)':wc==='ok'?'var(--gold)':'var(--red)';
-    const kda  =h.kda??'—';
-    const gpm  =h.avg_gpm?` · ${h.avg_gpm}GPM`:'';
+    const hid  = h.hero_id;
+    const img  = getHeroImg(hid, h.hero_short);
+    const fb   = getHeroFallback(hid);
+    const name = getHeroName(hid, h.hero_name);
+    const wr   = h.winrate??(h.wins&&h.matches?Math.round(h.wins/h.matches*100):0);
+    const wc   = wrc(wr);
+    const clr  = wc==='good'?'var(--green)':wc==='ok'?'var(--gold)':'var(--red)';
+    const kda  = h.kda??'—';
+    const gpm  = h.avg_gpm?` · ${h.avg_gpm}GPM`:'';
     return `
     <div class="hero-row">
       <div class="hero-rank">${i+1}</div>
@@ -712,8 +706,11 @@ function drawChart(matches){
       animation:{duration:600,easing:'easeOutQuart'},
       plugins:{
         legend:{display:false},
-        tooltip:{backgroundColor:'#101820',borderColor:'#182030',borderWidth:1,titleColor:'#6b8fa8',bodyColor:'#c8dce8',padding:9,
-          callbacks:{title:c=>`Match ${c[0].label}`,label:c=>` KDA: ${c.raw}`}}
+        tooltip:{
+          backgroundColor:'#101820',borderColor:'#182030',borderWidth:1,
+          titleColor:'#6b8fa8',bodyColor:'#c8dce8',padding:9,
+          callbacks:{title:c=>`Match ${c[0].label}`,label:c=>` KDA: ${c.raw}`}
+        }
       },
       scales:{
         x:{grid:{color:'rgba(24,32,48,.8)'},ticks:{color:'#2d4558',font:{family:'Share Tech Mono',size:8}}},
