@@ -1123,7 +1123,9 @@ function getMissionDesc(mission){
 async function checkMissions(){
   if(!currentPlayerData || !missionsData) return;
   
-  const btn = event.target;
+  const btn = document.querySelector('.mission-btn');
+  if(!btn) return;
+  
   btn.disabled = true;
   btn.textContent = '⏳ ПРОВЕРКА...';
   
