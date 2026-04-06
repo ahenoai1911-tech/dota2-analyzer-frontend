@@ -741,6 +741,11 @@ function swTab(id,btn){
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
+  
+  // Load missions when switching to missions tab
+  if(id === 'missions'){
+    loadMissions();
+  }
 }
 
 // ── MATCHES ──────────────────────────────────
@@ -1012,6 +1017,158 @@ function shareRoast(){
     window.Telegram.WebApp.showAlert('Скопируй текст прожарки и отправь друзьям! 😂');
   }else{
     alert('Скопируй текст прожарки и отправь друзьям! 😂\n\nПопробуй тоже: @DotaAnalyzerBot');
+  }
+}
+  // ── MISSIONS ─────────────────────────────────────────────────────────────────
+let missionsData = null;
+
+async function loadMissions(){
+  if(!currentPlayerData){ 
+    document.getElementById('missionsContent').innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">⚠️ Сначала найди игрока</div>';
+    return; 
+  }
+  
+  const accountId = currentPlayerData.account_id;
+  const username = currentPlayerData.profile.name;
+  
+  try{
+    const r = await fetch(`${API}/missions/generate`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        account_id: accountId,
+        username: username
+      })
+    });
+    
+    if(!r.ok) throw new Error('Failed to load missions');
+    
+    missionsData = await r.json();
+    renderMissions(missionsData);
+    
+  }catch(e){
+    document.getElementById('missionsContent').innerHTML=`<div style="text-align:center;padding:40px;color:var(--red2)">❌ ${e.message}</div>`;
+  }
+}
+
+function renderMissions(data){
+  const player = data.player;
+  const missions = data.missions;
+  const today = new Date().toLocaleDateString('ru-RU');
+  
+  let html = `
+    <div class="player-stats-card fu d1">
+      <div class="pstat">
+        <div class="pstat-val green">${player.level}</div>
+        <div class="pstat-lbl">УРОВЕНЬ</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-val gold">${player.xp}</div>
+        <div class="pstat-lbl">XP</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-val">${player.streak}</div>
+        <div class="pstat-lbl">СТРИК</div>
+      </div>
+    </div>
+    
+    <div class="sec fu d2"><span class="sec-icon">🎯</span>МИССИИ НА СЕГОДНЯ · ${today}</div>
+  `;
+  
+  missions.forEach((m, i) => {
+    const statusIcon = m.completed ? '✅' : '⏳';
+    const cardClass = m.completed ? 'completed' : '';
+    const desc = getMissionDesc(m);
+    
+    html += `
+      <div class="mission-card ${cardClass} fu d${i+3}">
+        <div class="mission-header">
+          <div class="mission-icon">${m.icon}</div>
+          <div class="mission-info">
+            <div class="mission-title">${desc}</div>
+            <div class="mission-desc">Цель: ${m.target}</div>
+          </div>
+          <div class="mission-status">${statusIcon}</div>
+        </div>
+        <div class="mission-progress">
+          <span class="mission-target">Прогресс: ${m.current || 0} / ${m.target}</span>
+          <span class="mission-xp">+25 XP</span>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += `
+    <button class="mission-btn fu d${missions.length+3}" onclick="checkMissions()">
+      🔍 ПРОВЕРИТЬ ПРОГРЕСС
+    </button>
+  `;
+  
+  document.getElementById('missionsContent').innerHTML = html;
+}
+
+function getMissionDesc(mission){
+  const descs = {
+    'deaths': `Умереть ≤ ${mission.target} раз`,
+    'gpm': `Сделать GPM > ${mission.target}`,
+    'kda': `Получить KDA ≥ ${mission.target}`
+  };
+  return descs[mission.type] || mission.description;
+}
+
+async function checkMissions(){
+  if(!currentPlayerData || !missionsData) return;
+  
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = '⏳ ПРОВЕРКА...';
+  
+  try{
+    const r = await fetch(`${API}/missions/check`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        account_id: currentPlayerData.account_id
+      })
+    });
+    
+    if(!r.ok) throw new Error('Failed to check missions');
+    
+    const result = await r.json();
+    showMissionResults(result);
+    
+  }catch(e){
+    alert(`Ошибка: ${e.message}`);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '🔍 ПРОВЕРИТЬ ПРОГРЕСС';
+  }
+}
+
+function showMissionResults(result){
+  let html = `
+    <div class="ai-msg assistant" style="margin:20px 0">
+      <div class="ai-msg-avatar">🎯</div>
+      <div class="ai-msg-bubble">
+        <strong>Результаты проверки:</strong><br><br>
+  `;
+  
+  result.missions.forEach(m => {
+    const icon = m.completed ? '✅' : '❌';
+    const status = m.completed ? 'Выполнено' : 'Не выполнено';
+    html += `${icon} ${getMissionDesc(m)}: ${status} (${m.current}/${m.target})<br>`;
+  });
+  
+  html += `<br>
+    📊 Выполнено: ${result.completed}/${result.total}<br>
+    ⭐ Получено XP: +${result.xp_gained}<br>
+    🎮 Матч ID: ${result.match_id}
+  </div></div>`;
+  
+  document.getElementById('missionsContent').innerHTML += html;
+  
+  if(result.completed === result.total){
+    alert('🎉 ВСЕ МИССИИ ВЫПОЛНЕНЫ! 🎉');
   }
 }
 </script>
