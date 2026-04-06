@@ -504,6 +504,13 @@ async function loadPlayer(query){
       return;
     }
     const data=await r.json();
+    
+    // Check if profile has no match data (private or new account)
+    if((!data.recent_matches || data.recent_matches.length === 0) && data.stats.total_matches <= 1) {
+      showErr('🔒 Закрытый профиль или нет данных о матчах');
+      return;
+    }
+    
     currentPlayerData=data;
     renderAll(data);
   }catch(e){ 
