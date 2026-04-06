@@ -223,6 +223,29 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .match-open-link{display:block;text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:1px;padding:6px;border:1px solid rgba(0,188,212,.15);border-radius:4px;text-decoration:none;transition:background .2s}
 .match-open-link:hover{background:rgba(0,188,212,.07)}
 
+  /* MISSIONS */
+.mission-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;position:relative;overflow:hidden}
+.mission-card.completed{border-color:var(--green);background:rgba(0,229,160,.05)}
+.mission-card.failed{border-color:var(--red);background:rgba(232,64,87,.05)}
+.mission-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mission-icon{font-size:24px;flex-shrink:0}
+.mission-info{flex:1}
+.mission-title{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--white);letter-spacing:.5px}
+.mission-desc{font-size:11px;color:var(--text2);margin-top:2px;font-family:'Share Tech Mono',monospace}
+.mission-status{font-size:20px;flex-shrink:0}
+.mission-progress{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.mission-target{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)}
+.mission-xp{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--gold)}
+.player-stats-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;display:flex;justify-content:space-around;text-align:center}
+.pstat{flex:1}
+.pstat-val{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--white);line-height:1}
+.pstat-val.green{color:var(--green)}
+.pstat-val.gold{color:var(--gold)}
+.pstat-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;margin-top:4px}
+.mission-btn{background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:var(--r);padding:12px 20px;color:#06090c;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:opacity .2s;width:100%;margin-top:10px}
+.mission-btn:hover{opacity:.85}
+.mission-btn:disabled{opacity:.3;cursor:not-allowed}
+  
 /* AI TAB */
 .ai-panel{display:flex;flex-direction:column;gap:10px}
 .ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
