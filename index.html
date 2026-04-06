@@ -494,14 +494,24 @@ async function loadPlayer(query){
   setLoad(true); hideErr(); hideRes();
   try{
     const r=await fetch(`${API}/player?query=${encodeURIComponent(query)}`);
-    if(!r.ok){ const e=await r.json().catch(()=>{}); throw new Error(e?.detail||`Error ${r.status}`); }
+    if(!r.ok){ 
+      const e=await r.json().catch(()=>({})); 
+      if(r.status === 403) {
+        showErr('🔒 Закрытый профиль или нет данных о матчах');
+      } else {
+        showErr(e?.detail||`Error ${r.status}`);
+      }
+      return;
+    }
     const data=await r.json();
     currentPlayerData=data;
     renderAll(data);
-  }catch(e){ showErr(e.message||'Failed to load player data.'); }
+  }catch(e){ 
+    showErr(e.message||'Failed to load player data.'); 
+  }
   finally{ setLoad(false); }
 }
-
+  
 function setLoad(on){
   document.getElementById('skelBlock').classList.toggle('active',on);
   const b=document.getElementById('sb'); b.disabled=on; b.textContent=on?'...':'НАЙТИ';
