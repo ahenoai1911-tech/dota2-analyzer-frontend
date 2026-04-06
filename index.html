@@ -1111,7 +1111,11 @@ function getMissionDesc(mission){
   const descs = {
     'deaths': `Умереть ≤ ${mission.target} раз`,
     'gpm': `Сделать GPM > ${mission.target}`,
-    'kda': `Получить KDA ≥ ${mission.target}`
+    'kda': `Получить KDA ≥ ${mission.target}`,
+    'networth': `Нафармить NW > ${mission.target}`,
+    'healing': `Залечить > ${mission.target} HP`,
+    'denies': `Заденаить ≥ ${mission.target} крипов`,
+    'tower_damage': `Урон башням > ${mission.target}`
   };
   return descs[mission.type] || mission.description;
 }
