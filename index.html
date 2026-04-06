@@ -635,40 +635,64 @@ function renderAll(data){
   </div>
 
   <div class="tab-panel" id="tab-ai">
-    <div class="ai-panel">
-      <div class="ai-actions fu d1">
-        <div class="ai-action-btn" onclick="aiQuick('analysis')">
-          <div class="ai-action-icon">🧠</div>
-          <div><div class="ai-action-title">Разбор игры</div><div class="ai-action-desc">Что хорошо и плохо</div></div>
-        </div>
-        <div class="ai-action-btn" onclick="aiQuick('forecast')">
-          <div class="ai-action-icon">📈</div>
-          <div><div class="ai-action-title">Прогноз роста</div><div class="ai-action-desc">Будет ли расти MMR</div></div>
-        </div>
-        <div class="ai-action-btn" onclick="aiQuick('heroes')">
-          <div class="ai-action-icon">🎯</div>
-          <div><div class="ai-action-title">Герои для пула</div><div class="ai-action-desc">Что учить дальше</div></div>
-        </div>
-        <div class="ai-action-btn" onclick="aiQuick('weaknesses')">
-          <div class="ai-action-icon">🔍</div>
-          <div><div class="ai-action-title">Слабые места</div><div class="ai-action-desc">Где теряешь игры</div></div>
+  <div class="ai-panel">
+    <!-- ROAST SECTION -->
+    <div class="sec fu d1"><span class="sec-icon">🔥</span>ПРОЖАРКА</div>
+    <div class="ai-actions fu d1">
+      <div class="ai-action-btn" onclick="roastPlayer('toxic')">
+        <div class="ai-action-icon">💀</div>
+        <div><div class="ai-action-title">Toxic Mode</div><div class="ai-action-desc">Жёсткая прожарка</div></div>
+      </div>
+      <div class="ai-action-btn" onclick="roastPlayer('brutal')">
+        <div class="ai-action-icon">☠️</div>
+        <div><div class="ai-action-title">Brutal Mode</div><div class="ai-action-desc">Максимальный угар</div></div>
+      </div>
+      <div class="ai-action-btn" onclick="roastPlayer('friendly')">
+        <div class="ai-action-icon">😄</div>
+        <div><div class="ai-action-title">Friendly Mode</div><div class="ai-action-desc">Мягкая прожарка</div></div>
+      </div>
+      <div class="ai-action-btn" onclick="roastPlayer('coach')">
+        <div class="ai-action-icon">🧠</div>
+        <div><div class="ai-action-title">Coach Mode</div><div class="ai-action-desc">С советами</div></div>
+      </div>
+    </div>
+
+    <!-- AI ANALYST SECTION -->
+    <div class="sec fu d1" style="margin-top:20px"><span class="sec-icon">🤖</span>AI АНАЛИТИК</div>
+    <div class="ai-actions fu d1">
+      <div class="ai-action-btn" onclick="aiQuick('analysis')">
+        <div class="ai-action-icon">🧠</div>
+        <div><div class="ai-action-title">Разбор игры</div><div class="ai-action-desc">Что хорошо и плохо</div></div>
+      </div>
+      <div class="ai-action-btn" onclick="aiQuick('forecast')">
+        <div class="ai-action-icon">📈</div>
+        <div><div class="ai-action-title">Прогноз роста</div><div class="ai-action-desc">Будет ли расти MMR</div></div>
+      </div>
+      <div class="ai-action-btn" onclick="aiQuick('heroes')">
+        <div class="ai-action-icon">🎯</div>
+        <div><div class="ai-action-title">Герои для пула</div><div class="ai-action-desc">Что учить дальше</div></div>
+      </div>
+      <div class="ai-action-btn" onclick="aiQuick('weaknesses')">
+        <div class="ai-action-icon">🔍</div>
+        <div><div class="ai-action-title">Слабые места</div><div class="ai-action-desc">Где теряешь игры</div></div>
+      </div>
+    </div>
+
+    <div class="ai-chat-box fu d2">
+      <div class="ai-chat-messages" id="aiMessages">
+        <div class="ai-msg assistant">
+          <div class="ai-msg-avatar">🤖</div>
+          <div class="ai-msg-bubble">Привет! Выбери режим прожарки выше или задай вопрос про игрока.</div>
         </div>
       </div>
-      <div class="ai-chat-box fu d2">
-        <div class="ai-chat-messages" id="aiMessages">
-          <div class="ai-msg assistant">
-            <div class="ai-msg-avatar">🤖</div>
-            <div class="ai-msg-bubble">Привет! Я AI-аналитик. Нажми кнопку выше или задай вопрос про игрока.</div>
-          </div>
-        </div>
-        <div class="ai-typing" id="aiTyping"><span></span><span></span><span></span></div>
-        <div class="ai-input-row">
-          <input class="ai-input" id="aiInput" type="text" placeholder="Спроси что-нибудь про игрока..." autocomplete="off"/>
-          <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">➤</button>
-        </div>
+      <div class="ai-typing" id="aiTyping"><span></span><span></span><span></span></div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="aiInput" type="text" placeholder="Спроси что-нибудь про игрока..." autocomplete="off"/>
+        <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">➤</button>
       </div>
     </div>
   </div>
+</div>
   `;
 
   document.getElementById('results').classList.add('active');
