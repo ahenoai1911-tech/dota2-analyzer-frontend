@@ -921,6 +921,69 @@ async function aiQuick(type){
   catch(e){ addAIMsg('assistant',`❌ Ошибка: ${e.message}`); }
   finally{ setAILoad(false); }
 }
+  // ── ROAST FUNCTION ───────────────────────────────────────────────────────────
+async function roastPlayer(mode){
+  if(!currentPlayerData){ alert('Сначала найди игрока!'); return; }
+  
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-ai').classList.add('active');
+  document.querySelector('.ai-tab').classList.add('active');
+  
+  const modeEmoji = {toxic:'💀',brutal:'☠️',friendly:'😄',coach:'🧠'};
+  const modeName = {toxic:'TOXIC',brutal:'BRUTAL',friendly:'FRIENDLY',coach:'COACH'};
+  
+  addAIMsg('user', `${modeEmoji[mode]} ${modeName[mode]} MODE`);
+  setAILoad(true);
+  
+  try{
+    const playerCtx = buildPlayerContext();
+    const r = await fetch(`${API}/roast`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        player_context: playerCtx,
+        mode: mode
+      })
+    });
+    
+    if(!r.ok) throw new Error('Roast failed');
+    
+    const data = await r.json();
+    addAIMsg('assistant', data.roast);
+    addShareButton(data.roast);
+    
+  }catch(e){
+    addAIMsg('assistant', `❌ Ошибка: ${e.message}`);
+  }finally{
+    setAILoad(false);
+  }
+}
+
+function addShareButton(roastText){
+  const el = document.getElementById('aiMessages');
+  const shareDiv = document.createElement('div');
+  shareDiv.style.cssText = 'text-align:center;margin-top:10px';
+  shareDiv.innerHTML = `
+    <button onclick="shareRoast()" style="
+      background:linear-gradient(135deg,var(--green),var(--cyan));
+      border:none;border-radius:var(--r2);padding:10px 20px;
+      color:#06090c;font-family:'Rajdhani',sans-serif;
+      font-size:14px;font-weight:700;letter-spacing:2px;
+      cursor:pointer;transition:opacity .2s">
+      📤 ПОДЕЛИТЬСЯ ПРОЖАРКОЙ
+    </button>`;
+  el.appendChild(shareDiv);
+  el.scrollTop = el.scrollHeight;
+}
+
+function shareRoast(){
+  if(window.Telegram?.WebApp){
+    window.Telegram.WebApp.showAlert('Скопируй текст прожарки и отправь друзьям! 😂');
+  }else{
+    alert('Скопируй текст прожарки и отправь друзьям! 😂\n\nПопробуй тоже: @DotaAnalyzerBot');
+  }
+}
 </script>
 </body>
 </html>
