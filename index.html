@@ -1,709 +1,548 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <title>Dota 2 Analyzer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg:#0a0e17;--bg2:#0d1219;--bg3:#12171f;
   --card:#151b26;--card2:#1a2130;
   --border:#1e2838;--border2:#2a3548;
-  --red:#ff4757;--red2:#ff6b7a;--orange:#ffa502;
+  --red:#ff4757;--red2:#ff6b7a;
   --gold:#ffd32a;--gold2:#ffe66d;
   --green:#2ed573;--green2:#7bed9f;
   --blue:#5f27cd;--cyan:#00d2d3;--purple:#a29bfe;
   --ai:#6c5ce7;--ai2:#a29bfe;
   --text:#dfe6e9;--text2:#74b9ff;--text3:#636e72;
-  --white:#ffffff;
-  --accent:#00d2d3;
-  --r:12px;--r2:8px;
+  --white:#ffffff;--accent:#00d2d3;
+  --r:10px;--r2:7px;
+  --nav-h:56px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{
-  background:linear-gradient(135deg,#0a0e17 0%,#12171f 50%,#0a0e17 100%);
+  background:#0a0e17;
   color:var(--text);
   font-family:'Exo 2',sans-serif;
   min-height:100vh;
   font-size:14px;
   overflow-x:hidden;
-  position:relative;
+  padding-bottom:calc(var(--nav-h) + 8px);
 }
-body::before{
-  content:'';
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:0;
-  background-image:
-    radial-gradient(circle at 20% 50%, rgba(0,210,211,.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(108,92,231,.06) 0%, transparent 50%);
-}
-body::after{
-  content:'';
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:0;
-  background-image:
-    linear-gradient(rgba(0,210,211,.02) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,210,211,.02) 1px,transparent 1px);
-  background-size:50px 50px;
-}
-.wrap{max-width:680px;margin:0 auto;padding:16px 16px 60px;position:relative;z-index:1}
 
-/* WELCOME BANNER */
-.welcome-banner{
-  background:linear-gradient(135deg,rgba(0,210,211,.15),rgba(108,92,231,.15));
-  border:2px solid var(--cyan);
-  border-radius:var(--r);
-  padding:20px;
-  margin-bottom:20px;
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 8px 32px rgba(0,210,211,.3);
-  animation:slideDown .6s ease;
-}
-.welcome-banner::before{
-  content:'';
-  position:absolute;
-  top:-50%;
-  right:-50%;
-  width:200%;
-  height:200%;
-  background:radial-gradient(circle,rgba(0,210,211,.1) 0%,transparent 70%);
-  animation:rotate 20s linear infinite;
-}
-@keyframes rotate{
-  from{transform:rotate(0deg)}
-  to{transform:rotate(360deg)}
-}
-@keyframes slideDown{
-  from{opacity:0;transform:translateY(-20px)}
-  to{opacity:1;transform:translateY(0)}
-}
-@keyframes slideUp{
-  from{opacity:1;transform:translateY(0)}
-  to{opacity:0;transform:translateY(-20px)}
-}
-.welcome-content{
-  position:relative;
-  z-index:1;
-  text-align:center;
-}
-.welcome-emoji{
-  font-size:48px;
-  margin-bottom:12px;
-  animation:bounce 2s ease-in-out infinite;
-}
-@keyframes bounce{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-10px)}
-}
-.welcome-title{
-  font-family:'Rajdhani',sans-serif;
-  font-size:24px;
-  font-weight:700;
-  color:var(--white);
-  margin-bottom:8px;
-  text-shadow:0 2px 12px rgba(0,210,211,.5);
-}
-.welcome-text{
-  font-family:'Share Tech Mono',monospace;
-  font-size:12px;
-  color:var(--text2);
-  margin-bottom:16px;
-  line-height:1.6;
-}
-.welcome-stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  margin-top:16px;
-}
-.welcome-stat{
-  background:rgba(0,0,0,.3);
-  border:1px solid rgba(0,210,211,.3);
-  border-radius:8px;
-  padding:12px 8px;
-  backdrop-filter:blur(10px);
-}
-.welcome-stat-val{
-  font-family:'Rajdhani',sans-serif;
-  font-size:22px;
-  font-weight:700;
-  color:var(--cyan);
-  line-height:1;
-}
-.welcome-stat-lbl{
-  font-family:'Share Tech Mono',monospace;
-  font-size:9px;
-  color:var(--text3);
-  margin-top:4px;
-  letter-spacing:1px;
-}
-.welcome-close{
-  position:absolute;
-  top:12px;
-  right:12px;
-  background:rgba(0,0,0,.5);
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:50%;
-  width:28px;
-  height:28px;
+/* SCREENS */
+.screen{display:none;min-height:calc(100vh - var(--nav-h))}
+.screen.active{display:block}
+
+.wrap{max-width:640px;margin:0 auto;padding:12px 12px 8px}
+
+/* ── BOTTOM NAV ─────────────────────────────── */
+.bottom-nav{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  height:var(--nav-h);
+  background:var(--card);
+  border-top:1px solid var(--border2);
   display:flex;
+  z-index:1000;
+  backdrop-filter:blur(10px);
+  box-shadow:0 -4px 20px rgba(0,0,0,.5);
+}
+.nav-item{
+  flex:1;
+  display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
+  gap:3px;
   cursor:pointer;
-  color:var(--text);
-  font-size:16px;
-  transition:all .3s;
-  z-index:2;
+  transition:all .2s ease;
+  border:none;
+  background:none;
+  padding:0;
+  position:relative;
 }
-.welcome-close:hover{
-  background:rgba(255,71,87,.3);
-  border-color:var(--red);
-  color:var(--white);
-  transform:rotate(90deg);
+.nav-item::before{
+  content:'';
+  position:absolute;
+  top:0;left:50%;
+  transform:translateX(-50%);
+  width:0;height:2px;
+  background:var(--cyan);
+  border-radius:0 0 2px 2px;
+  transition:width .2s ease;
 }
+.nav-item.active::before{width:28px}
+.nav-icon{font-size:18px;line-height:1;transition:transform .2s}
+.nav-item.active .nav-icon{transform:translateY(-1px)}
+.nav-label{
+  font-family:'Share Tech Mono',monospace;
+  font-size:8px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--text3);
+  transition:color .2s;
+  white-space:nowrap;
+}
+.nav-item.active .nav-label{color:var(--cyan)}
 
-/* HEADER */
-.hdr{display:flex;align-items:center;gap:14px;padding:16px 0 18px;margin-bottom:20px;border-bottom:2px solid var(--border);position:relative}
-.hdr::after{content:'';position:absolute;bottom:-2px;left:0;width:140px;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple),transparent)}
-.hdr-logo{width:48px;height:48px;flex-shrink:0;border:2px solid rgba(0,210,211,.4);border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(0,210,211,.1),rgba(108,92,231,.1));box-shadow:0 4px 12px rgba(0,210,211,.2)}
-.hdr-em{font-size:24px}
-.hdr-title{flex:1}
-.hdr-title h1{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:var(--white);line-height:1;text-shadow:0 2px 8px rgba(0,210,211,.3)}
-.hdr-title p{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:4px;letter-spacing:2px}
-.hdr-live{display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:2px;border:1px solid rgba(0,210,211,.3);border-radius:6px;padding:6px 10px;background:rgba(0,210,211,.08);box-shadow:0 0 12px rgba(0,210,211,.2)}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:blink 2s ease-in-out infinite}
+/* ── HEADER ─────────────────────────────────── */
+.hdr{display:flex;align-items:center;gap:10px;padding:10px 0 12px;margin-bottom:14px;border-bottom:1px solid var(--border)}
+.hdr-logo{width:36px;height:36px;flex-shrink:0;border:1px solid rgba(0,210,211,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(0,210,211,.06)}
+.hdr-em{font-size:18px}
+.hdr-title h1{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--white)}
+.hdr-title p{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:1.5px}
+.hdr-live{margin-left:auto;display:flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);border:1px solid rgba(0,210,211,.25);border-radius:4px;padding:4px 8px;background:rgba(0,210,211,.06);white-space:nowrap}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 6px var(--cyan);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* SEARCH */
-.search-wrap{position:relative;margin-bottom:16px}
-.search-box{background:var(--card);border:2px solid var(--border2);border-radius:var(--r);padding:0 16px;display:flex;align-items:center;gap:12px;transition:all .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.search-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,210,211,.15),0 8px 20px rgba(0,210,211,.2)}
-.s-icon{color:var(--text3);font-size:16px;flex-shrink:0;transition:color .3s}
-.search-box:focus-within .s-icon{color:var(--cyan)}
-.search-input{flex:1;background:none;border:none;padding:14px 0;color:var(--white);font-size:16px;font-family:'Exo 2',sans-serif;font-weight:500;outline:none}
+/* ── SEARCH ─────────────────────────────────── */
+.search-wrap{position:relative;margin-bottom:12px}
+.search-box{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:0 12px;display:flex;align-items:center;gap:10px;transition:all .25s}
+.search-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,210,211,.12)}
+.s-icon{color:var(--text3);font-size:15px;flex-shrink:0}
+.search-input{flex:1;background:none;border:none;padding:11px 0;color:var(--white);font-size:15px;font-family:'Exo 2',sans-serif;font-weight:500;outline:none}
 .search-input::placeholder{color:var(--text3)}
-.search-btn{background:linear-gradient(135deg,var(--cyan),var(--purple));border:none;border-radius:var(--r2);padding:10px 20px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all .3s ease;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 12px rgba(0,210,211,.3)}
-.search-btn:hover{opacity:.9;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,210,211,.4)}
-.search-btn:active{transform:translateY(0)}
-.search-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.search-btn{background:linear-gradient(135deg,var(--cyan),var(--purple));border:none;border-radius:var(--r2);padding:8px 16px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .2s}
+.search-btn:hover{opacity:.88}
+.search-btn:active{transform:scale(.97)}
+.search-btn:disabled{opacity:.35;cursor:not-allowed}
 
 /* SUGGEST */
-.suggest-list{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card2);border:2px solid var(--border2);border-radius:var(--r);overflow:hidden;z-index:100;box-shadow:0 12px 40px rgba(0,0,0,.8);display:none;backdrop-filter:blur(10px)}
-.suggest-list.open{display:block;animation:slideDown .3s ease}
-.suggest-item{padding:10px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .2s;font-size:14px;border-bottom:1px solid var(--border)}
+.suggest-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;z-index:200;box-shadow:0 10px 32px rgba(0,0,0,.7);display:none}
+.suggest-list.open{display:block}
+.suggest-item{padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .15s;font-size:13px;border-bottom:1px solid var(--border)}
 .suggest-item:last-child{border-bottom:none}
-.suggest-item:hover{background:linear-gradient(90deg,rgba(0,210,211,.1),transparent);transform:translateX(4px)}
-.sug-av{width:32px;height:32px;border-radius:6px;object-fit:cover;background:var(--bg3);flex-shrink:0;border:1px solid var(--border)}
-.sug-name{color:var(--white);font-weight:600}
-.sug-id{color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:10px}
-.sug-hint{padding:10px 16px;font-size:11px;color:var(--text3);font-family:'Share Tech Mono',monospace;text-align:center}
+.suggest-item:hover{background:var(--bg3)}
+.sug-av{width:28px;height:28px;border-radius:5px;object-fit:cover;background:var(--bg3);flex-shrink:0}
+.sug-name{color:var(--white);font-weight:600;font-size:13px}
+.sug-id{color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:9px}
+.sug-hint{padding:7px 14px;font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;text-align:center}
 
 /* PICKER */
-.picker{background:var(--card);border:2px solid var(--border2);border-radius:var(--r);margin-bottom:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:fadeUp .4s ease}
-.picker-header{padding:12px 16px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--cyan);letter-spacing:2px;border-bottom:2px solid var(--border);background:linear-gradient(135deg,rgba(0,210,211,.1),rgba(108,92,231,.1))}
-.picker-item{padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .2s;border-bottom:1px solid var(--border)}
+.picker{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.picker-header{padding:9px 14px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:1.5px;border-bottom:1px solid var(--border);background:rgba(0,210,211,.05)}
+.picker-item{padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .15s;border-bottom:1px solid var(--border)}
 .picker-item:last-child{border-bottom:none}
-.picker-item:hover{background:linear-gradient(90deg,rgba(0,210,211,.08),transparent);transform:translateX(4px)}
-.picker-av{width:42px;height:42px;border-radius:8px;object-fit:cover;background:var(--bg3);flex-shrink:0;border:2px solid var(--border)}
-.picker-name{color:var(--white);font-weight:600;font-size:15px}
-.picker-id{color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:11px;margin-top:2px}
+.picker-item:hover{background:var(--bg3)}
+.picker-av{width:36px;height:36px;border-radius:6px;object-fit:cover;background:var(--bg3);flex-shrink:0}
+.picker-name{color:var(--white);font-weight:600;font-size:14px}
+.picker-id{color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:10px;margin-top:1px}
 
 /* SKELETON */
-.skel-block{display:none;margin-bottom:16px}
+.skel-block{display:none;margin-bottom:12px}
 .skel-block.active{display:block}
-.sk{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--r2)}
+.sk{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:var(--r2)}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.sk-profile{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:18px;display:flex;gap:16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.sk-av{width:64px;height:64px;flex-shrink:0;border-radius:var(--r2)}
-.sk-lines{flex:1;display:flex;flex-direction:column;gap:10px;padding-top:6px}
-.sk-line{height:12px}
-.sk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.sk-stat{height:80px;border-radius:var(--r)}
+.sk-profile{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:12px;margin-bottom:10px}
+.sk-av{width:52px;height:52px;flex-shrink:0;border-radius:var(--r2)}
+.sk-lines{flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px}
+.sk-line{height:11px}
+.sk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sk-stat{height:64px;border-radius:var(--r)}
 
 /* ERROR */
-.err{display:none;background:rgba(255,71,87,.1);border:2px solid rgba(255,71,87,.3);border-left:4px solid var(--red);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--red2);gap:10px;align-items:center;font-family:'Share Tech Mono',monospace;box-shadow:0 4px 12px rgba(255,71,87,.2)}
-.err.active{display:flex;animation:shake .5s ease}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.results{display:none}
-.results.active{display:block}
+.err{display:none;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.25);border-left:3px solid var(--red);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--red2);gap:8px;align-items:center;font-family:'Share Tech Mono',monospace}
+.err.active{display:flex}
 
-/* PROFILE */
-.profile-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px;position:relative;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.profile-banner{height:60px;background:linear-gradient(135deg,rgba(0,210,211,.15),rgba(108,92,231,.15));position:relative;overflow:hidden}
-.profile-banner::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(255,255,255,.02) 20px,rgba(255,255,255,.02) 40px)}
-.profile-banner::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple),transparent 70%);box-shadow:0 0 12px var(--cyan)}
-.profile-body{padding:0 18px 18px;display:flex;flex-direction:row;gap:14px;align-items:flex-end;margin-top:-32px}
-.profile-av{width:64px;height:64px;border-radius:10px;border:3px solid var(--bg);object-fit:cover;background:var(--bg3);flex-shrink:0;position:relative;z-index:1;box-shadow:0 4px 16px rgba(0,0,0,.5)}
-.profile-center{flex:1;min-width:0;padding-top:36px}
-.profile-name{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--white);letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,.5)}
-.profile-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
-.profile-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px}
-.source-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);border:1px solid rgba(0,210,211,.3);border-radius:4px;padding:3px 6px;letter-spacing:1px;background:rgba(0,210,211,.08)}
-.profile-right{flex-shrink:0;display:flex;flex-direction:column;gap:6px;padding-top:36px;align-items:stretch;min-width:80px}
-.rank-pill{background:linear-gradient(135deg,rgba(0,210,211,.1),rgba(108,92,231,.1));border:2px solid var(--border2);border-radius:var(--r2);padding:8px 10px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.rank-em{font-size:22px;line-height:1}
-.rank-name{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-top:3px;white-space:nowrap}
-.mmr-pill{background:rgba(255,211,42,.12);border:2px solid rgba(255,211,42,.3);border-radius:var(--r2);padding:6px 10px;text-align:center;box-shadow:0 4px 12px rgba(255,211,42,.2)}
-.mmr-val{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--gold);line-height:1}
-.mmr-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;margin-top:2px}
+/* PROFILE CARD */
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.profile-banner{height:40px;background:linear-gradient(135deg,rgba(0,210,211,.12),rgba(108,92,231,.12));position:relative;overflow:hidden}
+.profile-banner::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 14px,rgba(255,255,255,.015) 14px,rgba(255,255,255,.015) 28px)}
+.profile-banner::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--cyan),var(--purple),transparent 60%)}
+.profile-body{padding:0 14px 12px;display:flex;gap:10px;align-items:flex-end;margin-top:-22px}
+.profile-av{width:48px;height:48px;border-radius:8px;border:2px solid var(--bg);object-fit:cover;background:var(--bg3);flex-shrink:0;z-index:1;position:relative}
+.profile-center{flex:1;min-width:0;padding-top:24px}
+.profile-name{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.profile-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:3px}
+.profile-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3)}
+.source-badge{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--cyan);border:1px solid rgba(0,210,211,.25);border-radius:3px;padding:2px 5px}
+.profile-right{flex-shrink:0;display:flex;flex-direction:column;gap:4px;padding-top:24px;min-width:70px}
+.rank-pill{background:rgba(0,210,211,.06);border:1px solid var(--border2);border-radius:var(--r2);padding:5px 8px;text-align:center}
+.rank-em{font-size:18px;line-height:1}
+.rank-name{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;color:var(--text);margin-top:1px;white-space:nowrap}
+.mmr-pill{background:rgba(255,211,42,.08);border:1px solid rgba(255,211,42,.25);border-radius:var(--r2);padding:4px 8px;text-align:center}
+.mmr-val{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--gold);line-height:1}
+.mmr-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text3);letter-spacing:1px;margin-top:1px}
 
-/* TABS */
-.tabs{display:flex;gap:6px;background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:6px;margin-bottom:16px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.tab{flex:1;padding:10px 4px;text-align:center;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-radius:8px;cursor:pointer;transition:all .3s ease;border:none;background:none;position:relative}
-.tab:hover{color:var(--text2)}
-.tab.active{background:linear-gradient(135deg,rgba(0,210,211,.15),rgba(108,92,231,.15));color:var(--cyan);border:2px solid rgba(0,210,211,.3);box-shadow:0 4px 12px rgba(0,210,211,.2)}
-.tab.ai-tab.active{color:var(--ai2);border-color:rgba(108,92,231,.4);background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(162,155,254,.15));box-shadow:0 4px 12px rgba(108,92,231,.3)}
-.tab-panel{display:none}
-.tab-panel.active{display:block}
-
-/* SEC */
-.sec{font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:10px}
-.sec::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,var(--border2),transparent)}
-.sec-icon{color:var(--cyan);font-size:12px}
+/* SEC TITLE */
+.sec{font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent)}
+.sec-icon{color:var(--cyan)}
 
 /* WINRATE */
-.wr-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.wr-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--cyan),var(--purple))}
-.wr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
-.wr-num{font-family:'Rajdhani',sans-serif;font-size:58px;font-weight:700;line-height:.9;letter-spacing:-2px;text-shadow:0 4px 12px currentColor}
+.wr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;position:relative;overflow:hidden}
+.wr-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--cyan),var(--purple))}
+.wr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.wr-num{font-family:'Rajdhani',sans-serif;font-size:48px;font-weight:700;line-height:.9;letter-spacing:-2px}
 .wr-num.good{color:var(--green)}.wr-num.ok{color:var(--gold)}.wr-num.bad{color:var(--red)}
-.wr-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1.5px;margin-top:6px}
+.wr-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;margin-top:5px}
 .wr-wl{text-align:right}
-.wr-wl-row{font-size:13px;font-family:'Share Tech Mono',monospace;margin-bottom:4px;font-weight:600}
+.wr-wl-row{font-size:12px;font-family:'Share Tech Mono',monospace;margin-bottom:2px}
 .wr-wl-row .w{color:var(--green)}.wr-wl-row .l{color:var(--red)}
-.wr-total{font-size:11px;color:var(--text3);margin-top:5px;font-family:'Share Tech Mono',monospace}
-.wr-recent{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:12px}
-.wr-dot{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;font-family:'Rajdhani',sans-serif;transition:transform .2s}
-.wr-dot:hover{transform:scale(1.1)}
-.wr-dot.w{background:rgba(46,213,115,.15);color:var(--green);border:2px solid rgba(46,213,115,.3);box-shadow:0 2px 8px rgba(46,213,115,.2)}
-.wr-dot.l{background:rgba(255,71,87,.12);color:var(--red);border:2px solid rgba(255,71,87,.25);box-shadow:0 2px 8px rgba(255,71,87,.15)}
-.wr-bar-bg{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.3)}
-.wr-bar-fill{height:100%;border-radius:3px;transition:width 1.5s cubic-bezier(.4,0,.2,1)}
-.wr-bar-fill.good{background:linear-gradient(90deg,var(--green),var(--green2));box-shadow:0 0 12px var(--green)}
-.wr-bar-fill.ok{background:linear-gradient(90deg,var(--gold),var(--gold2));box-shadow:0 0 12px var(--gold)}
-.wr-bar-fill.bad{background:linear-gradient(90deg,var(--red),var(--red2));box-shadow:0 0 12px var(--red)}
+.wr-total{font-size:10px;color:var(--text3);margin-top:3px;font-family:'Share Tech Mono',monospace}
+.wr-recent{display:flex;gap:2px;flex-wrap:wrap;margin-bottom:8px}
+.wr-dot{width:17px;height:17px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;font-family:'Rajdhani',sans-serif}
+.wr-dot.w{background:rgba(46,213,115,.12);color:var(--green);border:1px solid rgba(46,213,115,.25)}
+.wr-dot.l{background:rgba(255,71,87,.1);color:var(--red);border:1px solid rgba(255,71,87,.2)}
+.wr-bar-bg{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.wr-bar-fill{height:100%;border-radius:2px;transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+.wr-bar-fill.good{background:linear-gradient(90deg,var(--green),var(--green2))}
+.wr-bar-fill.ok{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.wr-bar-fill.bad{background:linear-gradient(90deg,var(--red),var(--red2))}
 
 /* STREAK */
-.streak-badge{display:inline-flex;align-items:center;gap:8px;border-radius:8px;padding:8px 16px;font-size:12px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:2px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,.3);animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-.streak-badge.win{background:linear-gradient(135deg,rgba(46,213,115,.15),rgba(126,237,159,.15));border:2px solid rgba(46,213,115,.3);color:var(--green);box-shadow:0 4px 16px rgba(46,213,115,.3)}
-.streak-badge.loss{background:linear-gradient(135deg,rgba(255,71,87,.12),rgba(255,107,122,.12));border:2px solid rgba(255,71,87,.3);color:var(--red);box-shadow:0 4px 16px rgba(255,71,87,.3)}
+.streak-badge{display:inline-flex;align-items:center;gap:6px;border-radius:6px;padding:6px 12px;font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1.5px;margin-bottom:10px}
+.streak-badge.win{background:rgba(46,213,115,.08);border:1px solid rgba(46,213,115,.25);color:var(--green)}
+.streak-badge.loss{background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.25);color:var(--red)}
 
 /* TREND */
-.trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.trend-c{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:all .3s ease}
-.trend-c:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.4);border-color:var(--border2)}
-.trend-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-.trend-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.trend-key{font-size:11px;color:var(--text2);font-family:'Share Tech Mono',monospace}
-.trend-val{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--white)}
+.trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.trend-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px}
+.trend-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:5px}
+.trend-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.trend-key{font-size:10px;color:var(--text2);font-family:'Share Tech Mono',monospace}
+.trend-val{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--white)}
 .trend-val.green{color:var(--green)}.trend-val.gold{color:var(--gold)}.trend-val.red{color:var(--red)}
 
 /* STAT GRID */
-.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-.stat-c{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:14px 10px;text-align:center;transition:all .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.stat-c:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.5)}
-.stat-val{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;line-height:1;color:var(--white);text-shadow:0 2px 8px currentColor}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.stat-c{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 6px;text-align:center;transition:border-color .2s}
+.stat-c:hover{border-color:var(--border2)}
+.stat-val{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;line-height:1;color:var(--white)}
 .stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}.stat-val.gold{color:var(--gold)}
 .stat-val.blue{color:var(--blue)}.stat-val.purple{color:var(--purple)}
-.stat-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:6px}
+.stat-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
 
 /* CHART */
-.chart-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.chart-title{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text2)}
-.chart-legend{display:flex;gap:12px}
-.leg-i{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace}
-.leg-d{width:10px;height:4px;border-radius:2px}
-.chart-wrap{position:relative;height:160px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.chart-title{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2)}
+.chart-legend{display:flex;gap:10px}
+.leg-i{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace}
+.leg-d{width:8px;height:3px;border-radius:2px}
+.chart-wrap{position:relative;height:130px}
 
 /* HEROES */
-.hero-list{display:flex;flex-direction:column;gap:8px}
-.hero-row{background:var(--card);border:2px solid var(--border);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:10px;transition:all .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.hero-row:hover{border-color:var(--border2);transform:translateX(4px);box-shadow:0 6px 16px rgba(0,0,0,.4)}
-.hero-img{width:68px;height:38px;border-radius:6px;object-fit:cover;background:var(--bg3);border:2px solid var(--border);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.hero-rank{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);width:16px;text-align:center;flex-shrink:0;font-weight:700}
-.hero-name{flex:1;font-weight:600;font-size:14px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hero-stats{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
-.hero-games{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)}
-.hero-kda-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2)}
-.hero-bar{width:44px;height:4px;background:var(--bg);border-radius:2px;overflow:hidden;flex-shrink:0;box-shadow:inset 0 1px 3px rgba(0,0,0,.3)}
-.hero-bar-fill{height:100%;border-radius:2px;transition:width 1s ease;box-shadow:0 0 8px currentColor}
-.hero-wr{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;min-width:44px;text-align:right}
+.hero-list{display:flex;flex-direction:column;gap:6px}
+.hero-row{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;display:flex;align-items:center;gap:8px;transition:border-color .2s}
+.hero-row:hover{border-color:var(--border2)}
+.hero-img{width:56px;height:32px;border-radius:4px;object-fit:cover;background:var(--bg3);border:1px solid var(--border);flex-shrink:0}
+.hero-rank{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);width:14px;text-align:center;flex-shrink:0}
+.hero-name{flex:1;font-weight:600;font-size:13px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-stats{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.hero-games{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3)}
+.hero-kda-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text2)}
+.hero-bar{width:36px;height:3px;background:var(--bg);border-radius:2px;overflow:hidden;flex-shrink:0}
+.hero-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.hero-wr{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;min-width:38px;text-align:right}
 .hero-wr.good{color:var(--green)}.hero-wr.ok{color:var(--gold)}.hero-wr.bad{color:var(--red)}
 
 /* MATCHES */
-.match-list{display:flex;flex-direction:column;gap:8px}
-.match-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.match-card:hover{border-color:var(--border2);box-shadow:0 6px 16px rgba(0,0,0,.4)}
-.match-main{padding:12px 16px;display:grid;grid-template-columns:52px 1fr auto auto;align-items:center;gap:10px;position:relative}
-.match-main::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
-.match-card.win .match-main::before{background:linear-gradient(180deg,var(--green),var(--green2));box-shadow:3px 0 12px rgba(46,213,115,.4)}
-.match-card.loss .match-main::before{background:linear-gradient(180deg,var(--red),var(--red2));box-shadow:3px 0 12px rgba(255,71,87,.3)}
-.match-himg{width:52px;height:29px;border-radius:6px;object-fit:cover;background:var(--bg3);border:2px solid var(--border);display:block;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.match-kda-str{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text2);font-weight:600}
-.match-hero-name{font-size:11px;color:var(--text3);margin-top:3px;font-family:'Share Tech Mono',monospace}
-.match-dur{font-size:10px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:2px}
-.match-kda-val{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;text-align:center}
+.match-list{display:flex;flex-direction:column;gap:5px}
+.match-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .15s}
+.match-card:hover{border-color:var(--border2)}
+.match-main{padding:9px 12px;display:grid;grid-template-columns:46px 1fr auto auto;align-items:center;gap:8px;position:relative}
+.match-main::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.match-card.win .match-main::before{background:var(--green)}
+.match-card.loss .match-main::before{background:var(--red)}
+.match-himg{width:46px;height:26px;border-radius:4px;object-fit:cover;background:var(--bg3);border:1px solid var(--border);display:block}
+.match-kda-str{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2)}
+.match-hero-name{font-size:10px;color:var(--text3);margin-top:2px;font-family:'Share Tech Mono',monospace}
+.match-dur{font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:1px}
+.match-kda-val{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;text-align:center}
 .match-kda-val.good{color:var(--green)}.match-kda-val.ok{color:var(--gold)}.match-kda-val.bad{color:var(--red)}
-.match-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-.match-pill{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border-radius:6px}
-.match-pill.win{background:rgba(46,213,115,.12);color:var(--green);border:2px solid rgba(46,213,115,.3)}
-.match-pill.loss{background:rgba(255,71,87,.1);color:var(--red);border:2px solid rgba(255,71,87,.25)}
-.match-chevron{font-size:11px;color:var(--text3);transition:transform .3s;line-height:1}
+.match-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.match-pill{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:4px}
+.match-pill.win{background:rgba(46,213,115,.1);color:var(--green);border:1px solid rgba(46,213,115,.25)}
+.match-pill.loss{background:rgba(255,71,87,.08);color:var(--red);border:1px solid rgba(255,71,87,.2)}
+.match-chevron{font-size:10px;color:var(--text3);transition:transform .25s}
 .match-card.expanded .match-chevron{transform:rotate(180deg)}
-.match-expand{display:none;border-top:2px solid var(--border);padding:12px 16px;background:linear-gradient(135deg,rgba(0,210,211,.03),rgba(108,92,231,.03))}
-.match-expand.open{display:block;animation:slideDown .3s ease}
-.match-expand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.match-expand{display:none;border-top:1px solid var(--border);padding:10px 12px;background:var(--bg3)}
+.match-expand.open{display:block}
+.match-expand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
 .mex-cell{text-align:center}
-.mex-val{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--white)}
+.mex-val{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--white)}
 .mex-val.green{color:var(--green)}.mex-val.gold{color:var(--gold)}.mex-val.red{color:var(--red)}
 .mex-val.blue{color:var(--blue)}.mex-val.purple{color:var(--purple)}
-.mex-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
-.match-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.match-open-link{display:block;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:1px;padding:8px;border:2px solid rgba(0,210,211,.2);border-radius:6px;text-decoration:none;transition:all .3s;background:rgba(0,210,211,.05)}
-.match-open-link:hover{background:rgba(0,210,211,.12);border-color:rgba(0,210,211,.4);transform:translateY(-2px)}
+.mex-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.match-links{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.match-open-link{display:block;text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:1px;padding:6px;border:1px solid rgba(0,210,211,.15);border-radius:5px;text-decoration:none;transition:background .2s}
+.match-open-link:hover{background:rgba(0,210,211,.07)}
 
-/* AI TAB */
-.ai-panel{display:flex;flex-direction:column;gap:12px}
-.ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
-.ai-action-btn{background:var(--card);border:2px solid var(--border2);border-radius:var(--r);padding:14px 12px;cursor:pointer;text-align:left;transition:all .3s ease;display:flex;align-items:flex-start;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.ai-action-btn:hover{border-color:rgba(108,92,231,.5);background:linear-gradient(135deg,rgba(108,92,231,.1),rgba(162,155,254,.1));transform:translateY(-2px);box-shadow:0 6px 16px rgba(108,92,231,.3)}
-.ai-action-btn:active{transform:translateY(0)}
-.ai-action-icon{font-size:22px;flex-shrink:0;line-height:1}
-.ai-action-title{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--white);letter-spacing:.5px}
-.ai-action-desc{font-size:11px;color:var(--text3);margin-top:3px;font-family:'Share Tech Mono',monospace}
-.ai-chat-box{background:var(--card);border:2px solid var(--border2);border-radius:var(--r);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.ai-chat-messages{min-height:140px;max-height:450px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(135deg,rgba(0,210,211,.02),rgba(108,92,231,.02))}
-.ai-msg{display:flex;gap:10px;align-items:flex-start;animation:fadeUp .4s ease}
+/* INNER TABS (overview/matches/heroes/ai inside player screen) */
+.inner-tabs{display:flex;gap:3px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:3px;margin-bottom:10px}
+.inner-tab{flex:1;padding:7px 2px;text-align:center;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border-radius:6px;cursor:pointer;transition:all .2s;border:none;background:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inner-tab.active{background:rgba(0,210,211,.1);color:var(--cyan);border:1px solid rgba(0,210,211,.25)}
+.inner-tab.ai-tab.active{color:var(--ai2);border-color:rgba(108,92,231,.35);background:rgba(108,92,231,.1)}
+.inner-panel{display:none}
+.inner-panel.active{display:block}
+
+/* MISSIONS */
+.mission-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;transition:border-color .2s}
+.mission-card.done{border-color:rgba(46,213,115,.3);background:rgba(46,213,115,.04)}
+.mission-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.mission-icon{font-size:20px;flex-shrink:0}
+.mission-title{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--white)}
+.mission-desc{font-size:11px;color:var(--text3);margin-top:2px;font-family:'Share Tech Mono',monospace}
+.mission-reward{margin-left:auto;text-align:right;flex-shrink:0}
+.mission-reward-coins{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--gold)}
+.mission-reward-xp{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:1px}
+.mission-bar-bg{height:4px;background:var(--bg);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.mission-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.mission-progress{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);display:flex;justify-content:space-between}
+.claim-btn{width:100%;margin-top:8px;background:linear-gradient(135deg,var(--green),var(--green2));border:none;border-radius:var(--r2);padding:9px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;cursor:pointer;transition:opacity .2s}
+.claim-btn:hover{opacity:.88}
+.type-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;padding:3px 7px;border:1px solid var(--border);border-radius:3px;margin-bottom:8px;display:inline-block}
+
+/* SHOP */
+.shop-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px}
+.shop-item-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.shop-item-icon{font-size:24px;flex-shrink:0}
+.shop-item-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--white)}
+.shop-item-desc{font-size:11px;color:var(--text3);margin-top:2px;font-family:'Share Tech Mono',monospace}
+.shop-item-price{margin-left:auto;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--gold);white-space:nowrap}
+.buy-btn{width:100%;background:linear-gradient(135deg,var(--cyan),var(--purple));border:none;border-radius:var(--r2);padding:9px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;cursor:pointer;transition:opacity .2s}
+.buy-btn:hover{opacity:.88}
+.buy-btn:disabled{opacity:.35;cursor:not-allowed;background:var(--bg3);color:var(--text3)}
+
+/* USER PROFILE MINI */
+.user-mini{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.user-mini-name{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--white)}
+.user-mini-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px}
+.user-mini-coins{margin-left:auto;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--gold)}
+.user-mini-xp{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);text-align:right;margin-top:1px}
+.premium-badge{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--gold);border:1px solid rgba(255,211,42,.3);border-radius:3px;padding:2px 6px;background:rgba(255,211,42,.07)}
+
+/* XP BAR */
+.xp-bar-wrap{margin-bottom:12px}
+.xp-bar-label{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:4px}
+.xp-bar-bg{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.xp-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--purple),var(--ai2));transition:width .8s ease}
+
+/* AI */
+.ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.ai-action-btn{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:10px;cursor:pointer;text-align:left;transition:border-color .2s;display:flex;align-items:flex-start;gap:8px}
+.ai-action-btn:hover{border-color:rgba(108,92,231,.4)}
+.ai-action-btn:active{transform:scale(.97)}
+.ai-action-icon{font-size:18px;flex-shrink:0;line-height:1}
+.ai-action-title{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--white)}
+.ai-action-desc{font-size:10px;color:var(--text3);margin-top:2px;font-family:'Share Tech Mono',monospace}
+.ai-chat-box{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden}
+.ai-chat-messages{min-height:100px;max-height:360px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{display:flex;gap:8px;align-items:flex-start}
 .ai-msg.user{flex-direction:row-reverse}
-.ai-msg-bubble{padding:10px 14px;border-radius:10px;font-size:14px;line-height:1.6;max-width:85%;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.ai-msg.assistant .ai-msg-bubble{background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(162,155,254,.15));border:2px solid rgba(108,92,231,.3);color:var(--text);border-radius:10px 10px 10px 3px}
-.ai-msg.user .ai-msg-bubble{background:linear-gradient(135deg,rgba(0,210,211,.15),rgba(46,213,115,.15));border:2px solid rgba(0,210,211,.3);color:var(--white);border-radius:10px 10px 3px 10px}
-.ai-msg-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.ai-msg.assistant .ai-msg-avatar{background:linear-gradient(135deg,rgba(108,92,231,.2),rgba(162,155,254,.2));border:2px solid rgba(108,92,231,.4)}
-.ai-msg.user .ai-msg-avatar{background:linear-gradient(135deg,rgba(0,210,211,.2),rgba(46,213,115,.2));border:2px solid rgba(0,210,211,.4)}
-.ai-typing{display:none;align-items:center;gap:5px;padding:10px 16px}
+.ai-msg-bubble{padding:8px 12px;border-radius:8px;font-size:13px;line-height:1.5;max-width:85%}
+.ai-msg.assistant .ai-msg-bubble{background:rgba(108,92,231,.12);border:1px solid rgba(108,92,231,.25);color:var(--text);border-radius:8px 8px 8px 2px}
+.ai-msg.user .ai-msg-bubble{background:rgba(0,210,211,.1);border:1px solid rgba(0,210,211,.25);color:var(--white);border-radius:8px 8px 2px 8px}
+.ai-msg-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px}
+.ai-msg.assistant .ai-msg-avatar{background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3)}
+.ai-msg.user .ai-msg-avatar{background:rgba(0,210,211,.12);border:1px solid rgba(0,210,211,.25)}
+.ai-typing{display:none;align-items:center;gap:4px;padding:8px 12px}
 .ai-typing.active{display:flex}
-.ai-typing span{width:7px;height:7px;background:var(--ai);border-radius:50%;animation:typing .9s ease-in-out infinite;box-shadow:0 0 8px var(--ai)}
+.ai-typing span{width:6px;height:6px;background:var(--ai);border-radius:50%;animation:typing .9s ease-in-out infinite}
 .ai-typing span:nth-child(2){animation-delay:.2s}
 .ai-typing span:nth-child(3){animation-delay:.4s}
 @keyframes typing{0%,80%,100%{transform:scale(.8);opacity:.5}40%{transform:scale(1.2);opacity:1}}
-.ai-input-row{display:flex;gap:10px;padding:12px;border-top:2px solid var(--border);background:var(--bg3)}
-.ai-input{flex:1;background:var(--bg);border:2px solid var(--border2);border-radius:var(--r2);padding:10px 14px;color:var(--white);font-size:14px;font-family:'Exo 2',sans-serif;outline:none;transition:all .3s}
-.ai-input:focus{border-color:var(--ai);box-shadow:0 0 0 3px rgba(108,92,231,.15)}
+.ai-input-row{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border);background:var(--bg3)}
+.ai-input{flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 12px;color:var(--white);font-size:13px;font-family:'Exo 2',sans-serif;outline:none;transition:border-color .2s}
+.ai-input:focus{border-color:var(--ai)}
 .ai-input::placeholder{color:var(--text3)}
-.ai-send-btn{background:linear-gradient(135deg,var(--ai),var(--ai2));border:none;border-radius:var(--r2);padding:10px 18px;color:#fff;font-size:16px;cursor:pointer;transition:all .3s ease;flex-shrink:0;box-shadow:0 4px 12px rgba(108,92,231,.3)}
-.ai-send-btn:hover{opacity:.9;transform:translateY(-2px);box-shadow:0 6px 16px rgba(108,92,231,.4)}
-.ai-send-btn:active{transform:translateY(0)}
-.ai-send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.ai-send-btn{background:linear-gradient(135deg,var(--ai),var(--ai2));border:none;border-radius:var(--r2);padding:9px 14px;color:#fff;font-size:15px;cursor:pointer;transition:opacity .2s;flex-shrink:0}
+.ai-send-btn:hover{opacity:.88}
+.ai-send-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:32px 20px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:11px;line-height:1.8}
+.empty-state .es-icon{font-size:36px;margin-bottom:12px;display:block}
 
 /* ANIMATIONS */
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.fu{animation:fadeUp .4s ease both}
-.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}
-.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .3s ease both}
 
-.footer{text-align:center;padding:24px 0 8px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:2px;border-top:2px solid var(--border);margin-top:12px;position:relative}
-.footer::before{content:'';position:absolute;top:-2px;left:50%;transform:translateX(-50%);width:100px;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+/* SCREEN HEADERS */
+.screen-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0 10px;margin-bottom:10px;border-bottom:1px solid var(--border)}
+.screen-hdr h2{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--white)}
 
 @media(max-width:380px){
-  .stat-val{font-size:22px}.wr-num{font-size:48px}
-  .tab{font-size:10px;padding:8px 4px;letter-spacing:1px}
-  .match-main{grid-template-columns:44px 1fr auto auto;gap:8px}
-  .hero-img{width:56px;height:32px}
-  .hdr-logo{width:40px;height:40px}
-  .hdr-title h1{font-size:18px}
+  .stat-val{font-size:20px}
+  .wr-num{font-size:40px}
+  .inner-tab{font-size:10px;padding:6px 1px}
+  .match-main{grid-template-columns:40px 1fr auto auto;gap:6px}
+  .ai-actions{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 <body>
+
+<!-- ── SCREEN: SEARCH ──────────────────────── -->
+<div class="screen active" id="screen-search">
 <div class="wrap">
-
-<!-- WELCOME BANNER -->
-<div class="welcome-banner" id="welcomeBanner" style="display:none">
-  <div class="welcome-close" onclick="closeWelcome()">✕</div>
-  <div class="welcome-content">
-    <div class="welcome-emoji">👋</div>
-    <div class="welcome-title">С ВОЗВРАЩЕНИЕМ!</div>
-    <div class="welcome-text">Рады видеть тебя снова в Dota 2 Analyzer<br>Проверь свои новые миссии и награды</div>
-    <div class="welcome-stats" id="welcomeStats"></div>
+  <div class="hdr">
+    <div class="hdr-logo"><span class="hdr-em">⚔️</span></div>
+    <div class="hdr-title">
+      <h1>Dota 2 Analyzer</h1>
+      <p>stratz · opendota · ai · v2.1</p>
+    </div>
+    <div class="hdr-live"><div class="live-dot"></div>LIVE</div>
   </div>
-</div>
 
-<div class="hdr">
-  <div class="hdr-logo"><span class="hdr-em">⚔️</span></div>
-  <div class="hdr-title">
-    <h1>Dota 2 Analyzer</h1>
-    <p>stratz · opendota · ai · v2.1</p>
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="s-icon">🔍</span>
+      <input class="search-input" id="si" type="text" placeholder="Ник или Steam ID..." autocomplete="off" spellcheck="false"/>
+      <button class="search-btn" id="sb" onclick="doSearch()">НАЙТИ</button>
+    </div>
+    <div class="suggest-list" id="sugList"></div>
   </div>
-  <div class="hdr-live"><div class="live-dot"></div>LIVE</div>
-</div>
 
-<div class="search-wrap">
-  <div class="search-box">
-    <span class="s-icon">🔍</span>
-    <input class="search-input" id="si" type="text" placeholder="Ник или Steam ID..." autocomplete="off" spellcheck="false"/>
-    <button class="search-btn" id="sb" onclick="doSearch()">НАЙТИ</button>
-  </div>
-  <div class="suggest-list" id="sugList"></div>
-</div>
+  <div id="pickerBlock"></div>
+  <div class="err" id="errBlock"><span>⚠</span><span id="errText"></span></div>
 
-<div id="pickerBlock"></div>
-<div class="err" id="errBlock"><span>⚠</span><span id="errText"></span></div>
-
-<div class="skel-block" id="skelBlock">
-  <div class="sk-profile">
-    <div class="sk-av sk"></div>
-    <div class="sk-lines">
-      <div class="sk-line sk" style="width:65%"></div>
-      <div class="sk-line sk" style="width:38%"></div>
-      <div class="sk-line sk" style="width:50%"></div>
+  <div class="skel-block" id="skelBlock">
+    <div class="sk-profile">
+      <div class="sk-av sk"></div>
+      <div class="sk-lines">
+        <div class="sk-line sk" style="width:65%"></div>
+        <div class="sk-line sk" style="width:38%"></div>
+        <div class="sk-line sk" style="width:50%"></div>
+      </div>
+    </div>
+    <div class="sk-grid">
+      <div class="sk-stat sk"></div><div class="sk-stat sk"></div><div class="sk-stat sk"></div>
     </div>
   </div>
-  <div class="sk-grid">
-    <div class="sk-stat sk"></div><div class="sk-stat sk"></div><div class="sk-stat sk"></div>
+
+  <div id="playerResults"></div>
+</div>
+</div>
+
+<!-- ── SCREEN: MISSIONS ───────────────────── -->
+<div class="screen" id="screen-missions">
+<div class="wrap">
+  <div class="screen-hdr">
+    <h2>Миссии</h2>
+    <div id="missionCoins" style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--gold)"></div>
+  </div>
+  <div id="userMiniBlock"></div>
+  <div id="missionsList">
+    <div class="empty-state"><span class="es-icon">🔍</span>Найди игрока чтобы увидеть миссии</div>
   </div>
 </div>
-
-<div class="results" id="results"></div>
-<div class="footer">DOTA 2 ANALYZER · STRATZ · OPENDOTA · AI · v2.1</div>
 </div>
 
+<!-- ── SCREEN: SHOP ───────────────────────── -->
+<div class="screen" id="screen-shop">
+<div class="wrap">
+  <div class="screen-hdr">
+    <h2>Магазин</h2>
+    <div id="shopCoins" style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--gold)"></div>
+  </div>
+  <div id="shopUserBlock"></div>
+  <div id="shopItems">
+    <div class="empty-state"><span class="es-icon">🛒</span>Загрузка магазина...</div>
+  </div>
+</div>
+</div>
+
+<!-- ── BOTTOM NAV ─────────────────────────── -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-search" onclick="showScreen('search')">
+    <span class="nav-icon">🔍</span>
+    <span class="nav-label">Поиск</span>
+  </button>
+  <button class="nav-item" id="nav-missions" onclick="showScreen('missions')">
+    <span class="nav-icon">🎯</span>
+    <span class="nav-label">Миссии</span>
+  </button>
+  <button class="nav-item" id="nav-shop" onclick="showScreen('shop')">
+    <span class="nav-icon">🛒</span>
+    <span class="nav-label">Магазин</span>
+  </button>
+</nav>
+
 <script>
-// API URL
 const API = "https://dota2-analyzer-production.up.railway.app";
 
 let tg = null;
 try{ tg = window.Telegram?.WebApp; if(tg){ tg.ready(); tg.expand(); } }catch(e){}
 
 let currentPlayerData = null;
-let currentUser = null;
-let lastVisitDate = localStorage.getItem('lastVisitDate');
-let currentDate = new Date().toISOString().split('T')[0];
+let currentUser = null; // loaded from API if tg available
+let userCoins = 0;
+let aiHistory = [];
 
-// Show welcome banner on first visit of the day
-window.addEventListener('DOMContentLoaded', () => {
-  if(lastVisitDate !== currentDate){
-    showWelcomeBanner();
-    localStorage.setItem('lastVisitDate', currentDate);
-  }
-});
+// ── SCREEN NAVIGATION ────────────────────────
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
 
-function showWelcomeBanner(){
-  const banner = document.getElementById('welcomeBanner');
-  if(!banner) return;
-  
-  // Load user stats for welcome banner
-  if(tg && tg.initDataUnsafe && tg.initDataUnsafe.user){
-    const telegramId = tg.initDataUnsafe.user.id;
-    fetch(API + '/user/profile?telegram_id=' + telegramId)
-      .then(r => r.json())
-      .then(data => {
-        const user = data.user;
-        const stats = document.getElementById('welcomeStats');
-        if(stats){
-          stats.innerHTML = 
-            '<div class="welcome-stat"><div class="welcome-stat-val">Lvl ' + user.level + '</div><div class="welcome-stat-lbl">УРОВЕНЬ</div></div>' +
-            '<div class="welcome-stat"><div class="welcome-stat-val">' + user.coins + '</div><div class="welcome-stat-lbl">МОНЕТЫ</div></div>' +
-            '<div class="welcome-stat"><div class="welcome-stat-val">' + user.xp + '</div><div class="welcome-stat-lbl">ОПЫТ</div></div>';
-        }
-      })
-      .catch(e => console.error('Failed to load user stats:', e));
-  } else {
-    const stats = document.getElementById('welcomeStats');
-    if(stats){
-      stats.innerHTML = 
-        '<div class="welcome-stat"><div class="welcome-stat-val">🎮</div><div class="welcome-stat-lbl">ИГРАЙ</div></div>' +
-        '<div class="welcome-stat"><div class="welcome-stat-val">🎯</div><div class="welcome-stat-lbl">МИССИИ</div></div>' +
-        '<div class="welcome-stat"><div class="welcome-stat-val">🏆</div><div class="welcome-stat-lbl">НАГРАДЫ</div></div>';
-    }
-  }
-  
-  banner.style.display = 'block';
-}
-
-function closeWelcome(){
-  const banner = document.getElementById('welcomeBanner');
-  if(banner){
-    banner.style.animation = 'slideUp .4s ease';
-    setTimeout(() => banner.style.display = 'none', 400);
-  }
+  if(name==='missions') refreshMissions();
+  if(name==='shop') refreshShop();
 }
 
 // ── HERO MAPS ────────────────────────────────
-const HERO_SHORT = {
-  1:"antimage",2:"axe",3:"bane",4:"bloodseeker",5:"crystal_maiden",
-  6:"drow_ranger",7:"earthshaker",8:"juggernaut",9:"mirana",10:"morphling",
-  11:"nevermore",12:"phantom_lancer",13:"puck",14:"pudge",15:"razor",
-  16:"sand_king",17:"storm_spirit",18:"sven",19:"tiny",20:"vengefulspirit",
-  21:"windrunner",22:"zuus",23:"kunkka",25:"lina",26:"lion",
-  27:"shadow_shaman",28:"slardar",29:"tidehunter",30:"witch_doctor",31:"lich",
-  32:"riki",33:"enigma",34:"tinker",35:"sniper",36:"necrolyte",
-  37:"warlock",38:"beastmaster",39:"queenofpain",40:"venomancer",
-  41:"faceless_void",42:"skeleton_king",43:"death_prophet",44:"phantom_assassin",
-  45:"pugna",46:"templar_assassin",47:"viper",48:"luna",49:"dragon_knight",
-  50:"dazzle",51:"rattletrap",52:"leshrac",53:"furion",54:"life_stealer",
-  55:"dark_seer",56:"clinkz",57:"omniknight",58:"enchantress",59:"huskar",
-  60:"night_stalker",61:"broodmother",62:"bounty_hunter",63:"weaver",
-  64:"jakiro",65:"batrider",66:"chen",67:"spectre",68:"ancient_apparition",
-  69:"doom_bringer",70:"ursa",71:"spirit_breaker",72:"gyrocopter",73:"alchemist",
-  74:"invoker",75:"silencer",76:"obsidian_destroyer",77:"lycan",78:"brewmaster",
-  79:"shadow_demon",80:"lone_druid",81:"chaos_knight",82:"meepo",
-  83:"treant",84:"ogre_magi",85:"undying",86:"rubick",
-  87:"disruptor",88:"nyx_assassin",89:"naga_siren",90:"keeper_of_the_light",
-  91:"wisp",92:"visage",93:"slark",94:"medusa",95:"troll_warlord",
-  96:"centaur",97:"magnataur",98:"shredder",99:"bristleback",
-  100:"tusk",101:"skywrath_mage",102:"abaddon",103:"elder_titan",
-  104:"legion_commander",106:"ember_spirit",107:"earth_spirit",
-  109:"terrorblade",110:"phoenix",111:"oracle",112:"winter_wyvern",
-  113:"arc_warden",120:"pangolier",121:"dark_willow",123:"grimstroke",
-  126:"void_spirit",128:"snapfire",129:"mars",135:"dawnbreaker",
-  136:"marci",137:"primal_beast",138:"muerta"
-};
+const HERO_SHORT={1:"antimage",2:"axe",3:"bane",4:"bloodseeker",5:"crystal_maiden",6:"drow_ranger",7:"earthshaker",8:"juggernaut",9:"mirana",10:"morphling",11:"nevermore",12:"phantom_lancer",13:"puck",14:"pudge",15:"razor",16:"sand_king",17:"storm_spirit",18:"sven",19:"tiny",20:"vengefulspirit",21:"windrunner",22:"zuus",23:"kunkka",25:"lina",26:"lion",27:"shadow_shaman",28:"slardar",29:"tidehunter",30:"witch_doctor",31:"lich",32:"riki",33:"enigma",34:"tinker",35:"sniper",36:"necrolyte",37:"warlock",38:"beastmaster",39:"queenofpain",40:"venomancer",41:"faceless_void",42:"skeleton_king",43:"death_prophet",44:"phantom_assassin",45:"pugna",46:"templar_assassin",47:"viper",48:"luna",49:"dragon_knight",50:"dazzle",51:"rattletrap",52:"leshrac",53:"furion",54:"life_stealer",55:"dark_seer",56:"clinkz",57:"omniknight",58:"enchantress",59:"huskar",60:"night_stalker",61:"broodmother",62:"bounty_hunter",63:"weaver",64:"jakiro",65:"batrider",66:"chen",67:"spectre",68:"ancient_apparition",69:"doom_bringer",70:"ursa",71:"spirit_breaker",72:"gyrocopter",73:"alchemist",74:"invoker",75:"silencer",76:"obsidian_destroyer",77:"lycan",78:"brewmaster",79:"shadow_demon",80:"lone_druid",81:"chaos_knight",82:"meepo",83:"treant",84:"ogre_magi",85:"undying",86:"rubick",87:"disruptor",88:"nyx_assassin",89:"naga_siren",90:"keeper_of_the_light",91:"wisp",92:"visage",93:"slark",94:"medusa",95:"troll_warlord",96:"centaur",97:"magnataur",98:"shredder",99:"bristleback",100:"tusk",101:"skywrath_mage",102:"abaddon",103:"elder_titan",104:"legion_commander",106:"ember_spirit",107:"earth_spirit",109:"terrorblade",110:"phoenix",111:"oracle",112:"winter_wyvern",113:"arc_warden",120:"pangolier",121:"dark_willow",123:"grimstroke",126:"void_spirit",128:"snapfire",129:"mars",135:"dawnbreaker",136:"marci",137:"primal_beast",138:"muerta"};
+const HERO_NAMES={1:"Anti-Mage",2:"Axe",3:"Bane",4:"Bloodseeker",5:"Crystal Maiden",6:"Drow Ranger",7:"Earthshaker",8:"Juggernaut",9:"Mirana",10:"Morphling",11:"Shadow Fiend",12:"Phantom Lancer",13:"Puck",14:"Pudge",15:"Razor",16:"Sand King",17:"Storm Spirit",18:"Sven",19:"Tiny",20:"Vengeful Spirit",21:"Windranger",22:"Zeus",23:"Kunkka",25:"Lina",26:"Lion",27:"Shadow Shaman",28:"Slardar",29:"Tidehunter",30:"Witch Doctor",31:"Lich",32:"Riki",33:"Enigma",34:"Tinker",35:"Sniper",36:"Necrophos",37:"Warlock",38:"Beastmaster",39:"Queen of Pain",40:"Venomancer",41:"Faceless Void",42:"Wraith King",43:"Death Prophet",44:"Phantom Assassin",45:"Pugna",46:"Templar Assassin",47:"Viper",48:"Luna",49:"Dragon Knight",50:"Dazzle",51:"Clockwerk",52:"Leshrac",53:"Nature's Prophet",54:"Lifestealer",55:"Dark Seer",56:"Clinkz",57:"Omniknight",58:"Enchantress",59:"Huskar",60:"Night Stalker",61:"Broodmother",62:"Bounty Hunter",63:"Weaver",64:"Jakiro",65:"Batrider",66:"Chen",67:"Spectre",68:"Ancient Apparition",69:"Doom",70:"Ursa",71:"Spirit Breaker",72:"Gyrocopter",73:"Alchemist",74:"Invoker",75:"Silencer",76:"Outworld Destroyer",77:"Lycan",78:"Brewmaster",79:"Shadow Demon",80:"Lone Druid",81:"Chaos Knight",82:"Meepo",83:"Treant Protector",84:"Ogre Magi",85:"Undying",86:"Rubick",87:"Disruptor",88:"Nyx Assassin",89:"Naga Siren",90:"Keeper of the Light",91:"Io",92:"Visage",93:"Slark",94:"Medusa",95:"Troll Warlord",96:"Centaur Warrunner",97:"Magnus",98:"Timbersaw",99:"Bristleback",100:"Tusk",101:"Skywrath Mage",102:"Abaddon",103:"Elder Titan",104:"Legion Commander",106:"Ember Spirit",107:"Earth Spirit",109:"Terrorblade",110:"Phoenix",111:"Oracle",112:"Winter Wyvern",113:"Arc Warden",120:"Pangolier",121:"Dark Willow",123:"Grimstroke",126:"Void Spirit",128:"Snapfire",129:"Mars",135:"Dawnbreaker",136:"Marci",137:"Primal Beast",138:"Muerta"};
+const RANK_MAP={1:{em:"🪵",name:"Herald"},2:{em:"🛡️",name:"Guardian"},3:{em:"⚒️",name:"Crusader"},4:{em:"🗡️",name:"Archon"},5:{em:"⚔️",name:"Legend"},6:{em:"🏅",name:"Ancient"},7:{em:"💎",name:"Divine"},8:{em:"🌟",name:"Immortal"}};
 
-const HERO_NAMES = {
-  1:"Anti-Mage",2:"Axe",3:"Bane",4:"Bloodseeker",5:"Crystal Maiden",
-  6:"Drow Ranger",7:"Earthshaker",8:"Juggernaut",9:"Mirana",10:"Morphling",
-  11:"Shadow Fiend",12:"Phantom Lancer",13:"Puck",14:"Pudge",15:"Razor",
-  16:"Sand King",17:"Storm Spirit",18:"Sven",19:"Tiny",20:"Vengeful Spirit",
-  21:"Windranger",22:"Zeus",23:"Kunkka",25:"Lina",26:"Lion",
-  27:"Shadow Shaman",28:"Slardar",29:"Tidehunter",30:"Witch Doctor",31:"Lich",
-  32:"Riki",33:"Enigma",34:"Tinker",35:"Sniper",36:"Necrophos",
-  37:"Warlock",38:"Beastmaster",39:"Queen of Pain",40:"Venomancer",
-  41:"Faceless Void",42:"Wraith King",43:"Death Prophet",44:"Phantom Assassin",
-  45:"Pugna",46:"Templar Assassin",47:"Viper",48:"Luna",49:"Dragon Knight",
-  50:"Dazzle",51:"Clockwerk",52:"Leshrac",53:"Nature's Prophet",54:"Lifestealer",
-  55:"Dark Seer",56:"Clinkz",57:"Omniknight",58:"Enchantress",59:"Huskar",
-  60:"Night Stalker",61:"Broodmother",62:"Bounty Hunter",63:"Weaver",
-  64:"Jakiro",65:"Batrider",66:"Chen",67:"Spectre",68:"Ancient Apparition",
-  69:"Doom",70:"Ursa",71:"Spirit Breaker",72:"Gyrocopter",73:"Alchemist",
-  74:"Invoker",75:"Silencer",76:"Outworld Destroyer",77:"Lycan",78:"Brewmaster",
-  79:"Shadow Demon",80:"Lone Druid",81:"Chaos Knight",82:"Meepo",
-  83:"Treant Protector",84:"Ogre Magi",85:"Undying",86:"Rubick",
-  87:"Disruptor",88:"Nyx Assassin",89:"Naga Siren",90:"Keeper of the Light",
-  91:"Io",92:"Visage",93:"Slark",94:"Medusa",95:"Troll Warlord",
-  96:"Centaur Warrunner",97:"Magnus",98:"Timbersaw",99:"Bristleback",
-  100:"Tusk",101:"Skywrath Mage",102:"Abaddon",103:"Elder Titan",
-  104:"Legion Commander",106:"Ember Spirit",107:"Earth Spirit",
-  109:"Terrorblade",110:"Phoenix",111:"Oracle",112:"Winter Wyvern",
-  113:"Arc Warden",120:"Pangolier",121:"Dark Willow",123:"Grimstroke",
-  126:"Void Spirit",128:"Snapfire",129:"Mars",135:"Dawnbreaker",
-  136:"Marci",137:"Primal Beast",138:"Muerta"
-};
+function getRank(t,s){if(t){const r=String(t),tier=parseInt(r[0])||0,stars=r.length>1?parseInt(r[1])||0:0,rk=RANK_MAP[tier]||{em:"❓",name:"Unknown"};return{em:rk.em,name:rk.name,stars};}if(!s||s==='Uncalibrated')return{em:"❓",name:"Uncalibrated",stars:0};const n=s.toLowerCase();let tier=0;if(n.includes('herald'))tier=1;else if(n.includes('guardian'))tier=2;else if(n.includes('crusader'))tier=3;else if(n.includes('archon'))tier=4;else if(n.includes('legend'))tier=5;else if(n.includes('ancient'))tier=6;else if(n.includes('divine'))tier=7;else if(n.includes('immortal'))tier=8;const stars=(s.match(/★/g)||[]).length,rk=RANK_MAP[tier]||{em:"❓",name:"Unknown"};return{em:rk.em,name:rk.name,stars};}
+function starsHtml(n){return n?`<span style="font-size:9px;color:var(--gold)"> ${'★'.repeat(Math.min(n,5))}</span>`:'';}
+function getHeroImg(hid,hs){const s=hs||HERO_SHORT[hid];return s?`https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${s}.png`:hid?`https://api.opendota.com/apps/dota2/images/heroes/${hid}_sb.png`:'';}
+function getHeroFb(hid){return hid?`https://api.opendota.com/apps/dota2/images/heroes/${hid}_sb.png`:'';}
+function getHeroName(hid,ns){if(ns&&ns!=='Unknown'&&!ns.startsWith('Hero #'))return ns;return HERO_NAMES[hid]||(hid?`Hero #${hid}`:'Unknown');}
+const wrc=w=>w>=55?'good':w>=50?'ok':'bad';
+const kdaC=k=>k>=4?'good':k>=2?'ok':'bad';
+const escH=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fnum=n=>(n!=null&&n!==0)?Number(n).toLocaleString('en'):'—';
 
-const RANK_MAP = {
-  1:{em:"🪵",name:"Herald"},2:{em:"🛡️",name:"Guardian"},
-  3:{em:"⚒️",name:"Crusader"},4:{em:"🗡️",name:"Archon"},
-  5:{em:"⚔️",name:"Legend"},6:{em:"🏅",name:"Ancient"},
-  7:{em:"💎",name:"Divine"},8:{em:"🌟",name:"Immortal"},
-};
-
-// ── HELPERS ──────────────────────────────────
-function getRank(rankTierNum, rankStr){
-  if(rankTierNum){
-    const s=String(rankTierNum);
-    const tier=parseInt(s[0])||0, stars=s.length>1?parseInt(s[1])||0:0;
-    const r=RANK_MAP[tier]||{em:"❓",name:"Unknown"};
-    return {em:r.em,name:r.name,stars};
-  }
-  if(!rankStr||rankStr==='Uncalibrated') return {em:"❓",name:"Uncalibrated",stars:0};
-  const n=rankStr.toLowerCase();
-  let tier=0;
-  if(n.includes('herald'))tier=1;
-  else if(n.includes('guardian'))tier=2;
-  else if(n.includes('crusader'))tier=3;
-  else if(n.includes('archon'))tier=4;
-  else if(n.includes('legend'))tier=5;
-  else if(n.includes('ancient'))tier=6;
-  else if(n.includes('divine'))tier=7;
-  else if(n.includes('immortal'))tier=8;
-  const stars=(rankStr.match(/★/g)||[]).length;
-  const r=RANK_MAP[tier]||{em:"❓",name:"Unknown"};
-  return {em:r.em,name:r.name,stars};
-}
-
-function starsHtml(n){ return n?`<span style="font-size:9px;color:var(--gold);letter-spacing:1px"> ${'★'.repeat(Math.min(n,5))}</span>`:''; }
-function getHeroImg(hid,hs){ const s=hs||HERO_SHORT[hid]; return s?`https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${s}.png`:hid?`https://api.opendota.com/apps/dota2/images/heroes/${hid}_sb.png`:''; }
-function getHeroFb(hid){ return hid?`https://api.opendota.com/apps/dota2/images/heroes/${hid}_sb.png`:''; }
-function getHeroName(hid,ns){ if(ns&&ns!=='Unknown'&&!ns.startsWith('Hero #'))return ns; return HERO_NAMES[hid]||(hid?`Hero #${hid}`:'Unknown'); }
-const wrc  = w => w>=55?'good':w>=50?'ok':'bad';
-const kdaC = k => k>=4?'good':k>=2?'ok':'bad';
-const escH = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const fnum = n => (n!=null&&n!==0)?Number(n).toLocaleString('en'):'—';
-
-// ── CACHE ────────────────────────────────────
-let cache = {};
-const CACHE_TTL = 300;
-
-function get_cache(key){
-  if(key in cache){
-    if(Date.now()/1000 - cache[key].ts < CACHE_TTL){
-      return cache[key].data;
-    }
-    delete cache[key];
-  }
-  return null;
-}
-
-function set_cache(key, data){
-  cache[key] = {data: data, ts: Date.now()/1000};
-}
-
-// ── EVENTS ───────────────────────────────────
-document.getElementById('si').addEventListener('keydown',e=>{ if(e.key==='Enter') doSearch(); });
+// ── SEARCH ───────────────────────────────────
+document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
 let sugTimer=null;
 document.getElementById('si').addEventListener('input',e=>{
   const v=e.target.value.trim();
   clearTimeout(sugTimer);
-  if(v.length<2||/^\d+$/.test(v)){ closeSug(); return; }
+  if(v.length<2||/^\d+$/.test(v)){closeSug();return;}
   sugTimer=setTimeout(()=>fetchSug(v),350);
 });
-document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap'))closeSug(); });
+document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))closeSug();});
 
-// ── SUGGEST ──────────────────────────────────
 async function fetchSug(q){
-  try{
-    const r=await fetch(`${API}/search?q=${encodeURIComponent(q)}`);
-    renderSug(await r.json());
-  }catch{ closeSug(); }
+  try{const r=await fetch(`${API}/search?q=${encodeURIComponent(q)}`);renderSug(await r.json());}
+  catch{closeSug();}
 }
 function renderSug(list){
   const el=document.getElementById('sugList');
-  if(!list||!list.length){ closeSug(); return; }
+  if(!list||!list.length){closeSug();return;}
   el.innerHTML=list.map(p=>`
     <div class="suggest-item" onclick="pickSug('${p.account_id}')">
       <img class="sug-av" src="${escH(p.avatarfull||'')}" onerror="this.style.visibility='hidden'" alt="">
       <div><div class="sug-name">${escH(p.personaname||'Unknown')}</div><div class="sug-id">#${p.account_id}</div></div>
     </div>`).join('');
-  if(list.length>1) el.innerHTML+=`<div class="sug-hint">↑ ${list.length} players found</div>`;
+  if(list.length>1)el.innerHTML+=`<div class="sug-hint">${list.length} игроков найдено</div>`;
   el.classList.add('open');
 }
-function pickSug(id){ document.getElementById('si').value=id; closeSug(); doSearch(); }
-function closeSug(){ document.getElementById('sugList').classList.remove('open'); }
+function pickSug(id){document.getElementById('si').value=id;closeSug();doSearch();}
+function closeSug(){document.getElementById('sugList').classList.remove('open');}
 
-// ── SEARCH ───────────────────────────────────
 async function doSearch(){
   const q=document.getElementById('si').value.trim();
-  if(!q) return;
-  closeSug(); clearPicker(); setLoad(true); hideErr(); hideRes();
+  if(!q)return;
+  closeSug();clearPicker();setLoad(true);hideErr();hideRes();
   try{
-    if(/^\d+$/.test(q)){ await loadPlayer(q); return; }
+    if(/^\d+$/.test(q)){await loadPlayer(q);return;}
     const r=await fetch(`${API}/search?q=${encodeURIComponent(q)}`);
     const list=await r.json();
-    if(!list||list.length===0){ showErr(`Player "${q}" not found. Try Steam ID.`); return; }
-    if(list.length===1){ await loadPlayer(String(list[0].account_id)); }
-    else{ setLoad(false); showPicker(list,q); }
-  }catch(e){ showErr(e.message||'Search failed.'); }
-  finally{ setLoad(false); }
+    if(!list||list.length===0){showErr(`Игрок "${q}" не найден. Попробуй Steam ID.`);return;}
+    if(list.length===1){await loadPlayer(String(list[0].account_id));}
+    else{setLoad(false);showPicker(list,q);}
+  }catch(e){showErr(e.message||'Ошибка поиска.');}
+  finally{setLoad(false);}
 }
 
 function showPicker(list,query){
@@ -712,60 +551,208 @@ function showPicker(list,query){
       <div class="picker-header">НАЙДЕНО ${list.length} ИГРОКОВ — ВЫБЕРИ НУЖНОГО</div>
       ${list.map(p=>`
         <div class="picker-item" onclick="pickPlayer('${p.account_id}')">
-          <img class="picker-av" src="${escH(p.avatarfull||'')}"
-            onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'36\\' height=\\'36\\'><rect width=\\'36\\' height=\\'36\\' fill=\\'%230e1520\\'/></svg>'" alt="">
-          <div><div class="picker-name">${escH(p.personaname||'Unknown')}</div><div class="picker-id">Steam ID: ${p.account_id}</div></div>
+          <img class="picker-av" src="${escH(p.avatarfull||'')}" onerror="this.style.opacity='.3'" alt="">
+          <div><div class="picker-name">${escH(p.personaname||'Unknown')}</div><div class="picker-id">ID: ${p.account_id}</div></div>
         </div>`).join('')}
     </div>`;
 }
-
-async function pickPlayer(id){ clearPicker(); document.getElementById('si').value=id; await loadPlayer(id); }
-function clearPicker(){ document.getElementById('pickerBlock').innerHTML=''; }
+async function pickPlayer(id){clearPicker();document.getElementById('si').value=id;await loadPlayer(id);}
+function clearPicker(){document.getElementById('pickerBlock').innerHTML='';}
 
 async function loadPlayer(query){
-  setLoad(true); hideErr(); hideRes();
+  setLoad(true);hideErr();hideRes();
   try{
     const r=await fetch(`${API}/player?query=${encodeURIComponent(query)}`);
-    if(!r.ok){ const e=await r.json().catch(()=>{}); throw new Error(e?.detail||`Error ${r.status}`); }
+    if(!r.ok){const e=await r.json().catch(()=>{});throw new Error(e?.detail||`Error ${r.status}`);}
     const data=await r.json();
     currentPlayerData=data;
-    
-    // Update missions progress if user is logged in
-    if(tg && tg.initDataUnsafe && tg.initDataUnsafe.user){
-      const telegramId = tg.initDataUnsafe.user.id;
-      fetch(`${API}/missions/update`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({telegram_id: telegramId, player_data: data})
-      }).catch(e => console.error('Failed to update missions:', e));
-    }
-    
     renderAll(data);
-  }catch(e){ showErr(e.message||'Failed to load player data.'); }
-  finally{ setLoad(false); }
+    // Обновляем миссии после загрузки игрока
+    if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user){
+      const tid=tg.initDataUnsafe.user.id;
+      fetch(`${API}/missions/update`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram_id:tid,player_data:data})}).catch(()=>{});
+      loadUserData(tid);
+    }
+  }catch(e){showErr(e.message||'Не удалось загрузить данные.');}
+  finally{setLoad(false);}
 }
 
 function setLoad(on){
   document.getElementById('skelBlock').classList.toggle('active',on);
-  const b=document.getElementById('sb'); b.disabled=on; b.textContent=on?'...':'НАЙТИ';
+  const b=document.getElementById('sb');b.disabled=on;b.textContent=on?'...':'НАЙТИ';
 }
-function showErr(m){ document.getElementById('errText').textContent=m; document.getElementById('errBlock').classList.add('active'); }
-function hideErr(){ document.getElementById('errBlock').classList.remove('active'); }
-function hideRes(){ const r=document.getElementById('results'); r.classList.remove('active'); r.innerHTML=''; currentPlayerData=null; }
+function showErr(m){document.getElementById('errText').textContent=m;document.getElementById('errBlock').classList.add('active');}
+function hideErr(){document.getElementById('errBlock').classList.remove('active');}
+function hideRes(){const r=document.getElementById('playerResults');r.innerHTML='';currentPlayerData=null;}
 
-// ── TABS ─────────────────────────────────────
-function swTab(id,btn){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
+// ── RENDER PLAYER ─────────────────────────────
+let chartInst=null;
+
+function renderAll(data){
+  const {profile,stats,top_heroes,recent_matches,trend,source,account_id}=data;
+  const rank=getRank(profile.rank_tier,profile.rank);
+  const mmr=profile.mmr_estimate||profile.mmr||null;
+  const wClass=wrc(stats.winrate);
+  const streak=trend?.streak;
+  const srcLbl=source==='stratz'?'⚡ STRATZ':'📊 OPENDOTA';
+  const rm=(recent_matches||[]).slice(0,20);
+  const avgF=key=>{const v=rm.map(m=>+(m[key]||0)).filter(x=>x>0);return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1):'—';};
+  const avgGpm=Math.round(rm.reduce((s,m)=>s+(m.gpm||0),0)/Math.max(rm.length,1));
+  const avgXpm=Math.round(rm.reduce((s,m)=>s+(m.xpm||0),0)/Math.max(rm.length,1));
+
+  document.getElementById('playerResults').innerHTML=`
+  <div class="profile-card fu">
+    <div class="profile-banner"></div>
+    <div class="profile-body">
+      <img class="profile-av" src="${escH(profile.avatar||'')}"
+        onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'48\\' height=\\'48\\'><rect width=\\'48\\' height=\\'48\\' fill=\\'%2312171f\\'/><text y=\\'34\\' x=\\'8\\' font-size=\\'24\\'>🎮</text></svg>'" alt=""/>
+      <div class="profile-center">
+        <div class="profile-name">${escH(profile.name)}</div>
+        <div class="profile-meta">
+          <span class="profile-sub">ID · ${escH(String(account_id||''))}</span>
+          <span class="source-badge">${srcLbl}${profile.is_anonymous?' · 🔒':''}</span>
+        </div>
+      </div>
+      <div class="profile-right">
+        <div class="rank-pill">
+          <div class="rank-em">${rank.em}</div>
+          <div class="rank-name">${escH(rank.name)}${starsHtml(rank.stars)}</div>
+        </div>
+        ${mmr?`<div class="mmr-pill"><div class="mmr-val">${fnum(mmr)}</div><div class="mmr-lbl">MMR</div></div>`:''}
+      </div>
+    </div>
+  </div>
+
+  <div class="inner-tabs fu">
+    <button class="inner-tab active" onclick="swInner('overview',this)">Обзор</button>
+    <button class="inner-tab" onclick="swInner('matches',this)">Матчи</button>
+    <button class="inner-tab" onclick="swInner('heroes',this)">Герои</button>
+    <button class="inner-tab ai-tab" onclick="swInner('ai',this)">AI</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="inner-panel active" id="ip-overview">
+    ${streak&&streak.count>=2?`<div class="streak-badge ${streak.type} fu">${streak.type==='win'?'🔥':'❄️'} ${streak.count} ${streak.type==='win'?'WIN':'LOSS'} STREAK</div>`:''}
+    <div class="wr-card fu">
+      <div class="wr-top">
+        <div><div class="wr-num ${wClass}">${stats.winrate}%</div><div class="wr-lbl">WIN RATE · ALL TIME</div></div>
+        <div class="wr-wl">
+          <div class="wr-wl-row"><span class="w">▲ ${stats.wins}W</span></div>
+          <div class="wr-wl-row"><span class="l">▼ ${stats.losses}L</span></div>
+          <div class="wr-total">${stats.total_matches} games</div>
+        </div>
+      </div>
+      <div class="sec"><span class="sec-icon">◈</span>Last ${rm.length} matches</div>
+      <div class="wr-recent" id="wrDots"></div>
+      <div class="wr-bar-bg"><div class="wr-bar-fill ${wClass}" id="wrFill" style="width:0%"></div></div>
+    </div>
+    ${trend?`
+    <div class="sec fu"><span class="sec-icon">◈</span>Trends</div>
+    <div class="trend-grid fu">
+      <div class="trend-c">
+        <div class="trend-label">Last 5</div>
+        <div class="trend-row"><span class="trend-key">WR</span><span class="trend-val ${wrc(trend.last5_winrate)}">${trend.last5_winrate}%</span></div>
+        <div class="trend-row"><span class="trend-key">KDA</span><span class="trend-val ${kdaC(trend.last5_avg_kda)}">${trend.last5_avg_kda}</span></div>
+        <div class="trend-row"><span class="trend-key">GPM</span><span class="trend-val">${trend.last5_avg_gpm}</span></div>
+      </div>
+      <div class="trend-c">
+        <div class="trend-label">Last 20</div>
+        <div class="trend-row"><span class="trend-key">WR</span><span class="trend-val ${wrc(trend.last20_winrate)}">${trend.last20_winrate}%</span></div>
+        <div class="trend-row"><span class="trend-key">KDA</span><span class="trend-val ${kdaC(trend.last20_avg_kda)}">${trend.last20_avg_kda}</span></div>
+        <div class="trend-row"><span class="trend-key">GPM</span><span class="trend-val">${trend.last20_avg_gpm}</span></div>
+      </div>
+    </div>`:''}
+    <div class="sec fu"><span class="sec-icon">◈</span>Averages (20 matches)</div>
+    <div class="stat-grid fu">
+      <div class="stat-c"><div class="stat-val ${kdaC(parseFloat(avgF('kda'))||0)}">${avgF('kda')}</div><div class="stat-lbl">KDA</div></div>
+      <div class="stat-c"><div class="stat-val gold">${avgF('kills')}</div><div class="stat-lbl">Kills</div></div>
+      <div class="stat-c"><div class="stat-val red">${avgF('deaths')}</div><div class="stat-lbl">Deaths</div></div>
+      <div class="stat-c"><div class="stat-val blue">${avgF('assists')}</div><div class="stat-lbl">Assists</div></div>
+      <div class="stat-c"><div class="stat-val green">${avgGpm}</div><div class="stat-lbl">GPM</div></div>
+      <div class="stat-c"><div class="stat-val purple">${avgXpm}</div><div class="stat-lbl">XPM</div></div>
+    </div>
+    <div class="chart-card fu">
+      <div class="chart-head">
+        <div class="chart-title">KDA by match</div>
+        <div class="chart-legend">
+          <div class="leg-i"><div class="leg-d" style="background:var(--green)"></div>WIN</div>
+          <div class="leg-i"><div class="leg-d" style="background:var(--red)"></div>LOSS</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="kdaChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- MATCHES -->
+  <div class="inner-panel" id="ip-matches">
+    <div class="match-list" id="matchList"></div>
+  </div>
+
+  <!-- HEROES -->
+  <div class="inner-panel" id="ip-heroes">
+    <div class="hero-list" id="heroList">
+      <div class="empty-state"><span class="es-icon" style="font-size:24px">⏳</span>Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- AI -->
+  <div class="inner-panel" id="ip-ai">
+    <div class="ai-actions fu">
+      <div class="ai-action-btn" onclick="aiQuick('analysis')">
+        <div class="ai-action-icon">🧠</div>
+        <div><div class="ai-action-title">Разбор игры</div><div class="ai-action-desc">Что хорошо/плохо</div></div>
+      </div>
+      <div class="ai-action-btn" onclick="aiQuick('forecast')">
+        <div class="ai-action-icon">📈</div>
+        <div><div class="ai-action-title">Прогноз роста</div><div class="ai-action-desc">Будет ли расти MMR</div></div>
+      </div>
+      <div class="ai-action-btn" onclick="aiQuick('heroes')">
+        <div class="ai-action-icon">🎯</div>
+        <div><div class="ai-action-title">Герои для пула</div><div class="ai-action-desc">Что учить дальше</div></div>
+      </div>
+      <div class="ai-action-btn" onclick="aiQuick('weaknesses')">
+        <div class="ai-action-icon">🔍</div>
+        <div><div class="ai-action-title">Слабые места</div><div class="ai-action-desc">Где теряешь игры</div></div>
+      </div>
+    </div>
+    <div class="ai-chat-box fu">
+      <div class="ai-chat-messages" id="aiMessages">
+        <div class="ai-msg assistant">
+          <div class="ai-msg-avatar">🤖</div>
+          <div class="ai-msg-bubble">Привет! Я AI-аналитик. Нажми кнопку выше или задай вопрос.</div>
+        </div>
+      </div>
+      <div class="ai-typing" id="aiTyping"><span></span><span></span><span></span></div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="aiInput" type="text" placeholder="Спроси про игрока..." autocomplete="off"/>
+        <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">➤</button>
+      </div>
+    </div>
+  </div>
+  `;
+
+  document.getElementById('playerResults').style.display='block';
+  setTimeout(()=>{const f=document.getElementById('wrFill');if(f)f.style.width=stats.winrate+'%';},150);
+  const dots=document.getElementById('wrDots');
+  rm.forEach(m=>{const d=document.createElement('div');d.className=`wr-dot ${m.win?'w':'l'}`;d.textContent=m.win?'W':'L';dots.appendChild(d);});
+  drawChart(rm);
+  renderMatches(rm);
+  renderHeroes(top_heroes||[]);
+  document.getElementById('aiInput').addEventListener('keydown',e=>{if(e.key==='Enter')aiSend();});
+}
+
+// ── INNER TABS ────────────────────────────────
+function swInner(id,btn){
+  document.querySelectorAll('.inner-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.inner-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ip-'+id).classList.add('active');
   btn.classList.add('active');
 }
 
 // ── MATCHES ──────────────────────────────────
 function renderMatches(matches){
   document.getElementById('matchList').innerHTML=matches.slice(0,20).map((m,i)=>{
-    const hid=m.hero_id,hs=m.hero_short;
-    const img=getHeroImg(hid,hs),fb=getHeroFb(hid);
+    const hid=m.hero_id,hs=m.hero_short,img=getHeroImg(hid,hs),fb=getHeroFb(hid);
     const hname=getHeroName(hid,m.hero);
     const dur=m.duration_min!=null?`${m.duration_min}:${String(m.duration_sec||0).padStart(2,'0')}`:'';
     const kda=m.kda??0,wc=m.win?'win':'loss';
@@ -797,8 +784,8 @@ function renderMatches(matches){
           <div class="mex-cell"><div class="mex-val">${m.match_id?'#'+String(m.match_id).slice(-6):''}</div><div class="mex-lbl">Match ID</div></div>
         </div>
         <div class="match-links">
-          <a class="match-open-link" href="https://www.dotabuff.com/matches/${m.match_id}" target="_blank">📊 Dotabuff</a>
-          <a class="match-open-link" href="https://stratz.com/matches/${m.match_id}" target="_blank">⚡ Stratz</a>
+          <a class="match-open-link" href="https://www.dotabuff.com/matches/${m.match_id}" target="_blank">Dotabuff</a>
+          <a class="match-open-link" href="https://stratz.com/matches/${m.match_id}" target="_blank">Stratz</a>
         </div>
       </div>
     </div>`;
@@ -807,7 +794,7 @@ function renderMatches(matches){
 
 function toggleMatch(i){
   const card=document.getElementById(`mc${i}`),exp=document.getElementById(`me${i}`);
-  if(!card||!exp) return;
+  if(!card||!exp)return;
   const open=exp.classList.contains('open');
   exp.classList.toggle('open',!open);
   card.classList.toggle('expanded',!open);
@@ -816,13 +803,12 @@ function toggleMatch(i){
 // ── HEROES ───────────────────────────────────
 function renderHeroes(list){
   const el=document.getElementById('heroList');
-  if(!list||!list.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:11px;font-family:Share Tech Mono,monospace">NO DATA</div>'; return; }
+  if(!list||!list.length){el.innerHTML='<div class="empty-state">NO DATA</div>';return;}
   el.innerHTML=list.slice(0,10).map((h,i)=>{
     const hid=h.hero_id,img=getHeroImg(hid,h.hero_short),fb=getHeroFb(hid);
     const name=getHeroName(hid,h.hero_name);
     const wr=h.winrate??(h.wins&&h.matches?Math.round(h.wins/h.matches*100):0);
     const wc=wrc(wr),clr=wc==='good'?'var(--green)':wc==='ok'?'var(--gold)':'var(--red)';
-    const kda=h.kda??'—',gpm=h.avg_gpm?` · ${h.avg_gpm}GPM`:'';
     return `
     <div class="hero-row">
       <div class="hero-rank">${i+1}</div>
@@ -830,7 +816,7 @@ function renderHeroes(list){
       <div class="hero-name">${escH(name)}</div>
       <div class="hero-stats">
         <div class="hero-games">${h.matches||0} games</div>
-        <div class="hero-kda-lbl">KDA ${kda}${gpm}</div>
+        <div class="hero-kda-lbl">KDA ${h.kda??'—'}${h.avg_gpm?` · ${h.avg_gpm}GPM`:''}</div>
       </div>
       <div class="hero-bar"><div class="hero-bar-fill" style="width:${wr}%;background:${clr}"></div></div>
       <div class="hero-wr ${wc}">${wr}%</div>
@@ -839,527 +825,246 @@ function renderHeroes(list){
 }
 
 // ── CHART ────────────────────────────────────
-let chartInst=null;
-
 function drawChart(matches){
-  if(chartInst){ chartInst.destroy(); chartInst=null; }
+  if(chartInst){chartInst.destroy();chartInst=null;}
   const ctx=document.getElementById('kdaChart')?.getContext('2d');
-  if(!ctx) return;
+  if(!ctx)return;
   const rev=[...matches.slice(0,15)].reverse();
   chartInst=new Chart(ctx,{
     type:'bar',
     data:{
       labels:rev.map((_,i)=>`#${i+1}`),
-      datasets:[{
-        data:rev.map(m=>m.kda||0),
-        backgroundColor:rev.map(m=>m.win?'rgba(0,229,160,.6)':'rgba(232,64,87,.6)'),
-        borderColor:rev.map(m=>m.win?'#00e5a0':'#e84057'),
-        borderWidth:1,borderRadius:3,borderSkipped:false,
-      }]
+      datasets:[{data:rev.map(m=>m.kda||0),backgroundColor:rev.map(m=>m.win?'rgba(46,213,115,.6)':'rgba(255,71,87,.6)'),borderColor:rev.map(m=>m.win?'#2ed573':'#ff4757'),borderWidth:1,borderRadius:3,borderSkipped:false}]
     },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      animation:{duration:600,easing:'easeOutQuart'},
-      plugins:{
-        legend:{display:false},
-        tooltip:{backgroundColor:'#101820',borderColor:'#182030',borderWidth:1,titleColor:'#6b8fa8',bodyColor:'#c8dce8',padding:9,
-          callbacks:{title:c=>`Match ${c[0].label}`,label:c=>` KDA: ${c.raw}`}}
-      },
-      scales:{
-        x:{grid:{color:'rgba(24,32,48,.8)'},ticks:{color:'#2d4558',font:{family:'Share Tech Mono',size:8}}},
-        y:{grid:{color:'rgba(24,32,48,.8)'},ticks:{color:'#2d4558',font:{family:'Share Tech Mono',size:8}},beginAtZero:true}
-      }
-    }
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:600,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:{backgroundColor:'#151b26',borderColor:'#1e2838',borderWidth:1,titleColor:'#636e72',bodyColor:'#dfe6e9',padding:8,callbacks:{title:c=>`Match ${c[0].label}`,label:c=>` KDA: ${c.raw}`}}},scales:{x:{grid:{color:'rgba(30,40,56,.8)'},ticks:{color:'#636e72',font:{family:'Share Tech Mono',size:8}}},y:{grid:{color:'rgba(30,40,56,.8)'},ticks:{color:'#636e72',font:{family:'Share Tech Mono',size:8}},beginAtZero:true}}}
   });
 }
 
-// ── RENDER ───────────────────────────────────
-function renderAll(data){
-  const {profile,stats,top_heroes,recent_matches,trend,source,account_id}=data;
-  const rank=getRank(profile.rank_tier,profile.rank);
-  const mmr=profile.mmr_estimate||profile.mmr||null;
-  const wClass=wrc(stats.winrate);
-  const streak=trend?.streak;
-  const srcLbl=source==='stratz'?'⚡ STRATZ':'📊 OPENDOTA';
-  const rm=(recent_matches||[]).slice(0,20);
-  const avgF=key=>{const v=rm.map(m=>+(m[key]||0)).filter(x=>x>0);return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1):'—';};
-  const avgGpm=Math.round(rm.reduce((s,m)=>s+(m.gpm||0),0)/Math.max(rm.length,1));
-  const avgXpm=Math.round(rm.reduce((s,m)=>s+(m.xpm||0),0)/Math.max(rm.length,1));
-
-  document.getElementById('results').innerHTML=`
-  <div class="profile-card fu d1">
-    <div class="profile-banner"></div>
-    <div class="profile-body">
-      <img class="profile-av" src="${escH(profile.avatar||'')}"
-        onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'52\\' height=\\'52\\'><rect width=\\'52\\' height=\\'52\\' fill=\\'%230e1520\\'/><text y=\\'36\\' x=\\'8\\' font-size=\\'28\\'>🎮</text></svg>'" alt=""/>
-      <div class="profile-center">
-        <div class="profile-name">${escH(profile.name)}</div>
-        <div class="profile-meta">
-          <span class="profile-sub">ID · ${escH(String(account_id||''))}</span>
-          <span class="source-badge">${srcLbl}${profile.is_anonymous?' · 🔒':''}</span>
-        </div>
-      </div>
-      <div class="profile-right">
-        <div class="rank-pill">
-          <div class="rank-em">${rank.em}</div>
-          <div class="rank-name">${escH(rank.name)}${starsHtml(rank.stars)}</div>
-        </div>
-        ${mmr?`<div class="mmr-pill"><div class="mmr-val">${fnum(mmr)}</div><div class="mmr-lbl">MMR</div></div>`:''}
-      </div>
-    </div>
-  </div>
-  
-    <div class="tabs fu d2">
-    <button class="tab active" onclick="swTab('overview',this)">Обзор</button>
-    <button class="tab" onclick="swTab('matches',this)">Матчи</button>
-    <button class="tab" onclick="swTab('heroes',this)">Герои</button>
-    <button class="tab" onclick="swTab('missions',this)">Миссии</button>
-    <button class="tab" onclick="swTab('shop',this)">Магазин</button>
-    <button class="tab ai-tab" onclick="swTab('ai',this)">AI</button>
-  </div>
-
-  <div class="tab-panel active" id="tab-overview">
-    ${streak&&streak.count>=2?`<div class="streak-badge ${streak.type} fu d2">${streak.type==='win'?'🔥':'❄️'} ${streak.count} ${streak.type==='win'?'WIN':'LOSS'} STREAK</div>`:''}
-    <div class="wr-card fu d3">
-      <div class="wr-top">
-        <div><div class="wr-num ${wClass}">${stats.winrate}%</div><div class="wr-lbl">WIN RATE · ALL TIME</div></div>
-        <div class="wr-wl">
-          <div class="wr-wl-row"><span class="w">▲ ${stats.wins}W</span></div>
-          <div class="wr-wl-row"><span class="l">▼ ${stats.losses}L</span></div>
-          <div class="wr-total">${stats.total_matches} games</div>
-        </div>
-      </div>
-      <div class="sec"><span class="sec-icon">◈</span>Last ${rm.length} matches</div>
-      <div class="wr-recent" id="wrDots"></div>
-      <div class="wr-bar-bg"><div class="wr-bar-fill ${wClass}" id="wrFill" style="width:0%"></div></div>
-    </div>
-    ${trend?`
-    <div class="sec fu d3"><span class="sec-icon">◈</span>Trends</div>
-    <div class="trend-grid fu d3">
-      <div class="trend-c">
-        <div class="trend-label">Last 5</div>
-        <div class="trend-row"><span class="trend-key">WR</span><span class="trend-val ${wrc(trend.last5_winrate)}">${trend.last5_winrate}%</span></div>
-        <div class="trend-row"><span class="trend-key">KDA</span><span class="trend-val ${kdaC(trend.last5_avg_kda)}">${trend.last5_avg_kda}</span></div>
-        <div class="trend-row"><span class="trend-key">GPM</span><span class="trend-val">${trend.last5_avg_gpm}</span></div>
-      </div>
-      <div class="trend-c">
-        <div class="trend-label">Last 20</div>
-        <div class="trend-row"><span class="trend-key">WR</span><span class="trend-val ${wrc(trend.last20_winrate)}">${trend.last20_winrate}%</span></div>
-        <div class="trend-row"><span class="trend-key">KDA</span><span class="trend-val ${kdaC(trend.last20_avg_kda)}">${trend.last20_avg_kda}</span></div>
-        <div class="trend-row"><span class="trend-key">GPM</span><span class="trend-val">${trend.last20_avg_gpm}</span></div>
-      </div>
-    </div>`:''}
-    <div class="sec fu d4"><span class="sec-icon">◈</span>Averages (20 matches)</div>
-    <div class="stat-grid fu d4">
-      <div class="stat-c"><div class="stat-val ${kdaC(parseFloat(avgF('kda'))||0)}">${avgF('kda')}</div><div class="stat-lbl">KDA</div></div>
-      <div class="stat-c"><div class="stat-val gold">${avgF('kills')}</div><div class="stat-lbl">Kills</div></div>
-      <div class="stat-c"><div class="stat-val red">${avgF('deaths')}</div><div class="stat-lbl">Deaths</div></div>
-      <div class="stat-c"><div class="stat-val blue">${avgF('assists')}</div><div class="stat-lbl">Assists</div></div>
-      <div class="stat-c"><div class="stat-val green">${avgGpm}</div><div class="stat-lbl">GPM</div></div>
-      <div class="stat-c"><div class="stat-val purple">${avgXpm}</div><div class="stat-lbl">XPM</div></div>
-    </div>
-    <div class="chart-card fu d5">
-      <div class="chart-head">
-        <div class="chart-title">KDA by match</div>
-        <div class="chart-legend">
-          <div class="leg-i"><div class="leg-d" style="background:var(--green)"></div>WIN</div>
-          <div class="leg-i"><div class="leg-d" style="background:var(--red)"></div>LOSS</div>
-        </div>
-      </div>
-      <div class="chart-wrap"><canvas id="kdaChart"></canvas></div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="tab-matches">
-    <div class="match-list" id="matchList"></div>
-  </div>
-
-  <div class="tab-panel" id="tab-heroes">
-    <div class="hero-list" id="heroList">
-      <div style="text-align:center;padding:24px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:10px">LOADING...</div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="tab-missions">
-    <div id="userProfileCard" class="fu d1"></div>
-    <div class="sec fu d2"><span class="sec-icon">🎯</span>Active Missions</div>
-    <div id="missionsList" class="fu d2">
-      <div style="text-align:center;padding:24px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:10px">LOADING...</div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="tab-shop">
-    <div id="shopUserInfo" class="fu d1"></div>
-    <div class="sec fu d2"><span class="sec-icon">🛒</span>Shop Items</div>
-    <div id="shopItems" class="fu d2">
-      <div style="text-align:center;padding:24px;color:var(--text3);font-family:'Share Tech Mono',monospace;font-size:10px">LOADING...</div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="tab-ai">
-    <div class="ai-panel">
-      <div class="ai-actions fu d1">
-        <div class="ai-action-btn" onclick="aiQuick('analysis')">
-          <div class="ai-action-icon">🧠</div>
-          <div><div class="ai-action-title">Разбор игры</div><div class="ai-action-desc">Что хорошо и плохо</div></div>
-        </div>
-        <div class="ai-action-btn" onclick="aiQuick('forecast')">
-          <div class="ai-action-icon">📈</div>
-          <div><div class="ai-action-title">Прогноз роста</div><div class="ai-action-desc">Будет ли расти MMR</div></div>
-        </div>
-        <div class="ai-action-btn" onclick="aiQuick('heroes')">
-          <div class="ai-action-icon">🎯</div>
-          <div><div class="ai-action-title">Герои для пула</div><div class="ai-action-desc">Что учить дальше</div></div>
-        </div>
-        <div class="ai-action-btn" onclick="aiQuick('weaknesses')">
-          <div class="ai-action-icon">🔍</div>
-          <div><div class="ai-action-title">Слабые места</div><div class="ai-action-desc">Где теряешь игры</div></div>
-        </div>
-      </div>
-      <div class="ai-chat-box fu d2">
-        <div class="ai-chat-messages" id="aiMessages">
-          <div class="ai-msg assistant">
-            <div class="ai-msg-avatar">🤖</div>
-            <div class="ai-msg-bubble">Привет! Я AI-аналитик. Нажми кнопку выше или задай вопрос про игрока.</div>
-          </div>
-        </div>
-        <div class="ai-typing" id="aiTyping"><span></span><span></span><span></span></div>
-        <div class="ai-input-row">
-          <input class="ai-input" id="aiInput" type="text" placeholder="Спроси что-нибудь про игрока..." autocomplete="off"/>
-          <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">➤</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  `;
-
-  document.getElementById('results').classList.add('active');
-  setTimeout(()=>{ const f=document.getElementById('wrFill'); if(f) f.style.width=stats.winrate+'%'; },150);
-  const dots=document.getElementById('wrDots');
-  rm.forEach(m=>{ const d=document.createElement('div'); d.className=`wr-dot ${m.win?'w':'l'}`; d.textContent=m.win?'W':'L'; dots.appendChild(d); });
-  drawChart(rm);
-  renderMatches(rm);
-  renderHeroes(top_heroes||[]);
-  document.getElementById('aiInput').addEventListener('keydown',e=>{ if(e.key==='Enter') aiSend(); });
-  
-  // Load missions and shop data
-  if(tg && tg.initDataUnsafe && tg.initDataUnsafe.user){
-    const telegramId = tg.initDataUnsafe.user.id;
-    loadUserProfile(telegramId);
-    loadMissions(telegramId);
-    loadShop(telegramId);
-  }
-  
-  // Add WebApp button (with delay to ensure DOM is ready)
-  }
-
-// ── WEBAPP BUTTON ────────────────────────────
-function renderWebAppButton(accountId){
-  const container = document.getElementById('webappBtnContainer');
-  if(!container) return;
-  container.innerHTML = '';
-}
-
 // ══════════════════════════════════════════════
-// MISSIONS & SHOP SYSTEM
+// MISSIONS & SHOP — работают без Telegram ID
 // ══════════════════════════════════════════════
 
-async function loadUserProfile(telegramId){
+// Локальный прогресс (если нет Telegram)
+let localMissions = null;
+let localCoins = parseInt(localStorage.getItem('localCoins')||'0');
+let localXp = parseInt(localStorage.getItem('localXp')||'0');
+let localLevel = parseInt(localStorage.getItem('localLevel')||'1');
+
+function getTelegramId(){
+  return tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+}
+
+async function loadUserData(telegramId){
+  if(!telegramId) return;
   try{
-    const r = await fetch(`${API}/user/profile?telegram_id=${telegramId}`);
-    const data = await r.json();
-    currentUser = data.user;
-    renderUserProfile(data);
+    const r=await fetch(`${API}/user/profile?telegram_id=${telegramId}`);
+    const data=await r.json();
+    currentUser=data.user;
+    userCoins=data.user.coins||0;
+    localLevel=data.user.level||1;
+    localXp=data.user.xp||0;
+    updateCoinDisplays();
+  }catch(e){console.error('loadUserData:',e);}
+}
+
+function updateCoinDisplays(){
+  const coins = currentUser ? currentUser.coins : localCoins;
+  const el1=document.getElementById('missionCoins');
+  const el2=document.getElementById('shopCoins');
+  if(el1) el1.textContent = `💰 ${coins}`;
+  if(el2) el2.textContent = `💰 ${coins}`;
+}
+
+// ── MISSIONS ─────────────────────────────────
+async function refreshMissions(){
+  const el = document.getElementById('missionsList');
+  const tid = getTelegramId();
+
+  if(!tid){
+    // Показываем миссии на основе данных игрока (без авторизации)
+    if(!currentPlayerData){
+      el.innerHTML=`<div class="empty-state"><span class="es-icon">🔍</span>Сначала найди игрока на вкладке Поиск</div>`;
+      return;
+    }
+    renderLocalMissions(currentPlayerData);
+    return;
+  }
+
+  el.innerHTML=`<div class="empty-state"><span class="es-icon" style="font-size:20px">⏳</span>Загрузка...</div>`;
+  try{
+    const r=await fetch(`${API}/missions?telegram_id=${tid}`);
+    const data=await r.json();
+    renderMissions(data.missions||[]);
+    updateCoinDisplays();
   }catch(e){
-    console.error('Failed to load user profile:', e);
+    // Fallback — показываем локальные миссии
+    if(currentPlayerData) renderLocalMissions(currentPlayerData);
+    else el.innerHTML=`<div class="empty-state"><span class="es-icon">⚠️</span>Не удалось загрузить миссии</div>`;
   }
 }
 
-function renderUserProfile(data){
-  const user = data.user;
-  const isPremium = data.is_premium;
-  const coinLimit = data.coin_limit;
-  const xpProgress = (user.xp / (user.level * 1000) * 100).toFixed(1);
-  
-  const profileCard = `
-    <div class="profile-card">
-      <div class="profile-banner"></div>
-      <div class="profile-body" style="padding:14px 18px">
-        <div style="flex:1">
-          <div class="profile-name" style="font-size:18px">👤 ${escH(user.username || 'Player')}</div>
-          <div class="profile-meta" style="margin-top:8px">
-            <span class="profile-sub">Level ${user.level}</span>
-            ${isPremium?'<span class="source-badge" style="background:linear-gradient(135deg,rgba(255,211,42,.15),rgba(255,230,109,.15));border-color:rgba(255,211,42,.4);color:var(--gold)">👑 PREMIUM</span>':''}
-          </div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <div class="rank-pill" style="min-width:90px">
-            <div style="font-size:20px;color:var(--gold)">💰</div>
-            <div class="rank-name" style="font-size:16px;font-weight:700;color:var(--gold)">${user.coins}${coinLimit?'/'+coinLimit:''}</div>
-            <div class="mmr-lbl">COINS</div>
-          </div>
-          <div class="rank-pill" style="min-width:90px">
-            <div style="font-size:20px;color:var(--cyan)">⭐</div>
-            <div class="rank-name" style="font-size:16px;font-weight:700;color:var(--cyan)">${user.xp}/${user.level*1000}</div>
-            <div class="mmr-lbl">XP</div>
-          </div>
-        </div>
-      </div>
-      <div style="padding:0 18px 14px">
-        <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.3)">
-          <div style="height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:3px;width:${xpProgress}%;transition:width 1s ease;box-shadow:0 0 12px var(--cyan)"></div>
-        </div>
-        <div style="text-align:center;margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3)">
-          ${xpProgress}% to Level ${user.level + 1}
-        </div>
-      </div>
-      ${!isPremium?`
-      <div style="padding:0 18px 14px">
-        <button onclick="showPremiumOffer()" style="width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:var(--r2);padding:12px;color:#0a0e17;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 12px rgba(255,211,42,.3);transition:all .3s">
-          ⭐ UPGRADE TO PREMIUM
-        </button>
-      </div>`:''}
-    </div>
-  `;
-  
-  document.getElementById('userProfileCard').innerHTML = profileCard;
-  document.getElementById('shopUserInfo').innerHTML = profileCard;
-}
+function renderLocalMissions(data){
+  // Генерируем миссии на основе статистики игрока (без сервера)
+  const s=data.stats, t=data.trend||{}, rm=data.recent_matches||[];
+  const wins5 = rm.slice(0,5).filter(m=>m.win).length;
+  const avgKda = t.last5_avg_kda||0;
 
-async function loadMissions(telegramId){
-  try{
-    const r = await fetch(`${API}/missions?telegram_id=${telegramId}`);
-    const data = await r.json();
-    renderMissions(data.missions);
-  }catch(e){
-    console.error('Failed to load missions:', e);
-    document.getElementById('missionsList').innerHTML = '<div style="text-align:center;padding:24px;color:var(--red)">Failed to load missions</div>';
-  }
+  const missions = [
+    {icon:'🏆',title:'Серия побед',desc:'Выиграй 3 матча подряд',progress:Math.min(data.trend?.streak?.type==='win'?data.trend.streak.count:0,3),target:3,coins:50,xp:100,type:'daily',done:data.trend?.streak?.type==='win'&&data.trend.streak.count>=3},
+    {icon:'⚔️',title:'Высокий KDA',desc:'Набери KDA 4+ в матче',progress:rm.filter(m=>m.kda>=4).length,target:1,coins:30,xp:60,type:'daily',done:rm.some(m=>m.kda>=4)},
+    {icon:'💰',title:'Фарм-мастер',desc:'Среднее GPM 600+ за 5 игр',progress:Math.round(t.last5_avg_gpm||0),target:600,coins:80,xp:150,type:'weekly',done:(t.last5_avg_gpm||0)>=600},
+    {icon:'🎯',title:'Стабильность',desc:'WR выше 50% за последние 20',progress:Math.round(s.winrate),target:50,coins:100,xp:200,type:'weekly',done:s.winrate>=50},
+    {icon:'🌟',title:'Мастер игры',desc:'Выиграй 50 матчей',progress:Math.min(s.wins,50),target:50,coins:200,xp:500,type:'monthly',done:s.wins>=50},
+  ];
+
+  renderMissions(missions);
 }
 
 function renderMissions(missions){
-  if(!missions || missions.length === 0){
-    document.getElementById('missionsList').innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-family:Share Tech Mono,monospace;font-size:11px">No active missions. Check back later!</div>';
+  const el=document.getElementById('missionsList');
+  if(!missions||missions.length===0){
+    el.innerHTML=`<div class="empty-state"><span class="es-icon">📭</span>Нет активных миссий</div>`;
     return;
   }
-  
-  const grouped = {daily:[],weekly:[],monthly:[]};
-  missions.forEach(m => grouped[m.type]?.push(m));
-  
-  let html = '';
-  
-  ['daily','weekly','monthly'].forEach(type => {
-    if(grouped[type].length === 0) return;
-    const typeLabel = type === 'daily' ? '📅 Daily' : type === 'weekly' ? '📆 Weekly' : '📊 Monthly';
-    html += `<div class="sec" style="margin-top:16px"><span class="sec-icon">${typeLabel.split(' ')[0]}</span>${typeLabel.split(' ')[1]}</div>`;
-    
-    grouped[type].forEach(m => {
-      const progress = Math.min((m.progress / m.target_value * 100), 100).toFixed(0);
-      const isComplete = m.completed;
-      const canClaim = isComplete && !m.claimed;
-      
-      html += `
-        <div class="hero-row" style="flex-direction:column;align-items:stretch;gap:8px;padding:14px;${isComplete?'border-color:var(--green);box-shadow:0 0 12px rgba(46,213,115,.2)':''}">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="font-size:24px;flex-shrink:0">${m.icon}</div>
-            <div style="flex:1">
-              <div style="font-size:14px;font-weight:700;color:var(--white)">${escH(m.title)}</div>
-              <div style="font-size:11px;color:var(--text3);margin-top:2px">${escH(m.description)}</div>
-            </div>
-            ${isComplete?'<div style="font-size:20px;color:var(--green)">✅</div>':''}
+
+  const groups={daily:[],weekly:[],monthly:[]};
+  missions.forEach(m=>groups[m.type]?.push(m));
+  const typeNames={daily:'Ежедневные',weekly:'Недельные',monthly:'Месячные'};
+
+  let html='';
+  ['daily','weekly','monthly'].forEach(type=>{
+    if(!groups[type].length)return;
+    html+=`<div class="type-label">${typeNames[type]}</div>`;
+    groups[type].forEach(m=>{
+      const pct=Math.min(Math.round((m.progress/m.target_value||m.target)*100),100);
+      const done=m.completed||m.done||pct>=100;
+      const canClaim=done&&!m.claimed;
+      html+=`
+      <div class="mission-card ${done?'done':''}">
+        <div class="mission-top">
+          <div class="mission-icon">${m.icon||'🎯'}</div>
+          <div style="flex:1;min-width:0">
+            <div class="mission-title">${escH(m.title)}</div>
+            <div class="mission-desc">${escH(m.description||m.desc||'')}</div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="flex:1">
-              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px">
-                <span>${m.progress}/${m.target_value}</span>
-                <span>${progress}%</span>
-              </div>
-              <div class="hero-bar" style="width:100%;height:6px">
-                <div class="hero-bar-fill" style="width:${progress}%;background:${isComplete?'var(--green)':'var(--cyan)'}"></div>
-              </div>
-            </div>
-            <div style="text-align:right;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2)">
-              <div>💰 ${m.reward_coins}</div>
-              <div>⭐ ${m.reward_xp}</div>
-            </div>
+          <div class="mission-reward">
+            <div class="mission-reward-coins">+${m.reward_coins||m.coins||0}</div>
+            <div class="mission-reward-xp">+${m.reward_xp||m.xp||0} XP</div>
           </div>
-          ${canClaim?`<button onclick="claimMission(${m.id})" style="background:linear-gradient(135deg,var(--green),var(--green2));border:none;border-radius:var(--r2);padding:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 12px rgba(46,213,115,.3);transition:all .3s">🎁 CLAIM REWARD</button>`:''}
         </div>
-      `;
+        <div class="mission-bar-bg">
+          <div class="mission-bar-fill" style="width:${pct}%;background:${done?'var(--green)':'var(--cyan)'}"></div>
+        </div>
+        <div class="mission-progress">
+          <span>${m.progress||0} / ${m.target_value||m.target||1}</span>
+          <span>${pct}%</span>
+        </div>
+        ${canClaim?`<button class="claim-btn" onclick="claimMission(${m.id||0})">ПОЛУЧИТЬ НАГРАДУ</button>`:''}
+      </div>`;
     });
   });
-  
-  document.getElementById('missionsList').innerHTML = html;
+  el.innerHTML=html;
 }
 
 async function claimMission(missionId){
-  if(!tg || !tg.initDataUnsafe || !tg.initDataUnsafe.user) return;
-  const telegramId = tg.initDataUnsafe.user.id;
-  
+  const tid=getTelegramId();
+  if(!tid){alert('Авторизуйся через Telegram для получения наград');return;}
   try{
-    const r = await fetch(`${API}/missions/claim`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({telegram_id: telegramId, mission_id: missionId})
-    });
-    const data = await r.json();
-    
-    if(data.status === 'ok'){
-      alert(`🎉 Reward claimed!\n💰 +${data.reward.coins} coins\n⭐ +${data.reward.xp} XP${data.reward.new_level > currentUser.level ? '\n\n🎊 LEVEL UP! Level ' + data.reward.new_level : ''}`);
-      loadUserProfile(telegramId);
-      loadMissions(telegramId);
+    const r=await fetch(`${API}/missions/claim`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram_id:tid,mission_id:missionId})});
+    const data=await r.json();
+    if(data.status==='ok'){
+      alert(`Награда получена!\n+${data.reward?.coins||0} монет\n+${data.reward?.xp||0} XP`);
+      loadUserData(tid);
+      refreshMissions();
     }
-  }catch(e){
-    alert('Failed to claim reward: ' + e.message);
-  }
+  }catch(e){alert('Ошибка: '+e.message);}
 }
 
-async function loadShop(telegramId){
+// ── SHOP ─────────────────────────────────────
+async function refreshShop(){
+  const el=document.getElementById('shopItems');
+  const tid=getTelegramId();
+
+  el.innerHTML=`<div class="empty-state"><span class="es-icon" style="font-size:20px">⏳</span>Загрузка...</div>`;
+
   try{
-    const r = await fetch(`${API}/shop`);
-    const data = await r.json();
-    renderShop(data.items);
+    const r=await fetch(`${API}/shop`);
+    const data=await r.json();
+    if(tid) await loadUserData(tid);
+    renderShop(data.items||[]);
   }catch(e){
-    console.error('Failed to load shop:', e);
-    document.getElementById('shopItems').innerHTML = '<div style="text-align:center;padding:24px;color:var(--red)">Failed to load shop</div>';
+    el.innerHTML=`<div class="empty-state"><span class="es-icon">⚠️</span>Не удалось загрузить магазин</div>`;
   }
 }
 
 function renderShop(items){
-  if(!items || items.length === 0){
-    document.getElementById('shopItems').innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3)">Shop is empty</div>';
-    return;
-  }
-  
-  const grouped = {};
-  items.forEach(item => {
-    if(!grouped[item.type]) grouped[item.type] = [];
+  const el=document.getElementById('shopItems');
+  if(!items||items.length===0){el.innerHTML=`<div class="empty-state"><span class="es-icon">📦</span>Магазин пуст</div>`;return;}
+
+  const coins=currentUser?currentUser.coins:localCoins;
+  const typeLabels={booster_xp:'XP Бустеры',booster_coins:'Монетные бустеры',booster_mega:'Мега бустеры',cosmetic_frame:'Рамки',cosmetic_title:'Титулы'};
+  const grouped={};
+  items.forEach(item=>{
+    if(!grouped[item.type])grouped[item.type]=[];
     grouped[item.type].push(item);
   });
-  
-  let html = '';
-  
-  Object.keys(grouped).forEach(type => {
-    const typeLabel = type === 'booster_xp' ? '⚡ XP Boosters' : 
-                      type === 'booster_coins' ? '💰 Coin Boosters' :
-                      type === 'booster_mega' ? '🚀 Mega Boosters' :
-                      type === 'cosmetic_frame' ? '🖼️ Frames' :
-                      type === 'cosmetic_title' ? '🏷️ Titles' :
-                      type.startsWith('special') ? '🎁 Special' : '📦 Items';
-    
-    html += `<div class="sec" style="margin-top:16px"><span class="sec-icon">${typeLabel.split(' ')[0]}</span>${typeLabel.substring(typeLabel.indexOf(' ')+1)}</div>`;
-    
-    grouped[type].forEach(item => {
-      const canAfford = currentUser && currentUser.coins >= item.price;
-      
-      html += `
-        <div class="hero-row" style="flex-direction:column;align-items:stretch;gap:10px;padding:14px">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="font-size:28px;flex-shrink:0">${item.icon}</div>
-            <div style="flex:1">
-              <div style="font-size:15px;font-weight:700;color:var(--white)">${escH(item.name)}</div>
-              <div style="font-size:11px;color:var(--text3);margin-top:3px">${escH(item.description)}</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:20px;font-weight:700;color:var(--gold)">💰 ${item.price}</div>
-            </div>
+
+  let html='';
+  Object.keys(grouped).forEach(type=>{
+    const label=typeLabels[type]||'Предметы';
+    html+=`<div class="type-label">${label}</div>`;
+    grouped[type].forEach(item=>{
+      const canAfford=coins>=item.price;
+      html+=`
+      <div class="shop-item">
+        <div class="shop-item-top">
+          <div class="shop-item-icon">${item.icon||'📦'}</div>
+          <div style="flex:1;min-width:0">
+            <div class="shop-item-name">${escH(item.name)}</div>
+            <div class="shop-item-desc">${escH(item.description||'')}</div>
           </div>
-          <button onclick="buyItem(${item.id}, '${escH(item.name)}', ${item.price})" 
-            ${!canAfford?'disabled':''} 
-            style="background:${canAfford?'linear-gradient(135deg,var(--cyan),var(--purple))':'var(--bg3)'};border:none;border-radius:var(--r2);padding:10px;color:${canAfford?'#fff':'var(--text3)'};font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:${canAfford?'pointer':'not-allowed'};box-shadow:${canAfford?'0 4px 12px rgba(0,210,211,.3)':'none'};transition:all .3s;opacity:${canAfford?'1':'0.5'}">
-            ${canAfford?'🛒 BUY NOW':'❌ NOT ENOUGH COINS'}
-          </button>
+          <div class="shop-item-price">💰 ${item.price}</div>
         </div>
-      `;
+        <button class="buy-btn" onclick="buyItem(${item.id},'${escH(item.name)}',${item.price})" ${!canAfford?'disabled':''}>
+          ${canAfford?'КУПИТЬ':'НЕ ХВАТАЕТ МОНЕТ'}
+        </button>
+      </div>`;
     });
   });
-  
-  document.getElementById('shopItems').innerHTML = html;
+  el.innerHTML=html;
 }
 
-async function buyItem(itemId, itemName, price){
-  if(!tg || !tg.initDataUnsafe || !tg.initDataUnsafe.user) return;
-  const telegramId = tg.initDataUnsafe.user.id;
-  
-  if(!confirm(`Buy ${itemName} for ${price} coins?`)) return;
-  
+async function buyItem(itemId,itemName,price){
+  const tid=getTelegramId();
+  if(!tid){alert('Авторизуйся через Telegram для покупок');return;}
+  if(!confirm(`Купить ${itemName} за ${price} монет?`))return;
   try{
-    const r = await fetch(`${API}/shop/buy`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({telegram_id: telegramId, item_id: itemId})
-    });
-    const data = await r.json();
-    
-    if(data.status === 'ok'){
-      alert(`✅ Purchased ${data.item}!\n💰 Coins left: ${data.coins_left}`);
-      loadUserProfile(telegramId);
-      loadShop(telegramId);
+    const r=await fetch(`${API}/shop/buy`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram_id:tid,item_id:itemId})});
+    const data=await r.json();
+    if(data.status==='ok'){
+      alert(`Куплено ${data.item}!\nОсталось монет: ${data.coins_left}`);
+      loadUserData(tid);
+      refreshShop();
     }
-  }catch(e){
-    alert('Purchase failed: ' + e.message);
-  }
+  }catch(e){alert('Ошибка: '+e.message);}
 }
 
-function showPremiumOffer(){
-  if(tg && tg.showPopup){
-    tg.showPopup({
-      title: '💎 Premium Subscription',
-      message: 'Get access to ALL missions, unlimited coins, and exclusive items for 30 days!\n\nPrice: 129 Telegram Stars',
-      buttons: [
-        {id: 'buy', type: 'default', text: '⭐ Buy Premium'},
-        {id: 'cancel', type: 'cancel'}
-      ]
-    }, (buttonId) => {
-      if(buttonId === 'buy'){
-        alert('Premium purchase will be available when bot is deployed with payment handler');
-      }
-    });
-  } else {
-    alert('💎 Premium: 129 Stars\n\n✅ All missions\n✅ Unlimited coins\n✅ Exclusive items\n\nAvailable in Telegram bot!');
-  }
-}
-
-// ══════════════════════════════════════════════
-// AI — запросы идут через Railway /ai эндпоинт
-// ══════════════════════════════════════════════
-let aiHistory = [];
-
+// ── AI ────────────────────────────────────────
 function buildPlayerContext(){
-  if(!currentPlayerData) return "No player data.";
-  const d=currentPlayerData, p=d.profile, s=d.stats, t=d.trend||{};
+  if(!currentPlayerData)return"No player data.";
+  const d=currentPlayerData,p=d.profile,s=d.stats,t=d.trend||{};
   const heroes=(d.top_heroes||[]).slice(0,5).map(h=>`${h.hero_name||h.hero_id}(${h.matches}g,${h.winrate}%WR,KDA${h.kda})`).join(', ');
-  const matches=(d.recent_matches||[]).slice(0,10).map(m=>`${m.win?'W':'L'} ${m.hero||'hero'} ${m.kills}/${m.deaths}/${m.assists} KDA${m.kda} GPM${m.gpm}`).join('\n');
-  return `Player: ${p.name} | Rank: ${p.rank} | Source: ${d.source}
-WinRate: ${s.winrate}% (${s.wins}W/${s.losses}L, ${s.total_matches} total)
-Last5: WR${t.last5_winrate}% KDA${t.last5_avg_kda} GPM${t.last5_avg_gpm}
-Last20: WR${t.last20_winrate}% KDA${t.last20_avg_kda} GPM${t.last20_avg_gpm}
-Streak: ${t.streak?.count||0} ${t.streak?.type||'none'}
-Top Heroes: ${heroes}
-Recent matches:\n${matches}`.trim();
+  const matches=(d.recent_matches||[]).slice(0,10).map(m=>`${m.win?'W':'L'} ${m.hero||'hero'} ${m.kills}/${m.deaths}/${m.assists} KDA${m.kda}`).join('\n');
+  return `Player: ${p.name} | Rank: ${p.rank} | Source: ${d.source}\nWR: ${s.winrate}% (${s.wins}W/${s.losses}L)\nLast5: WR${t.last5_winrate}% KDA${t.last5_avg_kda}\nStreak: ${t.streak?.count||0} ${t.streak?.type||'none'}\nHeroes: ${heroes}\nMatches:\n${matches}`.trim();
 }
 
 async function callAI(userMessage){
   const playerCtx=buildPlayerContext();
-  const finalMessages=aiHistory.length===0
-    ? []
-    : aiHistory.slice(-6);
-
-  const r=await fetch(`${API}/ai`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      message: userMessage,
-      player_context: playerCtx,
-      history: finalMessages
-    })
-  });
-
-  if(!r.ok){
-    const e=await r.json().catch(()=>({}));
-    throw new Error(e?.detail||`AI error ${r.status}`);
-  }
-
+  const msgs=aiHistory.length===0
+    ?[{role:"user",content:`Player data:\n${playerCtx}\n\n---\n${userMessage}`}]
+    :[...aiHistory.slice(-6),{role:"user",content:userMessage}];
+  const r=await fetch(`${API}/ai`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:userMessage,player_context:playerCtx,history:aiHistory.slice(-6)})});
+  if(!r.ok){const e=await r.json().catch(()=>{});throw new Error(e?.detail||`AI error ${r.status}`);}
   const data=await r.json();
   const text=data.reply||'No response';
   aiHistory.push({role:'user',content:userMessage});
@@ -1369,57 +1074,49 @@ async function callAI(userMessage){
 
 function setAILoad(on){
   document.getElementById('aiTyping').classList.toggle('active',on);
-  const b=document.getElementById('aiSendBtn'); if(b) b.disabled=on;
+  const b=document.getElementById('aiSendBtn');if(b)b.disabled=on;
 }
 
 function addAIMsg(role,text){
-  const el=document.getElementById('aiMessages');
-  if(!el) return;
-  const div=document.createElement('div');
-  div.className=`ai-msg ${role}`;
-  div.innerHTML=`
-    <div class="ai-msg-avatar">${role==='assistant'?'🤖':'👤'}</div>
-    <div class="ai-msg-bubble">${escH(text).replace(/\n/g,'<br>')}</div>`;
-  el.appendChild(div);
-  el.scrollTop=el.scrollHeight;
+  const el=document.getElementById('aiMessages');if(!el)return;
+  const div=document.createElement('div');div.className=`ai-msg ${role}`;
+  div.innerHTML=`<div class="ai-msg-avatar">${role==='assistant'?'🤖':'👤'}</div><div class="ai-msg-bubble">${escH(text).replace(/\n/g,'<br>')}</div>`;
+  el.appendChild(div);el.scrollTop=el.scrollHeight;
 }
 
 async function aiSend(){
   const input=document.getElementById('aiInput');
-  const msg=input?.value.trim();
-  if(!msg) return;
-  if(!currentPlayerData){ addAIMsg('assistant','⚠️ Сначала найди игрока'); return; }
-  input.value='';
-  addAIMsg('user',msg);
-  setAILoad(true);
-  try{ addAIMsg('assistant',await callAI(msg)); }
-  catch(e){ addAIMsg('assistant',`❌ Ошибка: ${e.message}`); }
-  finally{ setAILoad(false); }
+  const msg=input?.value.trim();if(!msg)return;
+  if(!currentPlayerData){addAIMsg('assistant','⚠️ Сначала найди игрока');return;}
+  input.value='';addAIMsg('user',msg);setAILoad(true);
+  try{addAIMsg('assistant',await callAI(msg));}
+  catch(e){addAIMsg('assistant',`❌ Ошибка: ${e.message}`);}
+  finally{setAILoad(false);}
 }
 
 const AI_PROMPTS={
-  analysis:"Сделай детальный разбор игры этого игрока. Что он делает хорошо и плохо? Какие ключевые проблемы?",
-  forecast:"На основе трендов — будет ли этот игрок расти в MMR? Что нужно изменить?",
-  heroes:  "Посмотри на пул героев и стиль игры. Каких героев стоит освоить следующими и почему?",
-  weaknesses:"Найди конкретные слабые места по статистике. Где теряются игры — лейнинг, командные бои или поздняя игра?"
+  analysis:"Сделай детальный разбор игры этого игрока. Что он делает хорошо и плохо?",
+  forecast:"На основе трендов — будет ли этот игрок расти в MMR?",
+  heroes:"Посмотри на пул героев. Каких стоит освоить следующими и почему?",
+  weaknesses:"Найди конкретные слабые места. Где теряются игры?"
 };
 
 async function aiQuick(type){
-  if(!currentPlayerData){ alert('Сначала найди игрока!'); return; }
-  // переключаем на AI таб
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-ai').classList.add('active');
-  document.querySelector('.ai-tab').classList.add('active');
+  if(!currentPlayerData){alert('Сначала найди игрока!');return;}
+  swInner('ai',document.querySelector('.inner-tab.ai-tab'));
   const prompt=AI_PROMPTS[type];
-  addAIMsg('user',prompt);
-  setAILoad(true);
-  try{ addAIMsg('assistant',await callAI(prompt)); }
-  catch(e){ addAIMsg('assistant',`❌ Ошибка: ${e.message}`); }
-  finally{ setAILoad(false); }
+  addAIMsg('user',prompt);setAILoad(true);
+  try{addAIMsg('assistant',await callAI(prompt));}
+  catch(e){addAIMsg('assistant',`❌ Ошибка: ${e.message}`);}
+  finally{setAILoad(false);}
 }
 
-console.log('Dota 2 Analyzer v2.1 loaded successfully');
+// ── INIT ──────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const tid=getTelegramId();
+  if(tid){loadUserData(tid);}
+  refreshShop();
+});
 </script>
 </body>
 </html>
