@@ -905,19 +905,17 @@ function renderAll(data){
           <div class="rank-name">${escH(rank.name)}${starsHtml(rank.stars)}</div>
         </div>
         ${mmr?`<div class="mmr-pill"><div class="mmr-val">${fnum(mmr)}</div><div class="mmr-lbl">MMR</div></div>`:''}
-          </div>
+      </div>
+    </div>
   </div>
   
-  <!-- WebApp Button -->
-  <div class="fu d1" style="margin-bottom:16px" id="webappBtnContainer"></div>
-
-  <div class="tabs fu d2">
+    <div class="tabs fu d2">
     <button class="tab active" onclick="swTab('overview',this)">Обзор</button>
     <button class="tab" onclick="swTab('matches',this)">Матчи</button>
     <button class="tab" onclick="swTab('heroes',this)">Герои</button>
-    <button class="tab" onclick="swTab('missions',this)">🎯 Миссии</button>
-    <button class="tab" onclick="swTab('shop',this)">🛒 Магазин</button>
-    <button class="tab ai-tab" onclick="swTab('ai',this)">🤖 AI</button>
+    <button class="tab" onclick="swTab('missions',this)">Миссии</button>
+    <button class="tab" onclick="swTab('shop',this)">Магазин</button>
+    <button class="tab ai-tab" onclick="swTab('ai',this)">AI</button>
   </div>
 
   <div class="tab-panel active" id="tab-overview">
@@ -1052,30 +1050,14 @@ function renderAll(data){
     loadShop(telegramId);
   }
   
-  // Add WebApp button
-  renderWebAppButton(account_id);
-}
+  // Add WebApp button (with delay to ensure DOM is ready)
+  }
 
 // ── WEBAPP BUTTON ────────────────────────────
 function renderWebAppButton(accountId){
   const container = document.getElementById('webappBtnContainer');
   if(!container) return;
-  
-  const telegramId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : '';
-  const webappUrl = 'https://dota2-analyzer-production.up.railway.app';
-  
-  container.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <a href="${webappUrl}?player_id=${accountId}&telegram_id=${telegramId}" target="_blank" 
-         style="background:linear-gradient(135deg,var(--cyan),var(--purple));border:none;border-radius:var(--r);padding:14px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-align:center;text-decoration:none;box-shadow:0 4px 12px rgba(0,210,211,.3);transition:all .3s;display:block">
-        📊 ПОЛНЫЙ АНАЛИЗ
-      </a>
-      <a href="https://stratz.com/players/${accountId}" target="_blank"
-         style="background:linear-gradient(135deg,rgba(0,210,211,.15),rgba(108,92,231,.15));border:2px solid var(--border2);border-radius:var(--r);padding:14px;color:var(--cyan);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-align:center;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:all .3s;display:block">
-        ⚡ STRATZ
-      </a>
-    </div>
-  `;
+  container.innerHTML = '';
 }
 
 // ══════════════════════════════════════════════
