@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8"/>
@@ -55,6 +55,121 @@ body::after{
 }
 .wrap{max-width:680px;margin:0 auto;padding:16px 16px 60px;position:relative;z-index:1}
 
+/* WELCOME BANNER */
+.welcome-banner{
+  background:linear-gradient(135deg,rgba(0,210,211,.15),rgba(108,92,231,.15));
+  border:2px solid var(--cyan);
+  border-radius:var(--r);
+  padding:20px;
+  margin-bottom:20px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,210,211,.3);
+  animation:slideDown .6s ease;
+}
+.welcome-banner::before{
+  content:'';
+  position:absolute;
+  top:-50%;
+  right:-50%;
+  width:200%;
+  height:200%;
+  background:radial-gradient(circle,rgba(0,210,211,.1) 0%,transparent 70%);
+  animation:rotate 20s linear infinite;
+}
+@keyframes rotate{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
+@keyframes slideDown{
+  from{opacity:0;transform:translateY(-20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes slideUp{
+  from{opacity:1;transform:translateY(0)}
+  to{opacity:0;transform:translateY(-20px)}
+}
+.welcome-content{
+  position:relative;
+  z-index:1;
+  text-align:center;
+}
+.welcome-emoji{
+  font-size:48px;
+  margin-bottom:12px;
+  animation:bounce 2s ease-in-out infinite;
+}
+@keyframes bounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+}
+.welcome-title{
+  font-family:'Rajdhani',sans-serif;
+  font-size:24px;
+  font-weight:700;
+  color:var(--white);
+  margin-bottom:8px;
+  text-shadow:0 2px 12px rgba(0,210,211,.5);
+}
+.welcome-text{
+  font-family:'Share Tech Mono',monospace;
+  font-size:12px;
+  color:var(--text2);
+  margin-bottom:16px;
+  line-height:1.6;
+}
+.welcome-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:16px;
+}
+.welcome-stat{
+  background:rgba(0,0,0,.3);
+  border:1px solid rgba(0,210,211,.3);
+  border-radius:8px;
+  padding:12px 8px;
+  backdrop-filter:blur(10px);
+}
+.welcome-stat-val{
+  font-family:'Rajdhani',sans-serif;
+  font-size:22px;
+  font-weight:700;
+  color:var(--cyan);
+  line-height:1;
+}
+.welcome-stat-lbl{
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  color:var(--text3);
+  margin-top:4px;
+  letter-spacing:1px;
+}
+.welcome-close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:50%;
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:var(--text);
+  font-size:16px;
+  transition:all .3s;
+  z-index:2;
+}
+.welcome-close:hover{
+  background:rgba(255,71,87,.3);
+  border-color:var(--red);
+  color:var(--white);
+  transform:rotate(90deg);
+}
+
 /* HEADER */
 .hdr{display:flex;align-items:center;gap:14px;padding:16px 0 18px;margin-bottom:20px;border-bottom:2px solid var(--border);position:relative}
 .hdr::after{content:'';position:absolute;bottom:-2px;left:0;width:140px;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple),transparent)}
@@ -83,7 +198,6 @@ body::after{
 /* SUGGEST */
 .suggest-list{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card2);border:2px solid var(--border2);border-radius:var(--r);overflow:hidden;z-index:100;box-shadow:0 12px 40px rgba(0,0,0,.8);display:none;backdrop-filter:blur(10px)}
 .suggest-list.open{display:block;animation:slideDown .3s ease}
-@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 .suggest-item{padding:10px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .2s;font-size:14px;border-bottom:1px solid var(--border)}
 .suggest-item:last-child{border-bottom:none}
 .suggest-item:hover{background:linear-gradient(90deg,rgba(0,210,211,.1),transparent);transform:translateX(4px)}
@@ -314,6 +428,17 @@ body::after{
 <body>
 <div class="wrap">
 
+<!-- WELCOME BANNER -->
+<div class="welcome-banner" id="welcomeBanner" style="display:none">
+  <div class="welcome-close" onclick="closeWelcome()">✕</div>
+  <div class="welcome-content">
+    <div class="welcome-emoji">👋</div>
+    <div class="welcome-title">С ВОЗВРАЩЕНИЕМ!</div>
+    <div class="welcome-text">Рады видеть тебя снова в Dota 2 Analyzer<br>Проверь свои новые миссии и награды</div>
+    <div class="welcome-stats" id="welcomeStats"></div>
+  </div>
+</div>
+
 <div class="hdr">
   <div class="hdr-logo"><span class="hdr-em">⚔️</span></div>
   <div class="hdr-title">
@@ -354,15 +479,65 @@ body::after{
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-// ⚠️ ЗАМЕНИ НА СВОЙ RAILWAY URL
+// API URL
 const API = "https://dota2-analyzer-production.up.railway.app";
-// ══════════════════════════════════════════════
 
 let tg = null;
 try{ tg = window.Telegram?.WebApp; if(tg){ tg.ready(); tg.expand(); } }catch(e){}
 
 let currentPlayerData = null;
+let currentUser = null;
+let lastVisitDate = localStorage.getItem('lastVisitDate');
+let currentDate = new Date().toISOString().split('T')[0];
+
+// Show welcome banner on first visit of the day
+window.addEventListener('DOMContentLoaded', () => {
+  if(lastVisitDate !== currentDate){
+    showWelcomeBanner();
+    localStorage.setItem('lastVisitDate', currentDate);
+  }
+});
+
+function showWelcomeBanner(){
+  const banner = document.getElementById('welcomeBanner');
+  if(!banner) return;
+  
+  // Load user stats for welcome banner
+  if(tg && tg.initDataUnsafe && tg.initDataUnsafe.user){
+    const telegramId = tg.initDataUnsafe.user.id;
+    fetch(API + '/user/profile?telegram_id=' + telegramId)
+      .then(r => r.json())
+      .then(data => {
+        const user = data.user;
+        const stats = document.getElementById('welcomeStats');
+        if(stats){
+          stats.innerHTML = 
+            '<div class="welcome-stat"><div class="welcome-stat-val">Lvl ' + user.level + '</div><div class="welcome-stat-lbl">УРОВЕНЬ</div></div>' +
+            '<div class="welcome-stat"><div class="welcome-stat-val">' + user.coins + '</div><div class="welcome-stat-lbl">МОНЕТЫ</div></div>' +
+            '<div class="welcome-stat"><div class="welcome-stat-val">' + user.xp + '</div><div class="welcome-stat-lbl">ОПЫТ</div></div>';
+        }
+      })
+      .catch(e => console.error('Failed to load user stats:', e));
+  } else {
+    const stats = document.getElementById('welcomeStats');
+    if(stats){
+      stats.innerHTML = 
+        '<div class="welcome-stat"><div class="welcome-stat-val">🎮</div><div class="welcome-stat-lbl">ИГРАЙ</div></div>' +
+        '<div class="welcome-stat"><div class="welcome-stat-val">🎯</div><div class="welcome-stat-lbl">МИССИИ</div></div>' +
+        '<div class="welcome-stat"><div class="welcome-stat-val">🏆</div><div class="welcome-stat-lbl">НАГРАДЫ</div></div>';
+    }
+  }
+  
+  banner.style.display = 'block';
+}
+
+function closeWelcome(){
+  const banner = document.getElementById('welcomeBanner');
+  if(banner){
+    banner.style.animation = 'slideUp .4s ease';
+    setTimeout(() => banner.style.display = 'none', 400);
+  }
+}
 
 // ── HERO MAPS ────────────────────────────────
 const HERO_SHORT = {
@@ -465,6 +640,24 @@ const kdaC = k => k>=4?'good':k>=2?'ok':'bad';
 const escH = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const fnum = n => (n!=null&&n!==0)?Number(n).toLocaleString('en'):'—';
 
+// ── CACHE ────────────────────────────────────
+let cache = {};
+const CACHE_TTL = 300;
+
+function get_cache(key){
+  if(key in cache){
+    if(Date.now()/1000 - cache[key].ts < CACHE_TTL){
+      return cache[key].data;
+    }
+    delete cache[key];
+  }
+  return null;
+}
+
+function set_cache(key, data){
+  cache[key] = {data: data, ts: Date.now()/1000};
+}
+
 // ── EVENTS ───────────────────────────────────
 document.getElementById('si').addEventListener('keydown',e=>{ if(e.key==='Enter') doSearch(); });
 let sugTimer=null;
@@ -536,6 +729,17 @@ async function loadPlayer(query){
     if(!r.ok){ const e=await r.json().catch(()=>{}); throw new Error(e?.detail||`Error ${r.status}`); }
     const data=await r.json();
     currentPlayerData=data;
+    
+    // Update missions progress if user is logged in
+    if(tg && tg.initDataUnsafe && tg.initDataUnsafe.user){
+      const telegramId = tg.initDataUnsafe.user.id;
+      fetch(`${API}/missions/update`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({telegram_id: telegramId, player_data: data})
+      }).catch(e => console.error('Failed to update missions:', e));
+    }
+    
     renderAll(data);
   }catch(e){ showErr(e.message||'Failed to load player data.'); }
   finally{ setLoad(false); }
@@ -549,9 +753,127 @@ function showErr(m){ document.getElementById('errText').textContent=m; document.
 function hideErr(){ document.getElementById('errBlock').classList.remove('active'); }
 function hideRes(){ const r=document.getElementById('results'); r.classList.remove('active'); r.innerHTML=''; currentPlayerData=null; }
 
-// ── RENDER ───────────────────────────────────
+// ── TABS ─────────────────────────────────────
+function swTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── MATCHES ──────────────────────────────────
+function renderMatches(matches){
+  document.getElementById('matchList').innerHTML=matches.slice(0,20).map((m,i)=>{
+    const hid=m.hero_id,hs=m.hero_short;
+    const img=getHeroImg(hid,hs),fb=getHeroFb(hid);
+    const hname=getHeroName(hid,m.hero);
+    const dur=m.duration_min!=null?`${m.duration_min}:${String(m.duration_sec||0).padStart(2,'0')}`:'';
+    const kda=m.kda??0,wc=m.win?'win':'loss';
+    return `
+    <div class="match-card ${wc}" id="mc${i}">
+      <div class="match-main" onclick="toggleMatch(${i})">
+        <img class="match-himg" src="${escH(img)}" onerror="this.src='${escH(fb)}';this.onerror=null" alt="${escH(hname)}"/>
+        <div>
+          <div class="match-kda-str">${m.kills}/<span style="color:var(--red)">${m.deaths}</span>/${m.assists}</div>
+          <div class="match-hero-name">${escH(hname)}</div>
+          ${dur?`<div class="match-dur">⏱ ${dur}</div>`:''}
+        </div>
+        <div class="match-kda-val ${kdaC(kda)}">${kda}</div>
+        <div class="match-right">
+          <div class="match-pill ${wc}">${m.win?'WIN':'LOSS'}</div>
+          <span class="match-chevron">▼</span>
+        </div>
+      </div>
+      <div class="match-expand" id="me${i}">
+        <div class="match-expand-grid">
+          <div class="mex-cell"><div class="mex-val gold">${fnum(m.networth)}</div><div class="mex-lbl">Networth</div></div>
+          <div class="mex-cell"><div class="mex-val red">${fnum(m.hero_damage)}</div><div class="mex-lbl">Hero DMG</div></div>
+          <div class="mex-cell"><div class="mex-val purple">${fnum(m.tower_damage)}</div><div class="mex-lbl">Tower DMG</div></div>
+          <div class="mex-cell"><div class="mex-val green">${fnum(m.healing)}</div><div class="mex-lbl">Healing</div></div>
+          <div class="mex-cell"><div class="mex-val blue">${m.last_hits??'—'}</div><div class="mex-lbl">Last Hits</div></div>
+          <div class="mex-cell"><div class="mex-val">${m.denies??'—'}</div><div class="mex-lbl">Denies</div></div>
+          <div class="mex-cell"><div class="mex-val green">${m.gpm||'—'}</div><div class="mex-lbl">GPM</div></div>
+          <div class="mex-cell"><div class="mex-val purple">${m.xpm||'—'}</div><div class="mex-lbl">XPM</div></div>
+          <div class="mex-cell"><div class="mex-val">${m.match_id?'#'+String(m.match_id).slice(-6):''}</div><div class="mex-lbl">Match ID</div></div>
+        </div>
+        <div class="match-links">
+          <a class="match-open-link" href="https://www.dotabuff.com/matches/${m.match_id}" target="_blank">📊 Dotabuff</a>
+          <a class="match-open-link" href="https://stratz.com/matches/${m.match_id}" target="_blank">⚡ Stratz</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleMatch(i){
+  const card=document.getElementById(`mc${i}`),exp=document.getElementById(`me${i}`);
+  if(!card||!exp) return;
+  const open=exp.classList.contains('open');
+  exp.classList.toggle('open',!open);
+  card.classList.toggle('expanded',!open);
+}
+
+// ── HEROES ───────────────────────────────────
+function renderHeroes(list){
+  const el=document.getElementById('heroList');
+  if(!list||!list.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:11px;font-family:Share Tech Mono,monospace">NO DATA</div>'; return; }
+  el.innerHTML=list.slice(0,10).map((h,i)=>{
+    const hid=h.hero_id,img=getHeroImg(hid,h.hero_short),fb=getHeroFb(hid);
+    const name=getHeroName(hid,h.hero_name);
+    const wr=h.winrate??(h.wins&&h.matches?Math.round(h.wins/h.matches*100):0);
+    const wc=wrc(wr),clr=wc==='good'?'var(--green)':wc==='ok'?'var(--gold)':'var(--red)';
+    const kda=h.kda??'—',gpm=h.avg_gpm?` · ${h.avg_gpm}GPM`:'';
+    return `
+    <div class="hero-row">
+      <div class="hero-rank">${i+1}</div>
+      <img class="hero-img" src="${escH(img)}" onerror="this.src='${escH(fb)}';this.onerror=null" alt="${escH(name)}"/>
+      <div class="hero-name">${escH(name)}</div>
+      <div class="hero-stats">
+        <div class="hero-games">${h.matches||0} games</div>
+        <div class="hero-kda-lbl">KDA ${kda}${gpm}</div>
+      </div>
+      <div class="hero-bar"><div class="hero-bar-fill" style="width:${wr}%;background:${clr}"></div></div>
+      <div class="hero-wr ${wc}">${wr}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ── CHART ────────────────────────────────────
 let chartInst=null;
 
+function drawChart(matches){
+  if(chartInst){ chartInst.destroy(); chartInst=null; }
+  const ctx=document.getElementById('kdaChart')?.getContext('2d');
+  if(!ctx) return;
+  const rev=[...matches.slice(0,15)].reverse();
+  chartInst=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:rev.map((_,i)=>`#${i+1}`),
+      datasets:[{
+        data:rev.map(m=>m.kda||0),
+        backgroundColor:rev.map(m=>m.win?'rgba(0,229,160,.6)':'rgba(232,64,87,.6)'),
+        borderColor:rev.map(m=>m.win?'#00e5a0':'#e84057'),
+        borderWidth:1,borderRadius:3,borderSkipped:false,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      animation:{duration:600,easing:'easeOutQuart'},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#101820',borderColor:'#182030',borderWidth:1,titleColor:'#6b8fa8',bodyColor:'#c8dce8',padding:9,
+          callbacks:{title:c=>`Match ${c[0].label}`,label:c=>` KDA: ${c.raw}`}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(24,32,48,.8)'},ticks:{color:'#2d4558',font:{family:'Share Tech Mono',size:8}}},
+        y:{grid:{color:'rgba(24,32,48,.8)'},ticks:{color:'#2d4558',font:{family:'Share Tech Mono',size:8}},beginAtZero:true}
+      }
+    }
+  });
+}
+
+// ── RENDER ───────────────────────────────────
 function renderAll(data){
   const {profile,stats,top_heroes,recent_matches,trend,source,account_id}=data;
   const rank=getRank(profile.rank_tier,profile.rank);
@@ -729,227 +1051,9 @@ function renderAll(data){
   }
 }
 
-// ── TABS ─────────────────────────────────────
-function swTab(id,btn){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  btn.classList.add('active');
-}
-
-// ── MATCHES ──────────────────────────────────
-function renderMatches(matches){
-  document.getElementById('matchList').innerHTML=matches.slice(0,20).map((m,i)=>{
-    const hid=m.hero_id,hs=m.hero_short;
-    const img=getHeroImg(hid,hs),fb=getHeroFb(hid);
-    const hname=getHeroName(hid,m.hero);
-    const dur=m.duration_min!=null?`${m.duration_min}:${String(m.duration_sec||0).padStart(2,'0')}`:'';
-    const kda=m.kda??0,wc=m.win?'win':'loss';
-    return `
-    <div class="match-card ${wc}" id="mc${i}">
-      <div class="match-main" onclick="toggleMatch(${i})">
-        <img class="match-himg" src="${escH(img)}" onerror="this.src='${escH(fb)}';this.onerror=null" alt="${escH(hname)}"/>
-        <div>
-          <div class="match-kda-str">${m.kills}/<span style="color:var(--red)">${m.deaths}</span>/${m.assists}</div>
-          <div class="match-hero-name">${escH(hname)}</div>
-          ${dur?`<div class="match-dur">⏱ ${dur}</div>`:''}
-        </div>
-        <div class="match-kda-val ${kdaC(kda)}">${kda}</div>
-        <div class="match-right">
-          <div class="match-pill ${wc}">${m.win?'WIN':'LOSS'}</div>
-          <span class="match-chevron">▼</span>
-        </div>
-      </div>
-      <div class="match-expand" id="me${i}">
-        <div class="match-expand-grid">
-          <div class="mex-cell"><div class="mex-val gold">${fnum(m.networth)}</div><div class="mex-lbl">Networth</div></div>
-          <div class="mex-cell"><div class="mex-val red">${fnum(m.hero_damage)}</div><div class="mex-lbl">Hero DMG</div></div>
-          <div class="mex-cell"><div class="mex-val purple">${fnum(m.tower_damage)}</div><div class="mex-lbl">Tower DMG</div></div>
-          <div class="mex-cell"><div class="mex-val green">${fnum(m.healing)}</div><div class="mex-lbl">Healing</div></div>
-          <div class="mex-cell"><div class="mex-val blue">${m.last_hits??'—'}</div><div class="mex-lbl">Last Hits</div></div>
-          <div class="mex-cell"><div class="mex-val">${m.denies??'—'}</div><div class="mex-lbl">Denies</div></div>
-          <div class="mex-cell"><div class="mex-val green">${m.gpm||'—'}</div><div class="mex-lbl">GPM</div></div>
-          <div class="mex-cell"><div class="mex-val purple">${m.xpm||'—'}</div><div class="mex-lbl">XPM</div></div>
-          <div class="mex-cell"><div class="mex-val">${m.match_id?'#'+String(m.match_id).slice(-6):''}</div><div class="mex-lbl">Match ID</div></div>
-        </div>
-        <div class="match-links">
-          <a class="match-open-link" href="https://www.dotabuff.com/matches/${m.match_id}" target="_blank">📊 Dotabuff</a>
-          <a class="match-open-link" href="https://stratz.com/matches/${m.match_id}" target="_blank">⚡ Stratz</a>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toggleMatch(i){
-  const card=document.getElementById(`mc${i}`),exp=document.getElementById(`me${i}`);
-  if(!card||!exp) return;
-  const open=exp.classList.contains('open');
-  exp.classList.toggle('open',!open);
-  card.classList.toggle('expanded',!open);
-}
-
-// ── HEROES ───────────────────────────────────
-function renderHeroes(list){
-  const el=document.getElementById('heroList');
-  if(!list||!list.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:11px;font-family:Share Tech Mono,monospace">NO DATA</div>'; return; }
-  el.innerHTML=list.slice(0,10).map((h,i)=>{
-    const hid=h.hero_id,img=getHeroImg(hid,h.hero_short),fb=getHeroFb(hid);
-    const name=getHeroName(hid,h.hero_name);
-    const wr=h.winrate??(h.wins&&h.matches?Math.round(h.wins/h.matches*100):0);
-    const wc=wrc(wr),clr=wc==='good'?'var(--green)':wc==='ok'?'var(--gold)':'var(--red)';
-    const kda=h.kda??'—',gpm=h.avg_gpm?` · ${h.avg_gpm}GPM`:'';
-    return `
-    <div class="hero-row">
-      <div class="hero-rank">${i+1}</div>
-      <img class="hero-img" src="${escH(img)}" onerror="this.src='${escH(fb)}';this.onerror=null" alt="${escH(name)}"/>
-      <div class="hero-name">${escH(name)}</div>
-      <div class="hero-stats">
-        <div class="hero-games">${h.matches||0} games</div>
-        <div class="hero-kda-lbl">KDA ${kda}${gpm}</div>
-      </div>
-      <div class="hero-bar"><div class="hero-bar-fill" style="width:${wr}%;background:${clr}"></div></div>
-      <div class="hero-wr ${wc}">${wr}%</div>
-    </div>`;
-  }).join('');
-}
-
-// ── CHART ────────────────────────────────────
-function drawChart(matches){
-  if(chartInst){ chartInst.destroy(); chartInst=null; }
-  const ctx=document.getElementById('kdaChart')?.getContext('2d');
-  if(!ctx) return;
-  const rev=[...matches.slice(0,15)].reverse();
-  chartInst=new Chart(ctx,{
-    type:'bar',
-    data:{
-      labels:rev.map((_,i)=>`#${i+1}`),
-      datasets:[{
-        data:rev.map(m=>m.kda||0),
-        backgroundColor:rev.map(m=>m.win?'rgba(0,229,160,.6)':'rgba(232,64,87,.6)'),
-        borderColor:rev.map(m=>m.win?'#00e5a0':'#e84057'),
-        borderWidth:1,borderRadius:3,borderSkipped:false,
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      animation:{duration:600,easing:'easeOutQuart'},
-      plugins:{
-        legend:{display:false},
-        tooltip:{backgroundColor:'#101820',borderColor:'#182030',borderWidth:1,titleColor:'#6b8fa8',bodyColor:'#c8dce8',padding:9,
-          callbacks:{title:c=>`Match ${c[0].label}`,label:c=>` KDA: ${c.raw}`}}
-      },
-      scales:{
-        x:{grid:{color:'rgba(24,32,48,.8)'},ticks:{color:'#2d4558',font:{family:'Share Tech Mono',size:8}}},
-        y:{grid:{color:'rgba(24,32,48,.8)'},ticks:{color:'#2d4558',font:{family:'Share Tech Mono',size:8}},beginAtZero:true}
-      }
-    }
-  });
-}
-
-// ══════════════════════════════════════════════
-// AI — запросы идут через Railway /ai эндпоинт
-// ══════════════════════════════════════════════
-let aiHistory = [];
-
-function buildPlayerContext(){
-  if(!currentPlayerData) return "No player data.";
-  const d=currentPlayerData, p=d.profile, s=d.stats, t=d.trend||{};
-  const heroes=(d.top_heroes||[]).slice(0,5).map(h=>`${h.hero_name||h.hero_id}(${h.matches}g,${h.winrate}%WR,KDA${h.kda})`).join(', ');
-  const matches=(d.recent_matches||[]).slice(0,10).map(m=>`${m.win?'W':'L'} ${m.hero||'hero'} ${m.kills}/${m.deaths}/${m.assists} KDA${m.kda} GPM${m.gpm}`).join('\n');
-  return `Player: ${p.name} | Rank: ${p.rank} | Source: ${d.source}
-WinRate: ${s.winrate}% (${s.wins}W/${s.losses}L, ${s.total_matches} total)
-Last5: WR${t.last5_winrate}% KDA${t.last5_avg_kda} GPM${t.last5_avg_gpm}
-Last20: WR${t.last20_winrate}% KDA${t.last20_avg_kda} GPM${t.last20_avg_gpm}
-Streak: ${t.streak?.count||0} ${t.streak?.type||'none'}
-Top Heroes: ${heroes}
-Recent matches:\n${matches}`.trim();
-}
-
-async function callAI(userMessage){
-  const playerCtx=buildPlayerContext();
-  const finalMessages=aiHistory.length===0
-    ? []
-    : aiHistory.slice(-6);
-
-  const r=await fetch(`${API}/ai`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      message: userMessage,
-      player_context: playerCtx,
-      history: finalMessages
-    })
-  });
-
-  if(!r.ok){
-    const e=await r.json().catch(()=>({}));
-    throw new Error(e?.detail||`AI error ${r.status}`);
-  }
-
-  const data=await r.json();
-  const text=data.reply||'No response';
-  aiHistory.push({role:'user',content:userMessage});
-  aiHistory.push({role:'assistant',content:text});
-  return text;
-}
-
-function setAILoad(on){
-  document.getElementById('aiTyping').classList.toggle('active',on);
-  const b=document.getElementById('aiSendBtn'); if(b) b.disabled=on;
-}
-
-function addAIMsg(role,text){
-  const el=document.getElementById('aiMessages');
-  if(!el) return;
-  const div=document.createElement('div');
-  div.className=`ai-msg ${role}`;
-  div.innerHTML=`
-    <div class="ai-msg-avatar">${role==='assistant'?'🤖':'👤'}</div>
-    <div class="ai-msg-bubble">${escH(text).replace(/\n/g,'<br>')}</div>`;
-  el.appendChild(div);
-  el.scrollTop=el.scrollHeight;
-}
-
-async function aiSend(){
-  const input=document.getElementById('aiInput');
-  const msg=input?.value.trim();
-  if(!msg) return;
-  if(!currentPlayerData){ addAIMsg('assistant','⚠️ Сначала найди игрока'); return; }
-  input.value='';
-  addAIMsg('user',msg);
-  setAILoad(true);
-  try{ addAIMsg('assistant',await callAI(msg)); }
-  catch(e){ addAIMsg('assistant',`❌ Ошибка: ${e.message}`); }
-  finally{ setAILoad(false); }
-}
-
-const AI_PROMPTS={
-  analysis:"Сделай детальный разбор игры этого игрока. Что он делает хорошо и плохо? Какие ключевые проблемы?",
-  forecast:"На основе трендов — будет ли этот игрок расти в MMR? Что нужно изменить?",
-  heroes:  "Посмотри на пул героев и стиль игры. Каких героев стоит освоить следующими и почему?",
-  weaknesses:"Найди конкретные слабые места по статистике. Где теряются игры — лейнинг, командные бои или поздняя игра?"
-};
-
-async function aiQuick(type){
-  if(!currentPlayerData){ alert('Сначала найди игрока!'); return; }
-  // переключаем на AI таб
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-ai').classList.add('active');
-  document.querySelector('.ai-tab').classList.add('active');
-  const prompt=AI_PROMPTS[type];
-  addAIMsg('user',prompt);
-  setAILoad(true);
-  try{ addAIMsg('assistant',await callAI(prompt)); }
-  catch(e){ addAIMsg('assistant',`❌ Ошибка: ${e.message}`); }
-  finally{ setAILoad(false); }
-}
-
 // ══════════════════════════════════════════════
 // MISSIONS & SHOP SYSTEM
 // ══════════════════════════════════════════════
-let currentUser = null;
 
 async function loadUserProfile(telegramId){
   try{
@@ -1199,7 +1303,6 @@ function showPremiumOffer(){
       ]
     }, (buttonId) => {
       if(buttonId === 'buy'){
-        // Trigger Telegram Stars payment
         alert('Premium purchase will be available when bot is deployed with payment handler');
       }
     });
@@ -1208,6 +1311,106 @@ function showPremiumOffer(){
   }
 }
 
+// ══════════════════════════════════════════════
+// AI — запросы идут через Railway /ai эндпоинт
+// ══════════════════════════════════════════════
+let aiHistory = [];
+
+function buildPlayerContext(){
+  if(!currentPlayerData) return "No player data.";
+  const d=currentPlayerData, p=d.profile, s=d.stats, t=d.trend||{};
+  const heroes=(d.top_heroes||[]).slice(0,5).map(h=>`${h.hero_name||h.hero_id}(${h.matches}g,${h.winrate}%WR,KDA${h.kda})`).join(', ');
+  const matches=(d.recent_matches||[]).slice(0,10).map(m=>`${m.win?'W':'L'} ${m.hero||'hero'} ${m.kills}/${m.deaths}/${m.assists} KDA${m.kda} GPM${m.gpm}`).join('\n');
+  return `Player: ${p.name} | Rank: ${p.rank} | Source: ${d.source}
+WinRate: ${s.winrate}% (${s.wins}W/${s.losses}L, ${s.total_matches} total)
+Last5: WR${t.last5_winrate}% KDA${t.last5_avg_kda} GPM${t.last5_avg_gpm}
+Last20: WR${t.last20_winrate}% KDA${t.last20_avg_kda} GPM${t.last20_avg_gpm}
+Streak: ${t.streak?.count||0} ${t.streak?.type||'none'}
+Top Heroes: ${heroes}
+Recent matches:\n${matches}`.trim();
+}
+
+async function callAI(userMessage){
+  const playerCtx=buildPlayerContext();
+  const finalMessages=aiHistory.length===0
+    ? []
+    : aiHistory.slice(-6);
+
+  const r=await fetch(`${API}/ai`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      message: userMessage,
+      player_context: playerCtx,
+      history: finalMessages
+    })
+  });
+
+  if(!r.ok){
+    const e=await r.json().catch(()=>({}));
+    throw new Error(e?.detail||`AI error ${r.status}`);
+  }
+
+  const data=await r.json();
+  const text=data.reply||'No response';
+  aiHistory.push({role:'user',content:userMessage});
+  aiHistory.push({role:'assistant',content:text});
+  return text;
+}
+
+function setAILoad(on){
+  document.getElementById('aiTyping').classList.toggle('active',on);
+  const b=document.getElementById('aiSendBtn'); if(b) b.disabled=on;
+}
+
+function addAIMsg(role,text){
+  const el=document.getElementById('aiMessages');
+  if(!el) return;
+  const div=document.createElement('div');
+  div.className=`ai-msg ${role}`;
+  div.innerHTML=`
+    <div class="ai-msg-avatar">${role==='assistant'?'🤖':'👤'}</div>
+    <div class="ai-msg-bubble">${escH(text).replace(/\n/g,'<br>')}</div>`;
+  el.appendChild(div);
+  el.scrollTop=el.scrollHeight;
+}
+
+async function aiSend(){
+  const input=document.getElementById('aiInput');
+  const msg=input?.value.trim();
+  if(!msg) return;
+  if(!currentPlayerData){ addAIMsg('assistant','⚠️ Сначала найди игрока'); return; }
+  input.value='';
+  addAIMsg('user',msg);
+  setAILoad(true);
+  try{ addAIMsg('assistant',await callAI(msg)); }
+  catch(e){ addAIMsg('assistant',`❌ Ошибка: ${e.message}`); }
+  finally{ setAILoad(false); }
+}
+
+const AI_PROMPTS={
+  analysis:"Сделай детальный разбор игры этого игрока. Что он делает хорошо и плохо? Какие ключевые проблемы?",
+  forecast:"На основе трендов — будет ли этот игрок расти в MMR? Что нужно изменить?",
+  heroes:  "Посмотри на пул героев и стиль игры. Каких героев стоит освоить следующими и почему?",
+  weaknesses:"Найди конкретные слабые места по статистике. Где теряются игры — лейнинг, командные бои или поздняя игра?"
+};
+
+async function aiQuick(type){
+  if(!currentPlayerData){ alert('Сначала найди игрока!'); return; }
+  // переключаем на AI таб
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-ai').classList.add('active');
+  document.querySelector('.ai-tab').classList.add('active');
+  const prompt=AI_PROMPTS[type];
+  addAIMsg('user',prompt);
+  setAILoad(true);
+  try{ addAIMsg('assistant',await callAI(prompt)); }
+  catch(e){ addAIMsg('assistant',`❌ Ошибка: ${e.message}`); }
+  finally{ setAILoad(false); }
+}
+
+console.log('Dota 2 Analyzer v2.1 loaded successfully');
 </script>
 </body>
 </html>
