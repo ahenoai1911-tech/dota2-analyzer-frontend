@@ -46,6 +46,61 @@ body{
   padding-bottom:var(--nav-h);
 }
 
+/* ── WELCOME SCREEN ── */
+.welcome-screen{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:var(--bg-primary);
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(139,92,246,.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(6,182,212,.15) 0%, transparent 50%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:1000;opacity:1;transition:opacity .5s ease;
+}
+.welcome-screen.hide{opacity:0;pointer-events:none}
+.welcome-logo{
+  width:280px;height:280px;
+  border-radius:50%;
+  box-shadow:0 0 60px rgba(139,92,246,.4), 0 0 120px rgba(6,182,212,.2);
+  animation:float 3s ease-in-out infinite;
+  margin-bottom:32px;
+}
+.welcome-title{
+  font-size:32px;font-weight:700;
+  background:var(--accent-gradient);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:12px;
+  animation:fadeIn 1s ease;
+}
+.welcome-subtitle{
+  font-size:16px;color:var(--text-secondary);
+  margin-bottom:40px;
+  animation:fadeIn 1.5s ease;
+}
+.welcome-btn{
+  padding:14px 40px;
+  background:var(--accent-gradient);
+  border:none;border-radius:30px;
+  color:white;font-size:16px;font-weight:600;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(139,92,246,.3);
+  transition:all .3s ease;
+  animation:fadeIn 2s ease;
+}
+.welcome-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 32px rgba(139,92,246,.4);
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-20px)}
+}
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
 /* ── SCREENS ── */
 .screen{display:none}
 .screen.active{display:block}
@@ -653,6 +708,14 @@ body{
 </style>
 </head>
 <body>
+
+<!-- WELCOME SCREEN -->
+<div class="welcome-screen" id="welcomeScreen">
+  <img src="logo.png" alt="Dota 2 Analyzer" class="welcome-logo">
+  <div class="welcome-title">Dota 2 Analyzer</div>
+  <div class="welcome-subtitle">Анализ игроков · Миссии · AI помощник</div>
+  <button class="welcome-btn" onclick="hideWelcome()">Начать</button>
+</div>
 
 <!-- SCREEN: SEARCH -->
 <div class="screen active" id="screen-search">
@@ -1318,6 +1381,13 @@ async function buyItem(id,name,price){
   }catch(e){tg?.showAlert?.(e.message)||alert(e.message);}
 }
 
+// ── WELCOME ──────────────────────────────────────
+function hideWelcome(){
+  const ws=document.getElementById('welcomeScreen');
+  ws.classList.add('hide');
+  setTimeout(()=>ws.style.display='none',500);
+}
+
 // ── INIT ─────────────────────────────────────────
 window.addEventListener('DOMContentLoaded',()=>{
   const tid=getTid();
@@ -1327,6 +1397,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   const params=new URLSearchParams(location.search);
   const pid=params.get('player_id');
   if(pid){document.getElementById('si').value=pid;doSearch();}
+
+  // Автоматически скрыть welcome через 3 секунды
+  setTimeout(hideWelcome,3000);
 });
 </script>
 </body>
