@@ -403,9 +403,28 @@ body{
 .mission-card{
   background:var(--tg-card);border:1px solid var(--tg-border);
   border-radius:var(--r);padding:13px;margin-bottom:8px;
-  transition:border-color .15s;
+  transition:all .3s ease;
+  position:relative;
+  overflow:hidden;
 }
-.mission-card.done{border-color:rgba(76,217,100,.3)}
+.mission-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--tg-blue),var(--purple));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .6s ease;
+}
+.mission-card.done{
+  border-color:rgba(76,217,100,.4);
+  background:linear-gradient(135deg,var(--tg-card) 0%,rgba(76,217,100,.05) 100%);
+}
+.mission-card.done::before{
+  background:linear-gradient(90deg,var(--green),#34c759);
+  transform:scaleX(1);
+}
+.mission-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
 .mission-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .mission-icon{font-size:22px;flex-shrink:0}
 .mission-title{font-size:14px;font-weight:600;color:var(--tg-text)}
@@ -414,27 +433,60 @@ body{
 .mission-coins{font-size:13px;font-weight:700;color:var(--gold)}
 .mission-xp{font-size:10px;color:var(--tg-muted);margin-top:1px}
 .mission-bar-bg{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:5px}
-.mission-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.mission-bar-fill{
+  height:100%;border-radius:2px;
+  transition:width .8s cubic-bezier(0.4, 0.0, 0.2, 1);
+  background:linear-gradient(90deg,var(--tg-blue),var(--purple));
+  position:relative;
+}
+.mission-bar-fill::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+  animation:shimmer 2s infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .mission-progress{display:flex;justify-content:space-between;font-size:10px;color:var(--tg-muted)}
 .claim-btn{
   width:100%;margin-top:10px;
   background:linear-gradient(135deg,#4cd964,#34c759);
   border:none;border-radius:var(--r2);padding:9px;
   color:#fff;font-size:13px;font-weight:700;
-  cursor:pointer;letter-spacing:.3px;transition:opacity .15s;
+  cursor:pointer;letter-spacing:.3px;
+  transition:all .3s ease;
+  box-shadow:0 2px 8px rgba(76,217,100,.3);
 }
-.claim-btn:hover{opacity:.88}
+.claim-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(76,217,100,.5);
+}
+.claim-btn:active{
+  transform:translateY(0);
+}
 .type-badge{
   display:inline-block;font-size:10px;font-weight:600;
   color:var(--tg-muted);padding:3px 8px;
   border:1px solid var(--tg-border);border-radius:20px;
   margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;
+  background:rgba(255,255,255,.03);
+  transition:all .3s ease;
+}
+.type-badge:hover{
+  background:rgba(255,255,255,.06);
+  border-color:var(--tg-blue);
+  color:var(--tg-blue2);
 }
 
 /* ── SHOP ── */
 .shop-item{
   background:var(--tg-card);border:1px solid var(--tg-border);
   border-radius:var(--r);padding:13px;margin-bottom:8px;
+  transition:all .3s ease;
+  position:relative;
+}
+.shop-item:hover{
+  transform:translateY(-2px);
+  border-color:var(--tg-blue);
+  box-shadow:0 4px 12px rgba(36,129,204,.2);
 }
 .shop-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .shop-icon{font-size:26px;flex-shrink:0}
@@ -445,10 +497,21 @@ body{
   width:100%;background:var(--tg-blue);
   border:none;border-radius:var(--r2);padding:9px;
   color:#fff;font-size:13px;font-weight:600;
-  cursor:pointer;transition:background .15s,opacity .15s;
+  cursor:pointer;
+  transition:all .3s ease;
+  box-shadow:0 2px 6px rgba(36,129,204,.3);
 }
-.buy-btn:hover{background:var(--tg-blue2)}
-.buy-btn:disabled{opacity:.35;cursor:not-allowed;background:var(--tg-card2);color:var(--tg-muted)}
+.buy-btn:hover{
+  background:var(--tg-blue2);
+  transform:translateY(-1px);
+  box-shadow:0 4px 10px rgba(36,129,204,.4);
+}
+.buy-btn:active{transform:translateY(0)}
+.buy-btn:disabled{
+  opacity:.35;cursor:not-allowed;
+  background:var(--tg-card2);color:var(--tg-muted);
+  transform:none;box-shadow:none;
+}
 
 /* ── SCREEN HEADERS ── */
 .scr-hdr{
@@ -462,6 +525,11 @@ body{
   font-size:14px;font-weight:700;color:var(--gold);
   background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);
   border-radius:20px;padding:4px 10px;
+  transition:all .3s ease;
+}
+.balance-badge:hover{
+  background:rgba(255,214,10,.15);
+  transform:scale(1.05);
 }
 
 /* user mini card */
