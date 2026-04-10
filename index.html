@@ -1314,22 +1314,41 @@ function renderMissions(ms){
         </div>
         <div class="mission-bar-bg"><div class="mission-bar-fill" style="width:${pct}%;background:${done?'#10b981':'var(--accent-primary)'}"></div></div>
         <div class="mission-progress"><span>${m.progress||0} / ${tv}</span><span>${pct}%</span></div>
-        ${canClaim?`<button class="claim-btn" onclick="claimM(${m.id||0})">✅ Получить награду</button>`:''}
+        ${canClaim?`<button class="claim-btn" data-mission-id="${m.id||0}">✅ Получить награду</button>`:''}
       </div>`;
     });
   });
   el.innerHTML=html;
+
+  // Добавляем обработчики событий для кнопок
+  el.querySelectorAll('.claim-btn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      const missionId=parseInt(this.getAttribute('data-mission-id'));
+      claimM(missionId);
+    });
+  });
 }
 
 async function claimM(id){
+  console.log('🎯 claimM called with id:', id);
   const tid=getTid();
+  console.log('📱 Telegram ID:', tid);
+
   if(!tid){
     alert('❌ Установите Telegram ID в тест режиме или откройте через Telegram');
     return;
   }
+
+  console.log('📤 Sending request to:', `${API}/missions/claim`);
+  console.log('📦 Payload:', {telegram_id:tid, mission_id:id});
+
   try{
     const r=await fetch(`${API}/missions/claim`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram_id:tid,mission_id:id})});
+    console.log('📥 Response status:', r.status);
+
     const d=await r.json();
+    console.log('📥 Response data:', d);
+
     if(r.ok && d.status==='ok'){
       alert(`🎉 Награда получена!\n\n💰 +${d.reward?.coins||0} монет\n⭐ +${d.reward?.xp||0} XP`);
       loadUserData(tid);
@@ -1338,7 +1357,7 @@ async function claimM(id){
       alert('❌ Ошибка: '+(d.detail||'Не удалось получить награду'));
     }
   }catch(e){
-    console.error('Claim error:',e);
+    console.error('❌ Claim error:',e);
     alert('❌ Ошибка сети: '+e.message);
   }
 }
