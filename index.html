@@ -759,16 +759,12 @@ body{
 <div class="wrap">
   <div class="scr-hdr">
     <h2>🎯 Миссии</h2>
-    <div class="balance-badge" id="mCoins">💰 0</div>
-  </div>
-  <div id="mUserBlock"></div>
-  <div id="testIdBlock" style="margin-bottom:12px;padding:12px;background:var(--bg-card);border-radius:var(--r2);border:1px solid var(--border)">
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">🧪 Тест режим (для браузера):</div>
-    <div style="display:flex;gap:8px">
-      <input id="testIdInput" type="number" placeholder="Telegram ID" style="flex:1;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--r3);color:var(--text-primary);font-size:13px">
-      <button onclick="setTestId()" style="padding:8px 16px;background:var(--accent-gradient);border:none;border-radius:var(--r3);color:white;font-weight:600;cursor:pointer">Установить</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="balance-badge" id="premiumBadge" style="font-size:11px;padding:4px 10px">🆓 Free</div>
+      <div class="balance-badge" id="mCoins">💰 0</div>
     </div>
   </div>
+  <div id="mUserBlock"></div>
   <div id="mList"><div class="empty"><span class="empty-icon">🔍</span><div class="empty-text">Сначала найди игрока<br>на вкладке Поиск</div></div></div>
 </div>
 </div>
@@ -840,11 +836,7 @@ function getTid(){
   const urlId = params.get('telegram_id');
   if(urlId) return parseInt(urlId);
 
-  // 2. Для тестирования в браузере - берем из localStorage
-  const testId = localStorage.getItem('test_telegram_id');
-  if(testId) return parseInt(testId);
-
-  // 3. В Telegram Web App
+  // 2. В Telegram Web App
   return tg?.initDataUnsafe?.user?.id||null;
 }
 
@@ -1206,11 +1198,28 @@ const AI_P={
 };
 async function callAI(msg){
   const ctx=buildCtx();
+  const tid=getTid();
   const msgs=aiHistory.length===0?[{role:"user",content:`Данные игрока:\n${ctx}\n\n---\n${msg}`}]:[...aiHistory.slice(-6),{role:"user",content:msg}];
-  const r=await fetch(`${API}/ai`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,player_context:ctx,history:aiHistory.slice(-6)})});
-  if(!r.ok){const e=await r.json().catch(()=>{});throw new Error(e?.detail||`Ошибка ${r.status}`);}
+  const r=await fetch(`${API}/ai`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,player_context:ctx,history:aiHistory.slice(-6),telegram_id:tid})});
+  if(!r.ok){
+    const e=await r.json().catch(()=>{});
+    if(r.status===429){
+      // Лимит исчерпан
+      throw new Error(e?.detail||'Лимит AI запросов исчерпан');
+    }
+    throw new Error(e?.detail||`Ошибка ${r.status}`);
+  }
   const d=await r.json(),text=d.reply||'Нет ответа';
   aiHistory.push({role:'user',content:msg},{role:'assistant',content:text});
+
+  // Обновить счетчик AI запросов
+  if(tid && d.ai_remaining !== undefined){
+    if(currentUser){
+      currentUser.ai_limit={remaining:d.ai_remaining,limit:d.ai_limit};
+      updatePremiumBadge({premium:currentUser.premium,ai_requests:currentUser.ai_limit});
+    }
+  }
+
   return text;
 }
 function setAILoad(on){
@@ -1249,8 +1258,31 @@ async function loadUserData(tid){
     const d=await r.json();
     currentUser=d.user;
     updateBalance(currentUser.coins||0);
+
+    // Загрузить Premium статус
+    const pr=await fetch(`${API}/premium/status?telegram_id=${tid}`);
+    if(pr.ok){
+      const pd=await pr.json();
+      currentUser.premium=pd.premium;
+      currentUser.ai_limit=pd.ai_requests;
+      updatePremiumBadge(pd);
+    }
   }catch{}
 }
+
+function updatePremiumBadge(premiumData){
+  const badge=document.getElementById('premiumBadge');
+  if(!badge)return;
+
+  if(premiumData.premium){
+    badge.innerHTML=`⭐ Premium | AI: ${premiumData.ai_requests.remaining}/${premiumData.ai_requests.limit}`;
+    badge.style.background='linear-gradient(135deg, #8b5cf6, #06b6d4)';
+  }else{
+    badge.innerHTML=`🆓 Free | AI: ${premiumData.ai_requests.remaining}/${premiumData.ai_requests.limit}`;
+    badge.style.background='var(--bg-card)';
+  }
+}
+
 function updateBalance(coins){
   document.getElementById('mCoins').textContent=`💰 ${coins}`;
   document.getElementById('sCoins').textContent=`💰 ${coins}`;
