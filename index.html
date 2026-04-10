@@ -762,6 +762,13 @@ body{
     <div class="balance-badge" id="mCoins">💰 0</div>
   </div>
   <div id="mUserBlock"></div>
+  <div id="testIdBlock" style="margin-bottom:12px;padding:12px;background:var(--bg-card);border-radius:var(--r2);border:1px solid var(--border)">
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">🧪 Тест режим (для браузера):</div>
+    <div style="display:flex;gap:8px">
+      <input id="testIdInput" type="number" placeholder="Telegram ID" style="flex:1;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--r3);color:var(--text-primary);font-size:13px">
+      <button onclick="setTestId()" style="padding:8px 16px;background:var(--accent-gradient);border:none;border-radius:var(--r3);color:white;font-weight:600;cursor:pointer">Установить</button>
+    </div>
+  </div>
   <div id="mList"><div class="empty"><span class="empty-icon">🔍</span><div class="empty-text">Сначала найди игрока<br>на вкладке Поиск</div></div></div>
 </div>
 </div>
@@ -827,7 +834,14 @@ function stars(n){return n?`<span style="font-size:9px;color:#fbbf24"> ${'★'.r
 function hImg(id,sh){const s=sh||HS[id];return s?`https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${s}.png`:id?`https://api.opendota.com/apps/dota2/images/heroes/${id}_sb.png`:'';}
 function hFb(id){return id?`https://api.opendota.com/apps/dota2/images/heroes/${id}_sb.png`:'';}
 function hName(id,ns){if(ns&&ns!=='Unknown'&&!ns.startsWith('Hero #'))return ns;return HN[id]||(id?`Hero #${id}`:'Unknown');}
-function getTid(){return tg?.initDataUnsafe?.user?.id||null;}
+function getTid(){
+  // Для тестирования в браузере - берем из localStorage
+  const testId = localStorage.getItem('test_telegram_id');
+  if(testId) return parseInt(testId);
+
+  // В Telegram Web App
+  return tg?.initDataUnsafe?.user?.id||null;
+}
 
 // ── NAV ──────────────────────────────────────────
 function goScreen(name){
@@ -1309,15 +1323,24 @@ function renderMissions(ms){
 
 async function claimM(id){
   const tid=getTid();
-  if(!tid){tg?.showAlert?.('Авторизуйся через Telegram для получения наград');return;}
+  if(!tid){
+    alert('❌ Установите Telegram ID в тест режиме или откройте через Telegram');
+    return;
+  }
   try{
     const r=await fetch(`${API}/missions/claim`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram_id:tid,mission_id:id})});
     const d=await r.json();
-    if(d.status==='ok'){
-      tg?.showAlert?.(`Получено!\n+${d.reward?.coins||0}💰  +${d.reward?.xp||0} XP`) || alert(`+${d.reward?.coins||0}💰 +${d.reward?.xp||0} XP`);
-      loadUserData(tid);loadMissions();
+    if(r.ok && d.status==='ok'){
+      alert(`🎉 Награда получена!\n\n💰 +${d.reward?.coins||0} монет\n⭐ +${d.reward?.xp||0} XP`);
+      loadUserData(tid);
+      loadMissions();
+    }else{
+      alert('❌ Ошибка: '+(d.detail||'Не удалось получить награду'));
     }
-  }catch(e){alert('Ошибка: '+e.message);}
+  }catch(e){
+    console.error('Claim error:',e);
+    alert('❌ Ошибка сети: '+e.message);
+  }
 }
 
 // ── SHOP ─────────────────────────────────────────
@@ -1379,6 +1402,20 @@ async function buyItem(id,name,price){
       loadUserData(tid);loadShop();
     }else throw new Error(d.detail||'Ошибка');
   }catch(e){tg?.showAlert?.(e.message)||alert(e.message);}
+}
+
+// ── TEST MODE ────────────────────────────────────
+function setTestId(){
+  const inp=document.getElementById('testIdInput');
+  const id=inp?.value.trim();
+  if(!id||!parseInt(id)){
+    alert('Введите корректный Telegram ID');
+    return;
+  }
+  localStorage.setItem('test_telegram_id',id);
+  alert(`✅ Тестовый ID установлен: ${id}\n\nТеперь можно забирать награды!`);
+  loadUserData(parseInt(id));
+  loadMissions();
 }
 
 // ── WELCOME ──────────────────────────────────────
