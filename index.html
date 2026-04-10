@@ -59,11 +59,12 @@ body{
 }
 .welcome-screen.hide{opacity:0;pointer-events:none}
 .welcome-logo{
-  width:200px;height:200px;
+  width:150px;height:150px;
   border-radius:50%;
   object-fit:cover;
-  box-shadow:0 0 40px rgba(139,92,246,.4), 0 0 80px rgba(6,182,212,.2);
-  margin-bottom:32px;
+  display:block;
+  box-shadow:0 0 30px rgba(139,92,246,.3), 0 0 60px rgba(6,182,212,.15);
+  margin-bottom:24px;
 }
 .welcome-title{
   font-size:32px;font-weight:700;
@@ -1203,8 +1204,19 @@ const AI_P={
 async function callAI(msg){
   const ctx=buildCtx();
   const tid=getTid();
+
+  // AI работает и без telegram_id, но с лимитами только для зарегистрированных
   const msgs=aiHistory.length===0?[{role:"user",content:`Данные игрока:\n${ctx}\n\n---\n${msg}`}]:[...aiHistory.slice(-6),{role:"user",content:msg}];
-  const r=await fetch(`${API}/ai`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,player_context:ctx,history:aiHistory.slice(-6),telegram_id:tid})});
+  const payload = {
+    message:msg,
+    player_context:ctx,
+    history:aiHistory.slice(-6)
+  };
+
+  // Добавляем telegram_id только если он есть
+  if(tid) payload.telegram_id = tid;
+
+  const r=await fetch(`${API}/ai`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   if(!r.ok){
     const e=await r.json().catch(()=>{});
     if(r.status===429){
