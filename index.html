@@ -1,266 +1,1172 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dota 2 Analyzer</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root { --bg:#0f1115; --card:#1a1d24; --text:#fff; --sec:#8b8e97; --acc:#6f42c1; --acc-h:#8a5ce6; --ok:#2ecc71; --err:#e74c3c; --brd:#2d313c; }
-        * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-        header { padding:16px; background:var(--card); border-bottom:1px solid var(--brd); text-align:center; position:sticky; top:0; z-index:10; }
-        header h1 { font-size:18px; font-weight:600; }
-        main { flex:1; overflow-y:auto; padding:16px; padding-bottom:80px; }
-        .tab { display:none; animation:fade .3s ease; }
-        .tab.active { display:block; }
-        @keyframes fade { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-        .card { background:var(--card); border-radius:12px; padding:16px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,.3); }
-        .card h3 { font-size:16px; margin-bottom:8px; }
-        .stat-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--brd); }
-        .stat-row:last-child { border:none; }
-        .stat-val { font-weight:600; color:var(--acc); }
-        .btn { display:block; width:100%; padding:14px; margin:8px 0; background:var(--acc); color:#fff; border:none; border-radius:10px; font-size:16px; font-weight:500; cursor:pointer; transition:.2s; }
-        .btn:active { transform:scale(.98); background:var(--acc-h); }
-        .btn:disabled { background:#444; color:#888; cursor:not-allowed; }
-        .btn.small { width:auto; padding:8px 12px; font-size:14px; margin:0; }
-        .nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--brd); display:flex; justify-content:space-around; padding:10px 0; z-index:20; }
-        .nav-item { display:flex; flex-direction:column; align-items:center; color:var(--sec); font-size:12px; cursor:pointer; }
-        .nav-item.active { color:var(--acc); }
-        .nav-icon { font-size:22px; margin-bottom:4px; }
-        .loader { text-align:center; padding:40px; color:var(--sec); }
-        .input { width:100%; padding:14px; background:var(--card); border:1px solid var(--brd); border-radius:10px; color:#fff; margin-bottom:12px; outline:none; }
-        .input:focus { border-color:var(--acc); }
-        .mission { display:flex; align-items:center; justify-content:space-between; padding:12px; background:#22252e; border-radius:10px; margin-bottom:8px; }
-        .mission .prog { height:6px; background:#333; border-radius:3px; margin-top:6px; overflow:hidden; }
-        .mission .bar { height:100%; background:var(--acc); transition:width .3s; }
-        .mission.completed { border-left:4px solid var(--ok); }
-        .mission.claimed { opacity:.6; }
-        .shop-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:10px; }
-        .shop-item { background:#22252e; padding:10px; border-radius:10px; text-align:center; }
-        .shop-item .icon { font-size:32px; margin-bottom:4px; }
-        .shop-item .name { font-size:14px; font-weight:500; margin-bottom:4px; }
-        .shop-item .price { color:var(--ok); font-weight:600; margin-bottom:6px; }
-        #chat { max-height:200px; overflow-y:auto; margin-bottom:10px; padding:10px; background:#15171d; border-radius:8px; }
-        .msg { margin:6px 0; padding:8px 12px; border-radius:8px; max-width:85%; word-wrap:break-word; }
-        .msg.bot { background:#2a2d35; margin-right:auto; }
-        .msg.user { background:var(--acc); margin-left:auto; }
-        .toast { position:fixed; top:70px; left:50%; transform:translateX(-50%); background:var(--card); padding:12px 16px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,.4); z-index:100; animation:pop .3s ease; display:none; }
-        @keyframes pop { from{opacity:0;transform:translateX(-50%) translateY(-10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Dota 2 Analyzer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  /* Telegram palette */
+  --tg-bg:#17212b;
+  --tg-card:#242f3d;
+  --tg-card2:#2b3a4a;
+  --tg-border:#2f3f50;
+  --tg-blue:#2481cc;
+  --tg-blue2:#3d9de0;
+  --tg-text:#e8f4fd;
+  --tg-sub:#7d9ab5;
+  --tg-muted:#4a6278;
+  --green:#4cd964;
+  --red:#ff3b30;
+  --gold:#ffd60a;
+  --orange:#ff9500;
+  --purple:#af52de;
+  --nav-h:52px;
+  --r:12px;--r2:8px;--r3:4px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+html,body{height:100%;overscroll-behavior:none}
+body{
+  background:var(--tg-bg);
+  color:var(--tg-text);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:14px;
+  overflow-x:hidden;
+  padding-bottom:var(--nav-h);
+}
+
+/* ── SCREENS ── */
+.screen{display:none}
+.screen.active{display:block}
+.wrap{max-width:600px;margin:0 auto;padding:12px 12px 16px}
+
+/* ── NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:var(--nav-h);
+  background:var(--tg-card);
+  border-top:1px solid var(--tg-border);
+  display:flex;z-index:100;
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;cursor:pointer;
+  border:none;background:none;padding:0;
+  color:var(--tg-muted);transition:color .15s;
+}
+.nav-btn.active{color:var(--tg-blue2)}
+.nav-btn svg{width:22px;height:22px;stroke-width:1.8}
+.nav-btn span{font-size:10px;font-weight:500;letter-spacing:.2px}
+
+/* ── HEADER ── */
+.page-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0 12px;margin-bottom:12px;
+  border-bottom:1px solid var(--tg-border);
+}
+.page-title{font-size:17px;font-weight:700;color:var(--tg-text)}
+.page-sub{font-size:11px;color:var(--tg-muted);margin-top:1px}
+.live-badge{
+  display:flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:600;color:var(--green);
+  background:rgba(76,217,100,.1);
+  border:1px solid rgba(76,217,100,.2);
+  border-radius:20px;padding:3px 9px;
+}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+/* ── SEARCH ── */
+.search-row{display:flex;gap:8px;margin-bottom:10px}
+.search-field{
+  flex:1;display:flex;align-items:center;gap:8px;
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);padding:0 12px;
+  transition:border-color .15s;
+}
+.search-field:focus-within{border-color:var(--tg-blue)}
+.search-field svg{width:16px;height:16px;stroke:var(--tg-muted);flex-shrink:0}
+.search-field input{
+  flex:1;background:none;border:none;outline:none;
+  color:var(--tg-text);font-size:14px;font-family:'Inter',sans-serif;
+  padding:11px 0;
+}
+.search-field input::placeholder{color:var(--tg-muted)}
+.btn-primary{
+  background:var(--tg-blue);color:#fff;
+  border:none;border-radius:var(--r2);
+  padding:0 18px;font-size:13px;font-weight:600;
+  cursor:pointer;white-space:nowrap;
+  transition:background .15s,transform .1s;
+  flex-shrink:0;
+}
+.btn-primary:hover{background:var(--tg-blue2)}
+.btn-primary:active{transform:scale(.96)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+
+/* suggest */
+.suggest-wrap{position:relative}
+.suggest-drop{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;
+  background:var(--tg-card2);border:1px solid var(--tg-border);
+  border-radius:var(--r);overflow:hidden;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);display:none;
+}
+.suggest-drop.open{display:block}
+.sug-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 13px;cursor:pointer;
+  transition:background .12s;border-bottom:1px solid var(--tg-border);
+}
+.sug-item:last-child{border-bottom:none}
+.sug-item:hover{background:rgba(255,255,255,.04)}
+.sug-av{width:30px;height:30px;border-radius:6px;object-fit:cover;background:var(--tg-border);flex-shrink:0}
+.sug-name{font-size:13px;font-weight:500;color:var(--tg-text)}
+.sug-id{font-size:11px;color:var(--tg-muted);margin-top:1px}
+
+/* picker */
+.picker-card{background:var(--tg-card);border:1px solid var(--tg-border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.picker-head{padding:10px 14px;font-size:11px;font-weight:600;color:var(--tg-sub);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--tg-border)}
+.picker-row{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--tg-border)}
+.picker-row:last-child{border-bottom:none}
+.picker-row:hover{background:rgba(255,255,255,.04)}
+.picker-av{width:36px;height:36px;border-radius:8px;object-fit:cover;background:var(--tg-border);flex-shrink:0}
+.picker-name{font-size:14px;font-weight:600;color:var(--tg-text)}
+.picker-id{font-size:11px;color:var(--tg-muted);margin-top:1px}
+
+/* error */
+.err-bar{
+  display:none;align-items:center;gap:8px;
+  background:rgba(255,59,48,.1);border:1px solid rgba(255,59,48,.25);
+  border-radius:var(--r2);padding:10px 13px;margin-bottom:10px;
+  font-size:12px;color:#ff6b61;
+}
+.err-bar.show{display:flex}
+
+/* skeleton */
+.skel{display:none;margin-bottom:12px}
+.skel.show{display:block}
+.sk{background:linear-gradient(90deg,var(--tg-card) 25%,var(--tg-card2) 50%,var(--tg-card) 75%);background-size:200% 100%;animation:sk 1.3s infinite;border-radius:var(--r2)}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-row{display:flex;gap:12px;background:var(--tg-card);border-radius:var(--r);padding:14px;margin-bottom:8px}
+.sk-av{width:48px;height:48px;flex-shrink:0;border-radius:10px}
+.sk-lines{flex:1;display:flex;flex-direction:column;gap:7px;padding-top:2px}
+.sk-line{height:10px;border-radius:3px}
+.sk-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sk-box{height:64px;border-radius:var(--r)}
+
+/* ── PROFILE CARD ── */
+.profile-card{
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);overflow:hidden;margin-bottom:10px;
+}
+.profile-cover{
+  height:56px;
+  background:linear-gradient(135deg,#1a3a5c 0%,#0d2137 100%);
+  position:relative;
+}
+.profile-cover::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--tg-blue),transparent);
+}
+.profile-body{padding:0 14px 14px;display:flex;gap:12px;align-items:flex-end;margin-top:-22px}
+.profile-av{
+  width:48px;height:48px;border-radius:10px;
+  border:2px solid var(--tg-bg);object-fit:cover;
+  background:var(--tg-border);flex-shrink:0;position:relative;z-index:1;
+}
+.profile-info{flex:1;min-width:0;padding-top:24px}
+.profile-name{font-size:17px;font-weight:700;color:var(--tg-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.tag{
+  font-size:10px;font-weight:600;letter-spacing:.3px;
+  padding:2px 7px;border-radius:20px;
+}
+.tag-blue{background:rgba(36,129,204,.2);color:var(--tg-blue2);border:1px solid rgba(36,129,204,.3)}
+.tag-green{background:rgba(76,217,100,.15);color:var(--green);border:1px solid rgba(76,217,100,.25)}
+.tag-muted{background:rgba(255,255,255,.06);color:var(--tg-sub);border:1px solid var(--tg-border)}
+.profile-right{flex-shrink:0;display:flex;flex-direction:column;gap:4px;padding-top:24px;align-items:flex-end}
+.rank-box{
+  background:rgba(255,255,255,.06);border:1px solid var(--tg-border);
+  border-radius:var(--r2);padding:5px 10px;text-align:center;min-width:68px;
+}
+.rank-em{font-size:18px;line-height:1}
+.rank-name{font-size:10px;font-weight:600;color:var(--tg-sub);margin-top:2px;white-space:nowrap}
+.mmr-box{
+  background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);
+  border-radius:var(--r2);padding:3px 10px;text-align:center;min-width:68px;
+}
+.mmr-val{font-size:13px;font-weight:700;color:var(--gold)}
+.mmr-lbl{font-size:9px;color:var(--tg-muted);margin-top:1px}
+
+/* ── TABS (inner) ── */
+.tab-bar{
+  display:flex;background:var(--tg-card);
+  border:1px solid var(--tg-border);border-radius:var(--r);
+  padding:3px;gap:2px;margin-bottom:12px;
+}
+.tab-btn{
+  flex:1;padding:7px 4px;text-align:center;
+  font-size:12px;font-weight:600;color:var(--tg-muted);
+  border:none;background:none;border-radius:var(--r2);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.tab-btn.active{background:var(--tg-blue);color:#fff}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── SECTION LABEL ── */
+.section-lbl{
+  font-size:11px;font-weight:600;color:var(--tg-muted);
+  letter-spacing:.5px;text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:8px;
+}
+.section-lbl::after{content:'';flex:1;height:1px;background:var(--tg-border)}
+
+/* ── WR CARD ── */
+.wr-card{
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);padding:14px;margin-bottom:10px;
+}
+.wr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.wr-big{font-size:48px;font-weight:700;line-height:1;letter-spacing:-1px}
+.wr-big.good{color:var(--green)}.wr-big.ok{color:var(--gold)}.wr-big.bad{color:var(--red)}
+.wr-label{font-size:11px;color:var(--tg-muted);margin-top:4px}
+.wr-wl{text-align:right}
+.wr-w{font-size:16px;font-weight:700;color:var(--green)}
+.wr-l{font-size:16px;font-weight:700;color:var(--red)}
+.wr-total{font-size:11px;color:var(--tg-muted);margin-top:2px}
+.wr-dots{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:10px}
+.dot{
+  width:20px;height:20px;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:700;
+}
+.dot.w{background:rgba(76,217,100,.15);color:var(--green);border:1px solid rgba(76,217,100,.25)}
+.dot.l{background:rgba(255,59,48,.1);color:var(--red);border:1px solid rgba(255,59,48,.2)}
+.wr-bar{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.wr-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.wr-bar-fill.good{background:var(--green)}.wr-bar-fill.ok{background:var(--gold)}.wr-bar-fill.bad{background:var(--red)}
+
+/* streak */
+.streak{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:20px;
+  font-size:12px;font-weight:700;margin-bottom:10px;
+}
+.streak.win{background:rgba(76,217,100,.1);border:1px solid rgba(76,217,100,.2);color:var(--green)}
+.streak.loss{background:rgba(255,59,48,.1);border:1px solid rgba(255,59,48,.2);color:var(--red)}
+
+/* trends */
+.trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.trend-box{background:var(--tg-card);border:1px solid var(--tg-border);border-radius:var(--r);padding:12px}
+.trend-head{font-size:11px;font-weight:600;color:var(--tg-muted);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--tg-border)}
+.trend-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.trend-row:last-child{margin-bottom:0}
+.trend-key{font-size:12px;color:var(--tg-sub)}
+.trend-val{font-size:14px;font-weight:700;color:var(--tg-text)}
+.trend-val.good{color:var(--green)}.trend-val.ok{color:var(--gold)}.trend-val.bad{color:var(--red)}
+
+/* stats grid */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat-box{
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);padding:10px 6px;text-align:center;
+}
+.stat-num{font-size:22px;font-weight:700;line-height:1;color:var(--tg-text)}
+.stat-num.g{color:var(--green)}.stat-num.r{color:var(--red)}.stat-num.au{color:var(--gold)}
+.stat-num.b{color:#5ac8fa}.stat-num.p{color:var(--purple)}
+.stat-lbl{font-size:9px;font-weight:600;color:var(--tg-muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+/* chart */
+.chart-card{background:var(--tg-card);border:1px solid var(--tg-border);border-radius:var(--r);padding:13px;margin-bottom:10px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.chart-title{font-size:12px;font-weight:600;color:var(--tg-sub);text-transform:uppercase;letter-spacing:.5px}
+.chart-leg{display:flex;gap:10px}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--tg-muted)}
+.leg-dot{width:8px;height:3px;border-radius:2px}
+.chart-wrap{height:120px;position:relative}
+
+/* heroes */
+.hero-list{display:flex;flex-direction:column;gap:6px}
+.hero-row{
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);padding:8px 12px;
+  display:flex;align-items:center;gap:10px;
+  transition:background .12s;
+}
+.hero-row:active{background:var(--tg-card2)}
+.hero-n{font-size:10px;font-weight:600;color:var(--tg-muted);width:14px;text-align:center;flex-shrink:0}
+.hero-img{width:54px;height:30px;border-radius:5px;object-fit:cover;background:var(--tg-border);flex-shrink:0}
+.hero-name{flex:1;font-size:13px;font-weight:600;color:var(--tg-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.hero-games{font-size:10px;color:var(--tg-muted)}
+.hero-kda{font-size:10px;color:var(--tg-sub)}
+.hero-bar-wrap{width:36px;height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;flex-shrink:0}
+.hero-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.hero-wr{font-size:15px;font-weight:700;min-width:38px;text-align:right}
+.hero-wr.good{color:var(--green)}.hero-wr.ok{color:var(--gold)}.hero-wr.bad{color:var(--red)}
+
+/* matches */
+.match-list{display:flex;flex-direction:column;gap:5px}
+.match-card{
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);overflow:hidden;cursor:pointer;
+}
+.match-main{
+  padding:9px 12px;display:grid;
+  grid-template-columns:42px 1fr auto auto;
+  align-items:center;gap:9px;position:relative;
+}
+.match-main::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.match-card.win .match-main::before{background:var(--green)}
+.match-card.loss .match-main::before{background:var(--red)}
+.match-himg{width:42px;height:24px;border-radius:4px;object-fit:cover;background:var(--tg-border);display:block;flex-shrink:0}
+.match-kda{font-size:11px;color:var(--tg-sub);font-variant-numeric:tabular-nums}
+.match-hero{font-size:10px;color:var(--tg-muted);margin-top:2px}
+.match-dur{font-size:9px;color:var(--tg-muted);margin-top:1px}
+.match-kda-big{font-size:18px;font-weight:700;text-align:center}
+.match-kda-big.good{color:var(--green)}.match-kda-big.ok{color:var(--gold)}.match-kda-big.bad{color:var(--red)}
+.match-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;letter-spacing:.3px}
+.match-pill.win{background:rgba(76,217,100,.12);color:var(--green);border:1px solid rgba(76,217,100,.2)}
+.match-pill.loss{background:rgba(255,59,48,.1);color:var(--red);border:1px solid rgba(255,59,48,.18)}
+.match-chevron{font-size:10px;color:var(--tg-muted);transition:transform .2s;line-height:1}
+.match-card.open .match-chevron{transform:rotate(180deg)}
+.match-expand{display:none;border-top:1px solid var(--tg-border);padding:10px 12px;background:rgba(0,0,0,.2)}
+.match-card.open .match-expand{display:block}
+.mex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.mex-cell{text-align:center}
+.mex-val{font-size:14px;font-weight:700;color:var(--tg-text)}
+.mex-val.g{color:var(--green)}.mex-val.r{color:var(--red)}.mex-val.au{color:var(--gold)}.mex-val.b{color:#5ac8fa}.mex-val.p{color:var(--purple)}
+.mex-lbl{font-size:9px;color:var(--tg-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.match-links{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ext-link{
+  display:block;text-align:center;font-size:11px;font-weight:500;
+  color:var(--tg-blue2);padding:7px;
+  border:1px solid rgba(36,129,204,.2);border-radius:var(--r2);
+  text-decoration:none;transition:background .15s;
+}
+.ext-link:hover{background:rgba(36,129,204,.08)}
+
+/* ── AI ── */
+.ai-wrap{display:flex;flex-direction:column;gap:8px}
+.ai-quick{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:4px}
+.ai-q-btn{
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);padding:11px 10px;
+  cursor:pointer;text-align:left;transition:border-color .15s,background .15s;
+  display:flex;align-items:flex-start;gap:8px;
+}
+.ai-q-btn:hover{border-color:var(--tg-blue);background:rgba(36,129,204,.06)}
+.ai-q-btn:active{transform:scale(.97)}
+.ai-q-icon{font-size:18px;line-height:1;flex-shrink:0}
+.ai-q-title{font-size:12px;font-weight:600;color:var(--tg-text)}
+.ai-q-desc{font-size:10px;color:var(--tg-muted);margin-top:2px}
+.ai-chat{background:var(--tg-card);border:1px solid var(--tg-border);border-radius:var(--r);overflow:hidden}
+.ai-msgs{min-height:100px;max-height:320px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ai-msg{display:flex;gap:8px;align-items:flex-start}
+.ai-msg.user{flex-direction:row-reverse}
+.ai-bubble{padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;max-width:88%}
+.ai-msg.bot .ai-bubble{background:var(--tg-card2);border:1px solid var(--tg-border);border-radius:10px 10px 10px 2px;color:var(--tg-text)}
+.ai-msg.user .ai-bubble{background:var(--tg-blue);color:#fff;border-radius:10px 10px 2px 10px}
+.ai-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px}
+.ai-msg.bot .ai-avatar{background:rgba(36,129,204,.15);border:1px solid rgba(36,129,204,.25)}
+.ai-msg.user .ai-avatar{background:rgba(255,255,255,.12)}
+.ai-typing{display:none;align-items:center;gap:4px;padding:6px 12px}
+.ai-typing.on{display:flex}
+.ai-typing i{width:6px;height:6px;background:var(--tg-muted);border-radius:50%;animation:tp .8s ease-in-out infinite}
+.ai-typing i:nth-child(2){animation-delay:.15s}
+.ai-typing i:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1);opacity:1}}
+.ai-input-row{display:flex;gap:8px;padding:9px 10px;border-top:1px solid var(--tg-border);background:rgba(0,0,0,.15)}
+.ai-input{
+  flex:1;background:var(--tg-card2);border:1px solid var(--tg-border);
+  border-radius:var(--r2);padding:8px 12px;
+  color:var(--tg-text);font-size:13px;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color .15s;
+}
+.ai-input:focus{border-color:var(--tg-blue)}
+.ai-input::placeholder{color:var(--tg-muted)}
+.ai-send{
+  background:var(--tg-blue);border:none;border-radius:var(--r2);
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:background .15s;
+}
+.ai-send:hover{background:var(--tg-blue2)}
+.ai-send:disabled{opacity:.35;cursor:not-allowed}
+.ai-send svg{width:16px;height:16px;stroke:#fff;fill:none}
+
+/* ── MISSIONS ── */
+.mission-card{
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);padding:13px;margin-bottom:8px;
+  transition:border-color .15s;
+}
+.mission-card.done{border-color:rgba(76,217,100,.3)}
+.mission-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mission-icon{font-size:22px;flex-shrink:0}
+.mission-title{font-size:14px;font-weight:600;color:var(--tg-text)}
+.mission-desc{font-size:11px;color:var(--tg-muted);margin-top:2px}
+.mission-reward{margin-left:auto;text-align:right;flex-shrink:0}
+.mission-coins{font-size:13px;font-weight:700;color:var(--gold)}
+.mission-xp{font-size:10px;color:var(--tg-muted);margin-top:1px}
+.mission-bar-bg{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:5px}
+.mission-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.mission-progress{display:flex;justify-content:space-between;font-size:10px;color:var(--tg-muted)}
+.claim-btn{
+  width:100%;margin-top:10px;
+  background:linear-gradient(135deg,#4cd964,#34c759);
+  border:none;border-radius:var(--r2);padding:9px;
+  color:#fff;font-size:13px;font-weight:700;
+  cursor:pointer;letter-spacing:.3px;transition:opacity .15s;
+}
+.claim-btn:hover{opacity:.88}
+.type-badge{
+  display:inline-block;font-size:10px;font-weight:600;
+  color:var(--tg-muted);padding:3px 8px;
+  border:1px solid var(--tg-border);border-radius:20px;
+  margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;
+}
+
+/* ── SHOP ── */
+.shop-item{
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);padding:13px;margin-bottom:8px;
+}
+.shop-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.shop-icon{font-size:26px;flex-shrink:0}
+.shop-name{font-size:14px;font-weight:600;color:var(--tg-text)}
+.shop-desc{font-size:11px;color:var(--tg-muted);margin-top:2px}
+.shop-price{margin-left:auto;font-size:18px;font-weight:700;color:var(--gold);white-space:nowrap}
+.buy-btn{
+  width:100%;background:var(--tg-blue);
+  border:none;border-radius:var(--r2);padding:9px;
+  color:#fff;font-size:13px;font-weight:600;
+  cursor:pointer;transition:background .15s,opacity .15s;
+}
+.buy-btn:hover{background:var(--tg-blue2)}
+.buy-btn:disabled{opacity:.35;cursor:not-allowed;background:var(--tg-card2);color:var(--tg-muted)}
+
+/* ── SCREEN HEADERS ── */
+.scr-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0 12px;margin-bottom:12px;
+  border-bottom:1px solid var(--tg-border);
+}
+.scr-hdr h2{font-size:17px;font-weight:700;color:var(--tg-text)}
+.balance-badge{
+  display:flex;align-items:center;gap:5px;
+  font-size:14px;font-weight:700;color:var(--gold);
+  background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);
+  border-radius:20px;padding:4px 10px;
+}
+
+/* user mini card */
+.user-mini{
+  background:var(--tg-card);border:1px solid var(--tg-border);
+  border-radius:var(--r);padding:12px 14px;margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.user-av{width:36px;height:36px;border-radius:8px;background:var(--tg-blue);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.user-name{font-size:14px;font-weight:600;color:var(--tg-text)}
+.user-sub{font-size:10px;color:var(--tg-muted);margin-top:2px}
+.user-coins{margin-left:auto;font-size:14px;font-weight:700;color:var(--gold)}
+
+/* empty state */
+.empty{text-align:center;padding:40px 20px;color:var(--tg-muted)}
+.empty-icon{font-size:40px;margin-bottom:12px;display:block;opacity:.6}
+.empty-text{font-size:13px;line-height:1.6}
+
+/* animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .25s ease both}
+
+@media(max-width:380px){
+  .stats-grid .stat-num{font-size:18px}
+  .wr-big{font-size:40px}
+  .tab-btn{font-size:11px;padding:6px 2px}
+}
+</style>
 </head>
 <body>
-    <header><h1>⚔️ Dota 2 Analyzer</h1></header>
-    <div id="toast" class="toast"></div>
-    <main>
-        <div id="tab-profile" class="tab active">
-            <div class="card">
-                <input type="text" id="search-input" class="input" placeholder="Никнейм или Steam ID">
-                <button class="btn" onclick="fetchProfile()">🔍 Найти игрока</button>
-                <div id="profile-data"></div>
-            </div>
-            <div class="card">
-                <h3>🤖 AI Анализ</h3>
-                <div id="chat"></div>
-                <input type="text" id="ai-input" class="input" placeholder="Вопрос...">
-                <button class="btn" onclick="sendAI()">Отправить</button>
-            </div>
-        </div>
-        <div id="tab-missions" class="tab">
-            <button class="btn" onclick="syncMissions()">🔄 Синхронизировать прогресс</button>
-            <div id="missions-list" class="loader">Загрузка...</div>
-        </div>
-        <div id="tab-shop" class="tab">
-            <div class="card">
-                <h3>🛒 Магазин</h3>
-                <div id="shop-list" class="loader">Загрузка...</div>
-            </div>
-        </div>
-        <div id="tab-inventory" class="tab">
-            <div class="card">
-                <h3>🎒 Инвентарь</h3>
-                <div id="inv-list" class="loader">Загрузка...</div>
-            </div>
-        </div>
-    </main>
-    <div class="nav">
-        <div class="nav-item active" data-tab="profile"><span class="nav-icon">🔍</span>Профиль</div>
-        <div class="nav-item" data-tab="missions"><span class="nav-icon">🎯</span>Миссии</div>
-        <div class="nav-item" data-tab="shop"><span class="nav-icon">🛒</span>Магазин</div>
-        <div class="nav-item" data-tab="inventory"><span class="nav-icon">🎒</span>Инвентарь</div>
+
+<!-- SCREEN: SEARCH -->
+<div class="screen active" id="screen-search">
+<div class="wrap">
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">⚔️ Dota 2 Analyzer</div>
+      <div class="page-sub">stratz · opendota · ai</div>
     </div>
-    <script>
-        const tg = window.Telegram.WebApp; tg.expand(); tg.ready();
-        const API = window.location.origin;
-        let user = null, ctx = "", aid = null;
-        const toast = (m, err=false) => { const t=document.getElementById('toast'); t.textContent=m; t.style.color=err?'var(--err)':'var(--ok)'; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); };
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+  </div>
 
-        async function auth() {
-            try {
-                const r = await fetch(`${API}/webapp/auth`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({initData:tg.initData}) });
-                if(!r.ok) throw new Error('Auth failed');
-                user = await r.json();
-                tg.MainButton.setText(`Lvl ${user.user.level} | 💰${user.user.coins}`);
-                tg.MainButton.show();
-                document.querySelector('[data-tab="profile"]').click();
-            } catch { toast('❌ Ошибка авторизации',true); }
-        }
-        auth();
+  <div class="suggest-wrap">
+    <div class="search-row">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="si" type="text" placeholder="Ник или Steam ID..." autocomplete="off" spellcheck="false"/>
+      </div>
+      <button class="btn-primary" id="sb" onclick="doSearch()">Найти</button>
+    </div>
+    <div class="suggest-drop" id="sugDrop"></div>
+  </div>
 
-        document.querySelectorAll('.nav-item').forEach(el => el.onclick = () => {
-            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-            const tab = el.dataset.tab;
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            el.classList.add('active');
-            if(tab==='missions') loadMissions();
-            if(tab==='shop') loadShop();
-            if(tab==='inventory') loadInventory();
-        });
+  <div id="pickerBlock"></div>
+  <div class="err-bar" id="errBar">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="errMsg"></span>
+  </div>
 
-        async function fetchProfile() {
-            const q = document.getElementById('search-input').value.trim();
-            if(!q) return tg.showAlert('Введите ник или ID');
-            const el = document.getElementById('profile-data');
-            el.innerHTML = '<div class="loader">⏳ Загрузка...</div>';
-            try {
-                const r = await fetch(`${API}/player?query=${encodeURIComponent(q)}`);
-                if(!r.ok) throw new Error((await r.json()).detail||'Ошибка');
-                const d = await r.json();
-                aid = d.account_id; ctx = JSON.stringify(d.stats);
-                el.innerHTML = `
-                    <div style="text-align:center;margin-bottom:12px">
-                        <img src="${d.profile.avatar||'https://cdn.steamstatic.com/steamcommunity/public/images/avatars/fe/fe83d5.jpg'}" style="width:80px;height:80px;border-radius:50%;border:2px solid var(--acc)">
-                        <h2 style="margin:8px 0">${d.profile.name}</h2>
-                        <span style="background:#222;padding:4px 10px;border-radius:20px;font-size:14px">${d.profile.rank}</span>
-                    </div>
-                    <div class="stat-row"><span>Матчи</span><span class="stat-val">${d.stats.total_matches}</span></div>
-                    <div class="stat-row"><span>Винрейт</span><span class="stat-val">${d.stats.winrate}%</span></div>
-                    <div class="stat-row"><span>П/П</span><span class="stat-val">${d.stats.wins} / ${d.stats.losses}</span></div>
-                    <p style="margin-top:12px;font-size:12px;color:var(--sec)">💡 Теперь задавай вопросы AI!</p>
-                `;
-            } catch(e) { el.innerHTML = `<div class="loader" style="color:var(--err)">❌ ${e.message}</div>`; }
-        }
+  <div class="skel" id="skel">
+    <div class="sk-row"><div class="sk sk-av"></div><div class="sk-lines"><div class="sk sk-line" style="width:60%"></div><div class="sk sk-line" style="width:36%"></div></div></div>
+    <div class="sk-g"><div class="sk sk-box"></div><div class="sk sk-box"></div><div class="sk sk-box"></div></div>
+  </div>
 
-        async function sendAI() {
-            const inp = document.getElementById('ai-input'), msg = inp.value.trim();
-            if(!msg) return;
-            const chat = document.getElementById('chat');
-            chat.innerHTML += `<div class="msg user">${msg}</div>`; inp.value='';
-            try {
-                const r = await fetch(`${API}/ai`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg, player_context:ctx}) });
-                const d = await r.json();
-                chat.innerHTML += `<div class="msg bot">${d.reply.replace(/\n/g,'<br>')}</div>`;
-                chat.scrollTop = chat.scrollHeight;
-            } catch { toast('Ошибка AI',true); }
-        }
+  <div id="results"></div>
+</div>
+</div>
 
-        async function loadMissions() {
-            if(!user) return;
-            const el = document.getElementById('missions-list'); el.innerHTML='<div class="loader">⏳ Загрузка...</div>';
-            try {
-                const r = await fetch(`${API}/missions/assign`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({telegram_id:user.user.telegram_id}) });
-                const d = await r.json();
-                if(!d.missions.length) { el.innerHTML='<div class="loader">Нет активных миссий</div>'; return; }
-                el.innerHTML = d.missions.map(m => {
-                    const pct = m.target_value ? Math.min(100, (m.progress/m.target_value)*100) : 0;
-                    const completed = m.completed; const claimed = m.claimed;
-                    return `
-                    <div class="mission ${completed?'completed':''} ${claimed?'claimed':''}">
-                        <div style="flex:1;min-width:0">
-                            <div style="display:flex;justify-content:space-between;align-items:center">
-                                <strong>${m.icon||'🎯'} ${m.title}</strong>
-                                ${completed && !claimed ? `<button class="btn small" onclick="claimMission(${m.id})">Забрать</button>` : ''}
-                                ${claimed ? '<span style="color:var(--ok)">✅</span>' : ''}
-                            </div>
-                            <small style="color:#888">${m.description}</small>
-                            <div class="prog"><div class="bar" style="width:${pct}%"></div></div>
-                            <small style="color:#666">${m.progress || 0} / ${m.target_value}</small>
-                        </div>
-                    </div>`;
-                }).join('');
-            } catch { el.innerHTML='<div class="loader">❌ Ошибка</div>'; }
-        }
+<!-- SCREEN: MISSIONS -->
+<div class="screen" id="screen-missions">
+<div class="wrap">
+  <div class="scr-hdr">
+    <h2>🎯 Миссии</h2>
+    <div class="balance-badge" id="mCoins">💰 0</div>
+  </div>
+  <div id="mUserBlock"></div>
+  <div id="mList"><div class="empty"><span class="empty-icon">🔍</span><div class="empty-text">Сначала найди игрока<br>на вкладке Поиск</div></div></div>
+</div>
+</div>
 
-        async function syncMissions() {
-            if(!user || !aid) return tg.showAlert('Сначала найди игрока');
-            toast('🔄 Синхронизация...');
-            try {
-                await fetch(`${API}/missions/sync`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({telegram_id:user.user.telegram_id, account_id:aid}) });
-                loadMissions(); toast('✅ Прогресс обновлён');
-            } catch { toast('❌ Ошибка синхронизации',true); }
-        }
+<!-- SCREEN: SHOP -->
+<div class="screen" id="screen-shop">
+<div class="wrap">
+  <div class="scr-hdr">
+    <h2>🛒 Магазин</h2>
+    <div class="balance-badge" id="sCoins">💰 0</div>
+  </div>
+  <div id="sUserBlock"></div>
+  <div id="sItems"><div class="empty"><span class="empty-icon">⏳</span><div class="empty-text">Загрузка...</div></div></div>
+</div>
+</div>
 
-        async function claimMission(id) {
-            try {
-                const r = await fetch(`${API}/missions/claim`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({telegram_id:user.user.telegram_id, mission_id:id}) });
-                if(!r.ok) throw new Error((await r.json()).detail);
-                const d = await r.json();
-                toast(`+${d.new_xp} XP | Lvl ${d.new_level}`);
-                tg.MainButton.setText(`Lvl ${d.new_level} | 💰${user.user.coins}`);
-                loadMissions(); loadProfile();
-            } catch(e) { toast(e.message||'Ошибка',true); }
-        }
+<!-- NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-search" onclick="goScreen('search')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <span>Поиск</span>
+  </button>
+  <button class="nav-btn" id="nav-missions" onclick="goScreen('missions')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>Миссии</span>
+  </button>
+  <button class="nav-btn" id="nav-shop" onclick="goScreen('shop')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    <span>Магазин</span>
+  </button>
+</nav>
 
-        async function loadShop() {
-            if(!user) return;
-            const el = document.getElementById('shop-list'); el.innerHTML='<div class="loader">⏳ Загрузка...</div>';
-            try {
-                const r = await fetch(`${API}/shop/items?telegram_id=${user.user.telegram_id}`);
-                const d = await r.json();
-                el.innerHTML = `<div class="shop-grid">${d.items.map(i => `
-                    <div class="shop-item">
-                        <div class="icon">${i.icon}</div>
-                        <div class="name">${i.name}</div>
-                        <div class="price">💰 ${i.price}</div>
-                        <button class="btn small" ${user.user.coins<i.price?'disabled':''} onclick="buyItem(${i.id})">${i.owned>0?`Куплено (${i.owned})`:'Купить'}</button>
-                    </div>`).join('')}</div>`;
-            } catch { el.innerHTML='<div class="loader">❌ Ошибка</div>'; }
-        }
+<script>
+// ── CONFIG ──────────────────────────────────────
+const API = "https://dota2-analyzer-production.up.railway.app";
 
-        async function buyItem(id) {
-            try {
-                const r = await fetch(`${API}/shop/buy`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({telegram_id:user.user.telegram_id, item_id:id}) });
-                if(!r.ok) throw new Error((await r.json()).detail);
-                const d = await r.json();
-                toast(`✅ Куплено: ${d.item}`);
-                user.user.coins = d.new_coins; tg.MainButton.setText(`Lvl ${user.user.level} | 💰${user.user.coins}`);
-                loadShop();
-            } catch(e) { toast(e.message||'Ошибка',true); }
-        }
+let tg = null;
+try{ tg = window.Telegram?.WebApp; if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor?.('#17212b'); } }catch(e){}
 
-        async function loadInventory() {
-            if(!user) return;
-            const el = document.getElementById('inv-list'); el.innerHTML='<div class="loader">⏳ Загрузка...</div>';
-            try {
-                const r = await fetch(`${API}/user/profile?telegram_id=${user.user.telegram_id}`);
-                const d = await r.json();
-                if(!d.inventory.length) { el.innerHTML='<div class="loader">🎒 Пусто</div>'; return; }
-                el.innerHTML = d.inventory.map(i => `
-                    <div class="stat-row">
-                        <span>${i.icon} ${i.name}</span>
-                        <span class="stat-val">x${i.quantity}</span>
-                    </div>`).join('');
-            } catch { el.innerHTML='<div class="loader">❌ Ошибка</div>'; }
-        }
+let playerData = null, currentUser = null, aiHistory = [], chartInst = null;
 
-        function loadProfile() {
-            if(!user) return;
-            const el = document.getElementById('tab-profile').querySelector('.card');
-            el.innerHTML = `
-                <input type="text" id="search-input" class="input" placeholder="Никнейм или Steam ID">
-                <button class="btn" onclick="fetchProfile()">🔍 Найти игрока</button>
-                <div id="profile-data"></div>
-                <div style="margin-top:12px;text-align:center">
-                    <span style="font-size:20px;font-weight:600">💰 ${user.user.coins}</span> • 
-                    <span style="font-size:16px;color:var(--acc)">⭐ Lvl ${user.user.level}</span> • 
-                    <span style="font-size:14px;color:var(--sec)">${user.user.xp} / ${(user.user.level*500)} XP</span>
-                </div>
-                <div class="card"><h3>🤖 AI Анализ</h3><div id="chat"></div><input type="text" id="ai-input" class="input" placeholder="Вопрос..."><button class="btn" onclick="sendAI()">Отправить</button></div>
-            `;
-        }
-        if(tg.themeParams.bg_color) document.documentElement.style.setProperty('--bg', tg.themeParams.bg_color);
-        if(tg.themeParams.secondary_bg_color) document.documentElement.style.setProperty('--card', tg.themeParams.secondary_bg_color);
-    </script>
+// ── HERO MAPS ────────────────────────────────────
+const HS={1:"antimage",2:"axe",3:"bane",4:"bloodseeker",5:"crystal_maiden",6:"drow_ranger",7:"earthshaker",8:"juggernaut",9:"mirana",10:"morphling",11:"nevermore",12:"phantom_lancer",13:"puck",14:"pudge",15:"razor",16:"sand_king",17:"storm_spirit",18:"sven",19:"tiny",20:"vengefulspirit",21:"windrunner",22:"zuus",23:"kunkka",25:"lina",26:"lion",27:"shadow_shaman",28:"slardar",29:"tidehunter",30:"witch_doctor",31:"lich",32:"riki",33:"enigma",34:"tinker",35:"sniper",36:"necrolyte",37:"warlock",38:"beastmaster",39:"queenofpain",40:"venomancer",41:"faceless_void",42:"skeleton_king",43:"death_prophet",44:"phantom_assassin",45:"pugna",46:"templar_assassin",47:"viper",48:"luna",49:"dragon_knight",50:"dazzle",51:"rattletrap",52:"leshrac",53:"furion",54:"life_stealer",55:"dark_seer",56:"clinkz",57:"omniknight",58:"enchantress",59:"huskar",60:"night_stalker",61:"broodmother",62:"bounty_hunter",63:"weaver",64:"jakiro",65:"batrider",66:"chen",67:"spectre",68:"ancient_apparition",69:"doom_bringer",70:"ursa",71:"spirit_breaker",72:"gyrocopter",73:"alchemist",74:"invoker",75:"silencer",76:"obsidian_destroyer",77:"lycan",78:"brewmaster",79:"shadow_demon",80:"lone_druid",81:"chaos_knight",82:"meepo",83:"treant",84:"ogre_magi",85:"undying",86:"rubick",87:"disruptor",88:"nyx_assassin",89:"naga_siren",90:"keeper_of_the_light",91:"wisp",92:"visage",93:"slark",94:"medusa",95:"troll_warlord",96:"centaur",97:"magnataur",98:"shredder",99:"bristleback",100:"tusk",101:"skywrath_mage",102:"abaddon",103:"elder_titan",104:"legion_commander",106:"ember_spirit",107:"earth_spirit",109:"terrorblade",110:"phoenix",111:"oracle",112:"winter_wyvern",113:"arc_warden",120:"pangolier",121:"dark_willow",123:"grimstroke",126:"void_spirit",128:"snapfire",129:"mars",135:"dawnbreaker",136:"marci",137:"primal_beast",138:"muerta"};
+const HN={1:"Anti-Mage",2:"Axe",3:"Bane",4:"Bloodseeker",5:"Crystal Maiden",6:"Drow Ranger",7:"Earthshaker",8:"Juggernaut",9:"Mirana",10:"Morphling",11:"Shadow Fiend",12:"Phantom Lancer",13:"Puck",14:"Pudge",15:"Razor",16:"Sand King",17:"Storm Spirit",18:"Sven",19:"Tiny",20:"Vengeful Spirit",21:"Windranger",22:"Zeus",23:"Kunkka",25:"Lina",26:"Lion",27:"Shadow Shaman",28:"Slardar",29:"Tidehunter",30:"Witch Doctor",31:"Lich",32:"Riki",33:"Enigma",34:"Tinker",35:"Sniper",36:"Necrophos",37:"Warlock",38:"Beastmaster",39:"Queen of Pain",40:"Venomancer",41:"Faceless Void",42:"Wraith King",43:"Death Prophet",44:"Phantom Assassin",45:"Pugna",46:"Templar Assassin",47:"Viper",48:"Luna",49:"Dragon Knight",50:"Dazzle",51:"Clockwerk",52:"Leshrac",53:"Nature's Prophet",54:"Lifestealer",55:"Dark Seer",56:"Clinkz",57:"Omniknight",58:"Enchantress",59:"Huskar",60:"Night Stalker",61:"Broodmother",62:"Bounty Hunter",63:"Weaver",64:"Jakiro",65:"Batrider",66:"Chen",67:"Spectre",68:"Ancient Apparition",69:"Doom",70:"Ursa",71:"Spirit Breaker",72:"Gyrocopter",73:"Alchemist",74:"Invoker",75:"Silencer",76:"Outworld Destroyer",77:"Lycan",78:"Brewmaster",79:"Shadow Demon",80:"Lone Druid",81:"Chaos Knight",82:"Meepo",83:"Treant Protector",84:"Ogre Magi",85:"Undying",86:"Rubick",87:"Disruptor",88:"Nyx Assassin",89:"Naga Siren",90:"Keeper of the Light",91:"Io",92:"Visage",93:"Slark",94:"Medusa",95:"Troll Warlord",96:"Centaur Warrunner",97:"Magnus",98:"Timbersaw",99:"Bristleback",100:"Tusk",101:"Skywrath Mage",102:"Abaddon",103:"Elder Titan",104:"Legion Commander",106:"Ember Spirit",107:"Earth Spirit",109:"Terrorblade",110:"Phoenix",111:"Oracle",112:"Winter Wyvern",113:"Arc Warden",120:"Pangolier",121:"Dark Willow",123:"Grimstroke",126:"Void Spirit",128:"Snapfire",129:"Mars",135:"Dawnbreaker",136:"Marci",137:"Primal Beast",138:"Muerta"};
+const RM={1:{e:"🪵",n:"Herald"},2:{e:"🛡️",n:"Guardian"},3:{e:"⚒️",n:"Crusader"},4:{e:"🗡️",n:"Archon"},5:{e:"⚔️",n:"Legend"},6:{e:"🏅",n:"Ancient"},7:{e:"💎",n:"Divine"},8:{e:"🌟",n:"Immortal"}};
+
+// ── HELPERS ──────────────────────────────────────
+const h=(s)=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fn=(n)=>(n!=null&&n!==0)?Number(n).toLocaleString('en'):'—';
+const sv=(v,s='')=>v!=null?`${v}${s}`:'—';
+const wrc=(w)=>w>=55?'good':w>=50?'ok':'bad';
+const kc=(k)=>k>=4?'good':k>=2?'ok':'bad';
+
+function getRank(t,s){
+  if(t){const r=String(t),tier=parseInt(r[0])||0,stars=r.length>1?parseInt(r[1])||0:0,rk=RM[tier]||{e:"❓",n:"Unknown"};return{e:rk.e,n:rk.n,stars};}
+  if(!s||s==='Uncalibrated')return{e:"❓",n:"Uncalibrated",stars:0};
+  const nl=s.toLowerCase();let tier=0;
+  if(nl.includes('herald'))tier=1;else if(nl.includes('guardian'))tier=2;else if(nl.includes('crusader'))tier=3;else if(nl.includes('archon'))tier=4;else if(nl.includes('legend'))tier=5;else if(nl.includes('ancient'))tier=6;else if(nl.includes('divine'))tier=7;else if(nl.includes('immortal'))tier=8;
+  const stars=(s.match(/★/g)||[]).length,rk=RM[tier]||{e:"❓",n:"Unknown"};
+  return{e:rk.e,n:rk.n,stars};
+}
+function stars(n){return n?`<span style="font-size:9px;color:var(--gold)"> ${'★'.repeat(Math.min(n,5))}</span>`:''}
+function hImg(id,sh){const s=sh||HS[id];return s?`https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${s}.png`:id?`https://api.opendota.com/apps/dota2/images/heroes/${id}_sb.png`:'';}
+function hFb(id){return id?`https://api.opendota.com/apps/dota2/images/heroes/${id}_sb.png`:'';}
+function hName(id,ns){if(ns&&ns!=='Unknown'&&!ns.startsWith('Hero #'))return ns;return HN[id]||(id?`Hero #${id}`:'Unknown');}
+function getTid(){return tg?.initDataUnsafe?.user?.id||null;}
+
+// ── NAV ──────────────────────────────────────────
+function goScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='missions') loadMissions();
+  if(name==='shop') loadShop();
+}
+
+// ── SEARCH ───────────────────────────────────────
+document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+let sugT=null;
+document.getElementById('si').addEventListener('input',e=>{
+  const v=e.target.value.trim();
+  clearTimeout(sugT);
+  if(v.length<2||/^\d+$/.test(v)){closeSug();return;}
+  sugT=setTimeout(()=>fetchSug(v),350);
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.suggest-wrap'))closeSug();});
+
+async function fetchSug(q){
+  try{const r=await fetch(`${API}/search?q=${encodeURIComponent(q)}`);renderSug(await r.json());}
+  catch{closeSug();}
+}
+function renderSug(list){
+  const el=document.getElementById('sugDrop');
+  if(!list?.length){closeSug();return;}
+  el.innerHTML=list.map(p=>`
+    <div class="sug-item" onclick="pickSug('${p.account_id}')">
+      <img class="sug-av" src="${h(p.avatarfull||'')}" onerror="this.style.visibility='hidden'" alt="">
+      <div><div class="sug-name">${h(p.personaname||'Unknown')}</div><div class="sug-id">ID: ${p.account_id}</div></div>
+    </div>`).join('');
+  el.classList.add('open');
+}
+function pickSug(id){document.getElementById('si').value=id;closeSug();doSearch();}
+function closeSug(){document.getElementById('sugDrop').classList.remove('open');}
+
+async function doSearch(){
+  const q=document.getElementById('si').value.trim();
+  if(!q)return;
+  closeSug();clearPicker();setLoad(true);hideErr();clearResults();
+  try{
+    if(/^\d+$/.test(q)){await loadPlayer(q);return;}
+    const r=await fetch(`${API}/search?q=${encodeURIComponent(q)}`);
+    const list=await r.json();
+    if(!list?.length){showErr(`Игрок «${q}» не найден`);return;}
+    if(list.length===1){await loadPlayer(String(list[0].account_id));}
+    else{setLoad(false);showPicker(list);}
+  }catch(e){showErr(e.message||'Ошибка поиска');}
+  finally{setLoad(false);}
+}
+
+function showPicker(list){
+  document.getElementById('pickerBlock').innerHTML=`
+    <div class="picker-card fu">
+      <div class="picker-head">Найдено ${list.length} игроков — выбери нужного</div>
+      ${list.map(p=>`
+        <div class="picker-row" onclick="pickPl('${p.account_id}')">
+          <img class="picker-av" src="${h(p.avatarfull||'')}" onerror="this.style.opacity='.3'" alt="">
+          <div><div class="picker-name">${h(p.personaname||'Unknown')}</div><div class="picker-id">ID: ${p.account_id}</div></div>
+        </div>`).join('')}
+    </div>`;
+}
+async function pickPl(id){clearPicker();document.getElementById('si').value=id;await loadPlayer(id);}
+function clearPicker(){document.getElementById('pickerBlock').innerHTML='';}
+
+async function loadPlayer(query){
+  setLoad(true);hideErr();clearResults();
+  try{
+    const r=await fetch(`${API}/player?query=${encodeURIComponent(query)}`);
+    if(!r.ok){const e=await r.json().catch(()=>{});throw new Error(e?.detail||`Ошибка ${r.status}`);}
+    playerData=await r.json();
+    renderAll(playerData);
+    const tid=getTid();
+    if(tid) loadUserData(tid);
+  }catch(e){showErr(e.message||'Не удалось загрузить данные');}
+  finally{setLoad(false);}
+}
+
+function setLoad(on){
+  document.getElementById('skel').classList.toggle('show',on);
+  const b=document.getElementById('sb');b.disabled=on;b.textContent=on?'...':'Найти';
+}
+function showErr(m){const el=document.getElementById('errBar');document.getElementById('errMsg').textContent=m;el.classList.add('show');}
+function hideErr(){document.getElementById('errBar').classList.remove('show');}
+function clearResults(){document.getElementById('results').innerHTML='';}
+
+// ── RENDER ALL ────────────────────────────────────
+function renderAll(data){
+  const {profile,stats,top_heroes,recent_matches,source,account_id}=data;
+  const trend=data.trend||{};
+  const rank=getRank(profile.rank_tier,profile.rank);
+  const mmr=profile.mmr_estimate||profile.mmr||null;
+  const wc=wrc(stats.winrate);
+  const streak=trend.streak||null;
+  const srcTag=source==='stratz'?'⚡ Stratz':'📊 OpenDota';
+  const rm=(recent_matches||[]).slice(0,20);
+  const avgF=k=>{const v=rm.map(m=>+(m[k]||0)).filter(x=>x>0);return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1):'—';};
+  const avgGpm=rm.length?Math.round(rm.reduce((s,m)=>s+(m.gpm||0),0)/rm.length):0;
+  const avgXpm=rm.length?Math.round(rm.reduce((s,m)=>s+(m.xpm||0),0)/rm.length):0;
+
+  const t5wr=sv(trend.last5_winrate,'%'), t5kda=sv(trend.last5_avg_kda), t5gpm=sv(trend.last5_avg_gpm);
+  const t20wr=sv(trend.last20_winrate,'%'), t20kda=sv(trend.last20_avg_kda), t20gpm=sv(trend.last20_avg_gpm);
+
+  document.getElementById('results').innerHTML=`
+  <div class="profile-card fu">
+    <div class="profile-cover"></div>
+    <div class="profile-body">
+      <img class="profile-av" src="${h(profile.avatar||'')}"
+        onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'48\\' height=\\'48\\'><rect fill=\\'%23242f3d\\' width=\\'48\\' height=\\'48\\' rx=\\'10\\'/><text y=\\'34\\' x=\\'9\\' font-size=\\'26\\'>🎮</text></svg>'" alt="">
+      <div class="profile-info">
+        <div class="profile-name">${h(profile.name)}</div>
+        <div class="profile-tags">
+          <span class="tag tag-blue">${srcTag}</span>
+          <span class="tag tag-muted">ID ${h(String(account_id||''))}</span>
+          ${profile.is_anonymous?'<span class="tag tag-muted">🔒 Приватный</span>':''}
+        </div>
+      </div>
+      <div class="profile-right">
+        <div class="rank-box">
+          <div class="rank-em">${rank.e}</div>
+          <div class="rank-name">${h(rank.n)}${stars(rank.stars)}</div>
+        </div>
+        ${mmr?`<div class="mmr-box"><div class="mmr-val">${fn(mmr)}</div><div class="mmr-lbl">MMR</div></div>`:''}
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar fu">
+    <button class="tab-btn active" onclick="swTab('overview',this)">Обзор</button>
+    <button class="tab-btn" onclick="swTab('matches',this)">Матчи</button>
+    <button class="tab-btn" onclick="swTab('heroes',this)">Герои</button>
+    <button class="tab-btn" onclick="swTab('ai',this)">🤖 AI</button>
+  </div>
+
+  <div class="tab-panel active" id="tp-overview">
+    ${streak?.count>=2?`<div class="streak ${streak.type} fu">${streak.type==='win'?'🔥':'❄️'} ${streak.count} ${streak.type==='win'?'победы подряд':'поражений подряд'}</div>`:''}
+    <div class="wr-card fu">
+      <div class="wr-top">
+        <div>
+          <div class="wr-big ${wc}">${stats.winrate}%</div>
+          <div class="wr-label">Винрейт за всё время</div>
+        </div>
+        <div class="wr-wl">
+          <div class="wr-w">▲ ${stats.wins}П</div>
+          <div class="wr-l">▼ ${stats.losses}П</div>
+          <div class="wr-total">${stats.total_matches} матчей</div>
+        </div>
+      </div>
+      <div class="section-lbl">Последние ${rm.length} матчей</div>
+      <div class="wr-dots" id="wrDots"></div>
+      <div class="wr-bar"><div class="wr-bar-fill ${wc}" id="wrFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="section-lbl">Тренды</div>
+    <div class="trend-grid fu">
+      <div class="trend-box">
+        <div class="trend-head">Последние 5</div>
+        <div class="trend-row"><span class="trend-key">WR</span><span class="trend-val ${trend.last5_winrate!=null?wrc(trend.last5_winrate):''}">${t5wr}</span></div>
+        <div class="trend-row"><span class="trend-key">KDA</span><span class="trend-val ${trend.last5_avg_kda!=null?kc(trend.last5_avg_kda):''}">${t5kda}</span></div>
+        <div class="trend-row"><span class="trend-key">GPM</span><span class="trend-val">${t5gpm}</span></div>
+      </div>
+      <div class="trend-box">
+        <div class="trend-head">Последние 20</div>
+        <div class="trend-row"><span class="trend-key">WR</span><span class="trend-val ${trend.last20_winrate!=null?wrc(trend.last20_winrate):''}">${t20wr}</span></div>
+        <div class="trend-row"><span class="trend-key">KDA</span><span class="trend-val ${trend.last20_avg_kda!=null?kc(trend.last20_avg_kda):''}">${t20kda}</span></div>
+        <div class="trend-row"><span class="trend-key">GPM</span><span class="trend-val">${t20gpm}</span></div>
+      </div>
+    </div>
+
+    <div class="section-lbl">Средние (20 матчей)</div>
+    <div class="stats-grid fu">
+      <div class="stat-box"><div class="stat-num ${kc(parseFloat(avgF('kda'))||0)}">${avgF('kda')}</div><div class="stat-lbl">KDA</div></div>
+      <div class="stat-box"><div class="stat-num au">${avgF('kills')}</div><div class="stat-lbl">Kills</div></div>
+      <div class="stat-box"><div class="stat-num r">${avgF('deaths')}</div><div class="stat-lbl">Deaths</div></div>
+      <div class="stat-box"><div class="stat-num b">${avgF('assists')}</div><div class="stat-lbl">Assists</div></div>
+      <div class="stat-box"><div class="stat-num g">${avgGpm||'—'}</div><div class="stat-lbl">GPM</div></div>
+      <div class="stat-box"><div class="stat-num p">${avgXpm||'—'}</div><div class="stat-lbl">XPM</div></div>
+    </div>
+
+    <div class="chart-card fu">
+      <div class="chart-head">
+        <div class="chart-title">KDA по матчам</div>
+        <div class="chart-leg">
+          <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>Победа</div>
+          <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>Поражение</div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="kdaChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tp-matches">
+    <div class="match-list" id="matchList"></div>
+  </div>
+
+  <div class="tab-panel" id="tp-heroes">
+    <div class="hero-list" id="heroList">
+      <div class="empty"><span class="empty-icon" style="font-size:28px">⏳</span><div class="empty-text">Загрузка...</div></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tp-ai">
+    <div class="ai-wrap">
+      <div class="ai-quick fu">
+        <div class="ai-q-btn" onclick="aiQ('analysis')"><div class="ai-q-icon">🧠</div><div><div class="ai-q-title">Разбор игры</div><div class="ai-q-desc">Что хорошо и плохо</div></div></div>
+        <div class="ai-q-btn" onclick="aiQ('forecast')"><div class="ai-q-icon">📈</div><div><div class="ai-q-title">Прогноз MMR</div><div class="ai-q-desc">Будет ли рост</div></div></div>
+        <div class="ai-q-btn" onclick="aiQ('heroes')"><div class="ai-q-icon">🎯</div><div><div class="ai-q-title">Пул героев</div><div class="ai-q-desc">Что учить дальше</div></div></div>
+        <div class="ai-q-btn" onclick="aiQ('weak')"><div class="ai-q-icon">🔍</div><div><div class="ai-q-title">Слабые места</div><div class="ai-q-desc">Где теряешь игры</div></div></div>
+      </div>
+      <div class="ai-chat fu">
+        <div class="ai-msgs" id="aiMsgs">
+          <div class="ai-msg bot"><div class="ai-avatar">🤖</div><div class="ai-bubble">Привет! Нажми кнопку выше или задай вопрос про игрока.</div></div>
+        </div>
+        <div class="ai-typing" id="aiTyping"><i></i><i></i><i></i></div>
+        <div class="ai-input-row">
+          <input class="ai-input" id="aiIn" type="text" placeholder="Спроси про игрока..." autocomplete="off"/>
+          <button class="ai-send" id="aiBtn" onclick="aiSend()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+
+  setTimeout(()=>{const f=document.getElementById('wrFill');if(f)f.style.width=stats.winrate+'%';},100);
+  const dd=document.getElementById('wrDots');
+  rm.forEach(m=>{const d=document.createElement('div');d.className=`dot ${m.win?'w':'l'}`;d.textContent=m.win?'W':'L';dd.appendChild(d);});
+  drawChart(rm);
+  renderMatches(rm);
+  renderHeroes(top_heroes||[]);
+  document.getElementById('aiIn').addEventListener('keydown',e=>{if(e.key==='Enter')aiSend();});
+}
+
+// ── TABS ─────────────────────────────────────────
+function swTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tp-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── MATCHES ──────────────────────────────────────
+function renderMatches(ms){
+  document.getElementById('matchList').innerHTML=ms.slice(0,20).map((m,i)=>{
+    const img=hImg(m.hero_id,m.hero_short),fb=hFb(m.hero_id);
+    const name=hName(m.hero_id,m.hero);
+    const dur=m.duration_min!=null?`${m.duration_min}:${String(m.duration_sec||0).padStart(2,'0')}`:'';
+    const kda=m.kda??0,wc=m.win?'win':'loss';
+    return `
+    <div class="match-card ${wc}" id="mc${i}">
+      <div class="match-main" onclick="togM(${i})">
+        <img class="match-himg" src="${h(img)}" onerror="this.src='${h(fb)}';this.onerror=null" alt="${h(name)}"/>
+        <div>
+          <div class="match-kda">${m.kills}/<span style="color:var(--red)">${m.deaths}</span>/${m.assists}</div>
+          <div class="match-hero">${h(name)}</div>
+          ${dur?`<div class="match-dur">⏱ ${dur}</div>`:''}
+        </div>
+        <div class="match-kda-big ${kc(kda)}">${kda}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+          <div class="match-pill ${wc}">${m.win?'Победа':'Пор.'}</div>
+          <span class="match-chevron">▾</span>
+        </div>
+      </div>
+      <div class="match-expand" id="me${i}">
+        <div class="mex-grid">
+          <div class="mex-cell"><div class="mex-val au">${fn(m.networth)}</div><div class="mex-lbl">Networth</div></div>
+          <div class="mex-cell"><div class="mex-val r">${fn(m.hero_damage)}</div><div class="mex-lbl">Hero DMG</div></div>
+          <div class="mex-cell"><div class="mex-val p">${fn(m.tower_damage)}</div><div class="mex-lbl">Tower DMG</div></div>
+          <div class="mex-cell"><div class="mex-val g">${fn(m.healing)}</div><div class="mex-lbl">Healing</div></div>
+          <div class="mex-cell"><div class="mex-val b">${m.last_hits??'—'}</div><div class="mex-lbl">Last Hits</div></div>
+          <div class="mex-cell"><div class="mex-val">${m.denies??'—'}</div><div class="mex-lbl">Denies</div></div>
+          <div class="mex-cell"><div class="mex-val g">${m.gpm||'—'}</div><div class="mex-lbl">GPM</div></div>
+          <div class="mex-cell"><div class="mex-val p">${m.xpm||'—'}</div><div class="mex-lbl">XPM</div></div>
+          <div class="mex-cell"><div class="mex-val">${m.match_id?'#'+String(m.match_id).slice(-6):''}</div><div class="mex-lbl">ID</div></div>
+        </div>
+        <div class="match-links">
+          <a class="ext-link" href="https://www.dotabuff.com/matches/${m.match_id}" target="_blank">📊 Dotabuff</a>
+          <a class="ext-link" href="https://stratz.com/matches/${m.match_id}" target="_blank">⚡ Stratz</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function togM(i){const c=document.getElementById(`mc${i}`);c.classList.toggle('open');}
+
+// ── HEROES ───────────────────────────────────────
+function renderHeroes(list){
+  const el=document.getElementById('heroList');
+  if(!list?.length){el.innerHTML='<div class="empty"><span class="empty-icon" style="font-size:28px">📊</span><div class="empty-text">Нет данных</div></div>';return;}
+  el.innerHTML=list.slice(0,10).map((hero,i)=>{
+    const img=hImg(hero.hero_id,hero.hero_short),fb=hFb(hero.hero_id);
+    const name=hName(hero.hero_id,hero.hero_name);
+    const wr=hero.winrate!==undefined?hero.winrate:(hero.wins&&hero.matches?Math.round(hero.wins/hero.matches*100):0);
+    const wc=wrc(wr),clr=wc==='good'?'var(--green)':wc==='ok'?'var(--gold)':'var(--red)';
+    const kda=hero.kda??'—',gpm=hero.avg_gpm?` · ${hero.avg_gpm}GPM`:'';
+    return `
+    <div class="hero-row">
+      <div class="hero-n">${i+1}</div>
+      <img class="hero-img" src="${h(img)}" onerror="this.src='${h(fb)}';this.onerror=null" alt="${h(name)}"/>
+      <div class="hero-name">${h(name)}</div>
+      <div class="hero-meta">
+        <div class="hero-games">${hero.matches||0} игр</div>
+        <div class="hero-kda">KDA ${kda}${gpm}</div>
+      </div>
+      <div class="hero-bar-wrap"><div class="hero-bar-fill" style="width:${wr}%;background:${clr}"></div></div>
+      <div class="hero-wr ${wc}">${wr}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ── CHART ────────────────────────────────────────
+function drawChart(ms){
+  if(chartInst){chartInst.destroy();chartInst=null;}
+  const ctx=document.getElementById('kdaChart')?.getContext('2d');
+  if(!ctx)return;
+  const rev=[...ms.slice(0,15)].reverse();
+  chartInst=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:rev.map((_,i)=>`#${i+1}`),
+      datasets:[{
+        data:rev.map(m=>m.kda||0),
+        backgroundColor:rev.map(m=>m.win?'rgba(76,217,100,.5)':'rgba(255,59,48,.45)'),
+        borderColor:rev.map(m=>m.win?'#4cd964':'#ff3b30'),
+        borderWidth:1,borderRadius:4,borderSkipped:false,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      animation:{duration:500},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#242f3d',borderColor:'#2f3f50',borderWidth:1,titleColor:'#7d9ab5',bodyColor:'#e8f4fd',padding:8,callbacks:{title:c=>`Матч ${c[0].label}`,label:c=>` KDA: ${c.raw}`}}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4a6278',font:{family:'Inter',size:8}}},
+        y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4a6278',font:{family:'Inter',size:8}},beginAtZero:true}
+      }
+    }
+  });
+}
+
+// ── AI ───────────────────────────────────────────
+function buildCtx(){
+  if(!playerData)return"No player data.";
+  const d=playerData,p=d.profile,s=d.stats,t=d.trend||{};
+  const heroes=(d.top_heroes||[]).slice(0,5).map(h=>`${h.hero_name||h.hero_id}(${h.matches}г,WR${h.winrate}%,KDA${h.kda})`).join(', ');
+  const matches=(d.recent_matches||[]).slice(0,8).map(m=>`${m.win?'П':'П'} ${m.hero||'?'} ${m.kills}/${m.deaths}/${m.assists} KDA${m.kda}`).join('\n');
+  return `Игрок: ${p.name} | Ранг: ${p.rank}\nWR: ${s.winrate}% (${s.wins}П/${s.losses}П)\nLast5: WR${t.last5_winrate??'?'}% KDA${t.last5_avg_kda??'?'} GPM${t.last5_avg_gpm??'?'}\nStreak: ${t.streak?.count||0} ${t.streak?.type||'-'}\nГерои: ${heroes}\nМатчи:\n${matches}`.trim();
+}
+const AI_P={
+  analysis:"Сделай детальный разбор игры этого игрока. Что хорошо и плохо? Ключевые проблемы?",
+  forecast:"На основе трендов — будет ли этот игрок расти в MMR? Что изменить?",
+  heroes:"Посмотри на пул героев. Каких стоит освоить следующими и почему?",
+  weak:"Найди конкретные слабые места. Где именно теряются игры?"
+};
+async function callAI(msg){
+  const ctx=buildCtx();
+  const msgs=aiHistory.length===0?[{role:"user",content:`Данные игрока:\n${ctx}\n\n---\n${msg}`}]:[...aiHistory.slice(-6),{role:"user",content:msg}];
+  const r=await fetch(`${API}/ai`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,player_context:ctx,history:aiHistory.slice(-6)})});
+  if(!r.ok){const e=await r.json().catch(()=>{});throw new Error(e?.detail||`Ошибка ${r.status}`);}
+  const d=await r.json(),text=d.reply||'Нет ответа';
+  aiHistory.push({role:'user',content:msg},{role:'assistant',content:text});
+  return text;
+}
+function setAILoad(on){
+  document.getElementById('aiTyping').classList.toggle('on',on);
+  const b=document.getElementById('aiBtn');if(b)b.disabled=on;
+}
+function addMsg(role,text){
+  const el=document.getElementById('aiMsgs');if(!el)return;
+  const d=document.createElement('div');d.className=`ai-msg ${role}`;
+  d.innerHTML=`<div class="ai-avatar">${role==='bot'?'🤖':'👤'}</div><div class="ai-bubble">${h(text).replace(/\n/g,'<br>')}</div>`;
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+async function aiSend(){
+  const inp=document.getElementById('aiIn');
+  const msg=inp?.value.trim();if(!msg)return;
+  if(!playerData){addMsg('bot','⚠️ Сначала найди игрока');return;}
+  inp.value='';addMsg('user',msg);setAILoad(true);
+  try{addMsg('bot',await callAI(msg));}
+  catch(e){addMsg('bot',`❌ Ошибка: ${e.message}`);}
+  finally{setAILoad(false);}
+}
+async function aiQ(type){
+  if(!playerData){alert('Сначала найди игрока!');return;}
+  swTab('ai',document.querySelectorAll('.tab-btn')[3]);
+  const p=AI_P[type];addMsg('user',p);setAILoad(true);
+  try{addMsg('bot',await callAI(p));}
+  catch(e){addMsg('bot',`❌ Ошибка: ${e.message}`);}
+  finally{setAILoad(false);}
+}
+
+// ── USER DATA ─────────────────────────────────────
+async function loadUserData(tid){
+  try{
+    const r=await fetch(`${API}/user/profile?telegram_id=${tid}`);
+    if(!r.ok)return;
+    const d=await r.json();
+    currentUser=d.user;
+    updateBalance(currentUser.coins||0);
+  }catch{}
+}
+function updateBalance(coins){
+  document.getElementById('mCoins').textContent=`💰 ${coins}`;
+  document.getElementById('sCoins').textContent=`💰 ${coins}`;
+}
+
+// ── MISSIONS ──────────────────────────────────────
+async function loadMissions(){
+  const el=document.getElementById('mList');
+  const tid=getTid();
+  if(!tid&&!playerData){
+    el.innerHTML='<div class="empty"><span class="empty-icon">🔍</span><div class="empty-text">Сначала найди игрока<br>на вкладке Поиск</div></div>';
+    return;
+  }
+  el.innerHTML='<div class="empty"><span class="empty-icon" style="font-size:28px">⏳</span><div class="empty-text">Загрузка...</div></div>';
+  try{
+    if(tid){
+      const r=await fetch(`${API}/missions?telegram_id=${tid}`);
+      if(r.ok){const d=await r.json();renderMissions(d.missions||[]);return;}
+    }
+    if(playerData) renderLocalMissions(playerData);
+    else el.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-text">Не удалось загрузить</div></div>';
+  }catch{
+    if(playerData) renderLocalMissions(playerData);
+  }
+}
+
+function renderLocalMissions(data){
+  const s=data.stats,t=data.trend||{},rm=data.recent_matches||[];
+  const ms=[
+    {icon:'🏆',title:'Серия побед',desc:'Выиграй 3 матча подряд',progress:Math.min(t.streak?.type==='win'?t.streak.count:0,3),target:3,coins:50,xp:100,type:'daily',done:t.streak?.type==='win'&&t.streak.count>=3},
+    {icon:'⚔️',title:'Высокий KDA',desc:'Набери KDA 4+ в матче',progress:rm.filter(m=>m.kda>=4).length,target:1,coins:30,xp:60,type:'daily',done:rm.some(m=>m.kda>=4)},
+    {icon:'💰',title:'Фарм-мастер',desc:'Среднее GPM 600+',progress:Math.round(t.last5_avg_gpm||0),target:600,coins:80,xp:150,type:'weekly',done:(t.last5_avg_gpm||0)>=600},
+    {icon:'📈',title:'Стабильность',desc:'WR выше 50% за последние 20',progress:Math.round(s.winrate),target:50,coins:100,xp:200,type:'weekly',done:s.winrate>=50},
+    {icon:'🌟',title:'Мастер',desc:'Выиграй 50 матчей',progress:Math.min(s.wins,50),target:50,coins:200,xp:500,type:'monthly',done:s.wins>=50},
+  ];
+  renderMissions(ms);
+}
+
+function renderMissions(ms){
+  const el=document.getElementById('mList');
+  if(!ms?.length){el.innerHTML='<div class="empty"><span class="empty-icon">📭</span><div class="empty-text">Нет активных миссий</div></div>';return;}
+  const groups={daily:[],weekly:[],monthly:[]};
+  ms.forEach(m=>{const t=m.type||'daily';(groups[t]=groups[t]||[]).push(m);});
+  const labels={daily:'Ежедневные',weekly:'Недельные',monthly:'Месячные'};
+  let html='';
+  ['daily','weekly','monthly'].forEach(type=>{
+    if(!groups[type]?.length)return;
+    html+=`<div class="type-badge">${labels[type]}</div>`;
+    groups[type].forEach(m=>{
+      const tv=m.target_value||m.target||1;
+      const pct=Math.min(Math.round((m.progress||0)/tv*100),100);
+      const done=m.completed||m.done||pct>=100;
+      const canClaim=done&&!m.claimed;
+      html+=`
+      <div class="mission-card ${done?'done':''}">
+        <div class="mission-top">
+          <div class="mission-icon">${m.icon||'🎯'}</div>
+          <div style="flex:1;min-width:0">
+            <div class="mission-title">${h(m.title)}</div>
+            <div class="mission-desc">${h(m.description||m.desc||'')}</div>
+          </div>
+          <div class="mission-reward">
+            <div class="mission-coins">+${m.reward_coins||m.coins||0}💰</div>
+            <div class="mission-xp">+${m.reward_xp||m.xp||0} XP</div>
+          </div>
+        </div>
+        <div class="mission-bar-bg"><div class="mission-bar-fill" style="width:${pct}%;background:${done?'var(--green)':'var(--tg-blue)'}"></div></div>
+        <div class="mission-progress"><span>${m.progress||0} / ${tv}</span><span>${pct}%</span></div>
+        ${canClaim?`<button class="claim-btn" onclick="claimM(${m.id||0})">✅ Получить награду</button>`:''}
+      </div>`;
+    });
+  });
+  el.innerHTML=html;
+}
+
+async function claimM(id){
+  const tid=getTid();
+  if(!tid){tg?.showAlert?.('Авторизуйся через Telegram для получения наград');return;}
+  try{
+    const r=await fetch(`${API}/missions/claim`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram_id:tid,mission_id:id})});
+    const d=await r.json();
+    if(d.status==='ok'){
+      tg?.showAlert?.(`Получено!\n+${d.reward?.coins||0}💰  +${d.reward?.xp||0} XP`) || alert(`+${d.reward?.coins||0}💰 +${d.reward?.xp||0} XP`);
+      loadUserData(tid);loadMissions();
+    }
+  }catch(e){alert('Ошибка: '+e.message);}
+}
+
+// ── SHOP ─────────────────────────────────────────
+async function loadShop(){
+  const el=document.getElementById('sItems');
+  el.innerHTML='<div class="empty"><span class="empty-icon" style="font-size:28px">⏳</span><div class="empty-text">Загрузка...</div></div>';
+  try{
+    const r=await fetch(`${API}/shop`);
+    if(!r.ok)throw new Error();
+    const d=await r.json();
+    const tid=getTid();if(tid)loadUserData(tid);
+    renderShop(d.items||[]);
+  }catch{
+    el.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-text">Не удалось загрузить магазин</div></div>';
+  }
+}
+
+function renderShop(items){
+  const el=document.getElementById('sItems');
+  if(!items?.length){el.innerHTML='<div class="empty"><span class="empty-icon">📦</span><div class="empty-text">Магазин пуст</div></div>';return;}
+  const coins=currentUser?.coins||0;
+  const labels={booster_xp:'XP Бустеры',booster_coins:'Монетные бустеры',booster_mega:'Мега бустеры',cosmetic_frame:'Рамки',cosmetic_title:'Титулы',special_mission:'Специальное',special_refresh:'Специальное',special_ai:'Специальное'};
+  const groups={};
+  items.forEach(i=>{(groups[i.type]=groups[i.type]||[]).push(i);});
+  let html='';
+  Object.keys(groups).forEach(type=>{
+    html+=`<div class="type-badge">${labels[type]||type}</div>`;
+    groups[type].forEach(item=>{
+      const can=coins>=item.price;
+      html+=`
+      <div class="shop-item">
+        <div class="shop-top">
+          <div class="shop-icon">${item.icon||'📦'}</div>
+          <div style="flex:1;min-width:0">
+            <div class="shop-name">${h(item.name)}</div>
+            <div class="shop-desc">${h(item.description||'')}</div>
+          </div>
+          <div class="shop-price">${item.price}💰</div>
+        </div>
+        <button class="buy-btn" onclick="buyItem(${item.id},'${h(item.name)}',${item.price})" ${!can?'disabled':''}>
+          ${can?'Купить':'Недостаточно монет'}
+        </button>
+      </div>`;
+    });
+  });
+  el.innerHTML=html;
+}
+
+async function buyItem(id,name,price){
+  const tid=getTid();
+  if(!tid){tg?.showAlert?.('Авторизуйся через Telegram для покупок');return;}
+  const ok=await (tg?.showConfirm?.(`Купить ${name} за ${price}💰?`) ?? Promise.resolve(confirm(`Купить ${name} за ${price}💰?`)));
+  if(!ok)return;
+  try{
+    const r=await fetch(`${API}/shop/buy`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram_id:tid,item_id:id})});
+    const d=await r.json();
+    if(d.status==='ok'||d.item_name){
+      tg?.showAlert?.(`✅ Куплено!\nОсталось: ${d.coins_left}💰`) || alert(`✅ Куплено! Осталось: ${d.coins_left}💰`);
+      loadUserData(tid);loadShop();
+    }else throw new Error(d.detail||'Ошибка');
+  }catch(e){tg?.showAlert?.(e.message)||alert(e.message);}
+}
+
+// ── INIT ─────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const tid=getTid();
+  if(tid)loadUserData(tid);
+
+  // Если открыт с player_id в URL
+  const params=new URLSearchParams(location.search);
+  const pid=params.get('player_id');
+  if(pid){document.getElementById('si').value=pid;doSearch();}
+});
+</script>
 </body>
 </html>
