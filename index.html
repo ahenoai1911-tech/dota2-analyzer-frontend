@@ -766,6 +766,18 @@ body{
     </div>
   </div>
   <div id="mUserBlock"></div>
+
+  <!-- Тестовая панель (скрыта в Telegram, видна в браузере) -->
+  <div id="testPanel" style="display:none;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:12px;font-weight:600;color:var(--accent-secondary);margin-bottom:8px;">🧪 Тестовый режим (вне Telegram)</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Введи свой Telegram ID чтобы получать награды:</div>
+    <div style="display:flex;gap:8px;">
+      <input id="testIdInput" type="number" placeholder="Telegram ID (например: 123456789)"
+        style="flex:1;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text-primary);font-size:13px;outline:none;"/>
+      <button onclick="setTestId()" style="background:var(--accent-gradient);border:none;border-radius:8px;padding:8px 14px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Сохранить</button>
+    </div>
+  </div>
+
   <div id="mList"><div class="empty"><span class="empty-icon">🔍</span><div class="empty-text">Сначала найди игрока<br>на вкладке Поиск</div></div></div>
 </div>
 </div>
@@ -846,13 +858,16 @@ function hImg(id,sh){const s=sh||HS[id];return s?`https://cdn.cloudflare.steamst
 function hFb(id){return id?`https://api.opendota.com/apps/dota2/images/heroes/${id}_sb.png`:'';}
 function hName(id,ns){if(ns&&ns!=='Unknown'&&!ns.startsWith('Hero #'))return ns;return HN[id]||(id?`Hero #${id}`:'Unknown');}
 function getTid(){
-  // 1. Из URL параметра (для теста)
-  const params = new URLSearchParams(location.search);
-  const urlId = params.get('telegram_id');
+  // 1. Telegram Web App (приоритет)
+  const tgId = tg?.initDataUnsafe?.user?.id;
+  if(tgId) return tgId;
+  // 2. URL параметр ?telegram_id=123
+  const urlId = new URLSearchParams(location.search).get('telegram_id');
   if(urlId) return parseInt(urlId);
-
-  // 2. В Telegram Web App
-  return tg?.initDataUnsafe?.user?.id||null;
+  // 3. localStorage (тестовый режим через панель)
+  const stored = localStorage.getItem('test_telegram_id');
+  if(stored) return parseInt(stored);
+  return null;
 }
 
 // ── NAV ──────────────────────────────────────────
@@ -1407,7 +1422,8 @@ async function claimM(id){
   console.log('📱 Telegram ID:', tid);
 
   if(!tid){
-    alert('❌ Эта функция доступна только в Telegram боте!\n\nОткройте бота @YourBotName в Telegram и используйте Web App.');
+    // Показать тестовую панель чтобы пользователь мог ввести свой ID
+    showTestPanel();
     return;
   }
 
@@ -1513,6 +1529,11 @@ async function buyItem(id,name,price,type){
 }
 
 // ── TEST MODE ────────────────────────────────────
+function showTestPanel(){
+  const panel = document.getElementById('testPanel');
+  if(panel) { panel.style.display = panel.style.display==='none'?'block':'block'; panel.scrollIntoView({behavior:'smooth'}); }
+}
+
 function setTestId(){
   const inp=document.getElementById('testIdInput');
   const id=inp?.value.trim();
@@ -1521,7 +1542,8 @@ function setTestId(){
     return;
   }
   localStorage.setItem('test_telegram_id',id);
-  alert(`✅ Тестовый ID установлен: ${id}\n\nТеперь можно забирать награды!`);
+  const panel=document.getElementById('testPanel');
+  if(panel) panel.style.display='none';
   loadUserData(parseInt(id));
   loadMissions();
 }
@@ -1536,7 +1558,13 @@ function hideWelcome(){
 // ── INIT ─────────────────────────────────────────
 window.addEventListener('DOMContentLoaded',()=>{
   const tid=getTid();
-  if(tid)loadUserData(tid);
+  if(tid){
+    loadUserData(tid);
+  } else {
+    // Не в Telegram — показать тестовую панель
+    const panel=document.getElementById('testPanel');
+    if(panel) panel.style.display='block';
+  }
 
   // Если открыт с player_id в URL
   const params=new URLSearchParams(location.search);
