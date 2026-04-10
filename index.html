@@ -59,12 +59,8 @@ body{
 }
 .welcome-screen.hide{opacity:0;pointer-events:none}
 .welcome-logo{
-  width:150px;height:150px;
-  border-radius:50%;
-  object-fit:cover;
-  display:block;
-  box-shadow:0 0 30px rgba(139,92,246,.3), 0 0 60px rgba(6,182,212,.15);
   margin-bottom:24px;
+  display:flex;align-items:center;justify-content:center;
 }
 .welcome-title{
   font-size:32px;font-weight:700;
@@ -603,6 +599,15 @@ body{
   position:relative;
   box-shadow:var(--shadow-sm);
 }
+.shop-item.premium-item{
+  border-color:rgba(139,92,246,.5);
+  background:linear-gradient(135deg,var(--bg-card) 0%,rgba(139,92,246,.08) 100%);
+  box-shadow:var(--shadow-sm),0 0 20px rgba(139,92,246,.15);
+}
+.premium-btn{
+  background:linear-gradient(135deg,#8b5cf6,#06b6d4) !important;
+  box-shadow:0 4px 16px rgba(139,92,246,.4) !important;
+}
 .shop-item::before{
   content:'';position:absolute;inset:0;
   background:var(--accent-gradient);
@@ -702,7 +707,12 @@ body{
 
 <!-- WELCOME SCREEN -->
 <div class="welcome-screen" id="welcomeScreen">
-  <img src="logo.png" alt="Dota 2 Analyzer" class="welcome-logo">
+  <div class="welcome-logo" id="welcomeLogoWrap">
+    <img src="logo.png" alt="Dota 2 Analyzer" id="welcomeLogoImg"
+      onerror="this.style.display='none';document.getElementById('welcomeLogoFallback').style.display='flex'"
+      style="width:150px;height:150px;border-radius:50%;object-fit:cover;display:block;box-shadow:0 0 30px rgba(139,92,246,.3), 0 0 60px rgba(6,182,212,.15);">
+    <div id="welcomeLogoFallback" style="display:none;width:150px;height:150px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#06b6d4);align-items:center;justify-content:center;font-size:64px;box-shadow:0 0 30px rgba(139,92,246,.3),0 0 60px rgba(6,182,212,.15);">⚔️</div>
+  </div>
   <div class="welcome-title">Dota 2 Analyzer</div>
   <div class="welcome-subtitle">Анализ игроков · Миссии · AI помощник</div>
   <button class="welcome-btn" onclick="hideWelcome()">Начать</button>
@@ -1449,26 +1459,34 @@ function renderShop(items){
   const el=document.getElementById('sItems');
   if(!items?.length){el.innerHTML='<div class="empty"><span class="empty-icon">📦</span><div class="empty-text">Магазин пуст</div></div>';return;}
   const coins=currentUser?.coins||0;
-  const labels={booster_xp:'XP Бустеры',booster_coins:'Монетные бустеры',booster_mega:'Мега бустеры',cosmetic_frame:'Рамки',cosmetic_title:'Титулы',special_mission:'Специальное',special_refresh:'Специальное',special_ai:'Специальное'};
+  const labels={premium:'⭐ Premium',booster_xp:'XP Бустеры',booster_coins:'Монетные бустеры',booster_mega:'Мега бустеры',cosmetic_frame:'Рамки',cosmetic_title:'Титулы',special_mission:'Специальное',special_refresh:'Специальное',special_ai:'Специальное'};
   const groups={};
-  items.forEach(i=>{(groups[i.type]=groups[i.type]||[]).push(i);});
+  // Deduplicate items by id
+  const seen=new Set();
+  const uniqueItems=items.filter(i=>{if(seen.has(i.id))return false;seen.add(i.id);return true;});
+  uniqueItems.forEach(i=>{(groups[i.type]=groups[i.type]||[]).push(i);});
   let html='';
-  Object.keys(groups).forEach(type=>{
+  // Show premium first
+  const order=['premium','booster_xp','booster_coins','booster_mega','cosmetic_frame','cosmetic_title','special_ai','special_refresh','special_mission'];
+  const keys=[...order.filter(k=>groups[k]),...Object.keys(groups).filter(k=>!order.includes(k))];
+  keys.forEach(type=>{
     html+=`<div class="type-badge">${labels[type]||type}</div>`;
     groups[type].forEach(item=>{
-      const can=coins>=item.price;
+      const isPremium=item.type==='premium';
+      const priceIcon=isPremium?'⭐':'💰';
+      const can=isPremium||coins>=item.price;
       html+=`
-      <div class="shop-item">
+      <div class="shop-item${isPremium?' premium-item':''}">
         <div class="shop-top">
           <div class="shop-icon">${item.icon||'📦'}</div>
           <div style="flex:1;min-width:0">
             <div class="shop-name">${h(item.name)}</div>
             <div class="shop-desc">${h(item.description||'')}</div>
           </div>
-          <div class="shop-price">${item.price}💰</div>
+          <div class="shop-price">${item.price}${priceIcon}</div>
         </div>
-        <button class="buy-btn" onclick="buyItem(${item.id},'${h(item.name)}',${item.price})" ${!can?'disabled':''}>
-          ${can?'Купить':'Недостаточно монет'}
+        <button class="buy-btn${isPremium?' premium-btn':''}" onclick="buyItem(${item.id},'${h(item.name)}',${item.price},'${item.type}')" ${!can?'disabled':''}>
+          ${isPremium?'⭐ Купить Premium':can?'Купить':'Недостаточно монет'}
         </button>
       </div>`;
     });
@@ -1476,16 +1494,19 @@ function renderShop(items){
   el.innerHTML=html;
 }
 
-async function buyItem(id,name,price){
+async function buyItem(id,name,price,type){
   const tid=getTid();
   if(!tid){tg?.showAlert?.('Авторизуйся через Telegram для покупок');return;}
-  const ok=await (tg?.showConfirm?.(`Купить ${name} за ${price}💰?`) ?? Promise.resolve(confirm(`Купить ${name} за ${price}💰?`)));
+  const isPremium=type==='premium';
+  const confirmMsg=isPremium?`Купить ${name} за ${price}⭐?`:`Купить ${name} за ${price}💰?`;
+  const ok=await (tg?.showConfirm?.(confirmMsg) ?? Promise.resolve(confirm(confirmMsg)));
   if(!ok)return;
   try{
     const r=await fetch(`${API}/shop/buy`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram_id:tid,item_id:id})});
     const d=await r.json();
     if(d.status==='ok'||d.item_name){
-      tg?.showAlert?.(`✅ Куплено!\nОсталось: ${d.coins_left}💰`) || alert(`✅ Куплено! Осталось: ${d.coins_left}💰`);
+      const msg=isPremium?`✅ Premium активирован!\nПриятной игры!`:`✅ Куплено!\nОсталось: ${d.coins_left}💰`;
+      tg?.showAlert?.(msg) || alert(msg);
       loadUserData(tid);loadShop();
     }else throw new Error(d.detail||'Ошибка');
   }catch(e){tg?.showAlert?.(e.message)||alert(e.message);}
