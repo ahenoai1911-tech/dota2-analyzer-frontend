@@ -1268,12 +1268,21 @@ async function loadMissions(){
   try{
     if(tid){
       const r=await fetch(`${API}/missions?telegram_id=${tid}`);
-      if(r.ok){const d=await r.json();renderMissions(d.missions||[]);return;}
+      if(r.ok){
+        const d=await r.json();
+        renderMissions(d.missions||[]);
+        return;
+      }
+      // Если API не работает, показываем локальные миссии
+      console.warn('API /missions failed, showing local missions');
     }
+    // Показываем локальные миссии если есть данные игрока
     if(playerData) renderLocalMissions(playerData);
-    else el.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-text">Не удалось загрузить</div></div>';
-  }catch{
+    else el.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-text">Не удалось загрузить миссии.<br>Сначала найдите игрока на вкладке Поиск.</div></div>';
+  }catch(e){
+    console.error('Load missions error:', e);
     if(playerData) renderLocalMissions(playerData);
+    else el.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-text">Ошибка загрузки миссий</div></div>';
   }
 }
 
