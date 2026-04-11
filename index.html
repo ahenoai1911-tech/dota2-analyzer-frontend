@@ -701,6 +701,54 @@ body{
   .wr-big{font-size:40px}
   .tab-btn{font-size:11px;padding:6px 2px}
 }
+
+/* ── PREMIUM BANNER ── */
+.premium-banner{
+  background:linear-gradient(135deg,rgba(139,92,246,.25) 0%,rgba(6,182,212,.2) 100%);
+  border:1px solid rgba(139,92,246,.5);
+  border-radius:var(--r);padding:16px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.premium-banner::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,246,.3),transparent 70%);
+}
+.premium-banner-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+.premium-banner-sub{font-size:12px;color:var(--text-secondary);margin-bottom:12px}
+.premium-features{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.premium-feat{font-size:12px;color:var(--text-primary);display:flex;align-items:center;gap:6px}
+.premium-feat::before{content:'✓';color:#10b981;font-weight:700;flex-shrink:0}
+.premium-buy-btn{
+  width:100%;padding:12px;
+  background:linear-gradient(135deg,#8b5cf6,#06b6d4);
+  border:none;border-radius:var(--r2);
+  color:#fff;font-size:14px;font-weight:700;
+  cursor:pointer;letter-spacing:.3px;
+  box-shadow:0 4px 16px rgba(139,92,246,.4);
+  transition:all .3s ease;
+}
+.premium-buy-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(139,92,246,.5);}
+.premium-buy-btn:active{transform:translateY(0);}
+.premium-active-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,rgba(139,92,246,.3),rgba(6,182,212,.3));
+  border:1px solid rgba(139,92,246,.5);
+  border-radius:20px;padding:6px 14px;
+  font-size:12px;font-weight:600;color:#fff;
+  margin-bottom:14px;
+}
+
+/* ── SHOP PREMIUM ITEM ── */
+.shop-item.premium-item{
+  border-color:rgba(139,92,246,.5);
+  background:linear-gradient(135deg,var(--bg-card) 0%,rgba(139,92,246,.08) 100%);
+  box-shadow:var(--shadow-sm),0 0 20px rgba(139,92,246,.15);
+}
+.premium-btn{
+  background:linear-gradient(135deg,#8b5cf6,#06b6d4) !important;
+  box-shadow:0 4px 16px rgba(139,92,246,.4) !important;
+}
 </style>
 </head>
 <body>
@@ -766,6 +814,9 @@ body{
     </div>
   </div>
   <div id="mUserBlock"></div>
+
+  <!-- Premium banner -->
+  <div id="premiumBanner" style="display:none"></div>
 
   <!-- Тестовая панель (скрыта в Telegram, видна в браузере) -->
   <div id="testPanel" style="display:none;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:14px;margin-bottom:12px;">
@@ -1217,7 +1268,7 @@ function buildCtx(){
   if(!playerData)return"No player data.";
   const d=playerData,p=d.profile,s=d.stats,t=d.trend||{};
   const heroes=(d.top_heroes||[]).slice(0,5).map(h=>`${h.hero_name||h.hero_id}(${h.matches}г,WR${h.winrate}%,KDA${h.kda})`).join(', ');
-  const matches=(d.recent_matches||[]).slice(0,8).map(m=>`${m.win?'П':'П'} ${m.hero||'?'} ${m.kills}/${m.deaths}/${m.assists} KDA${m.kda}`).join('\n');
+  const matches=(d.recent_matches||[]).slice(0,8).map(m=>`${m.win?'Win':'Loss'} ${m.hero||'?'} ${m.kills}/${m.deaths}/${m.assists} KDA${m.kda}`).join('\n');
   return `Игрок: ${p.name} | Ранг: ${p.rank}\nWR: ${s.winrate}% (${s.wins}П/${s.losses}П)\nLast5: WR${t.last5_winrate??'?'}% KDA${t.last5_avg_kda??'?'} GPM${t.last5_avg_gpm??'?'}\nStreak: ${t.streak?.count||0} ${t.streak?.type||'-'}\nГерои: ${heroes}\nМатчи:\n${matches}`.trim();
 }
 const AI_P={
@@ -1294,33 +1345,103 @@ async function aiQ(type){
 // ── USER DATA ─────────────────────────────────────
 async function loadUserData(tid){
   try{
-    const r=await fetch(`${API}/user/profile?telegram_id=${tid}`);
-    if(!r.ok)return;
-    const d=await r.json();
-    currentUser=d.user;
-    updateBalance(currentUser.coins||0);
-
-    // Загрузить Premium статус
-    const pr=await fetch(`${API}/premium/status?telegram_id=${tid}`);
+    const [ur, pr]=await Promise.all([
+      fetch(`${API}/user/profile?telegram_id=${tid}`),
+      fetch(`${API}/premium/status?telegram_id=${tid}`)
+    ]);
+    if(ur.ok){
+      const d=await ur.json();
+      currentUser=d.user;
+      updateBalance(currentUser.coins||0);
+    }
     if(pr.ok){
       const pd=await pr.json();
-      currentUser.premium=pd.premium;
-      currentUser.ai_limit=pd.ai_requests;
+      if(currentUser){ currentUser.premium=pd.premium; currentUser.ai_limit=pd.ai_requests; }
       updatePremiumBadge(pd);
     }
-  }catch{}
+  }catch(e){ console.error('loadUserData error:',e); }
 }
 
 function updatePremiumBadge(premiumData){
+  // Обновить маленький бейдж вверху
   const badge=document.getElementById('premiumBadge');
-  if(!badge)return;
+  if(badge){
+    if(premiumData.premium){
+      badge.innerHTML=`⭐ Premium | AI: ${premiumData.ai_requests?.remaining??'?'}/${premiumData.ai_requests?.limit??'?'}`;
+      badge.style.background='linear-gradient(135deg, #8b5cf6, #06b6d4)';
+    }else{
+      badge.innerHTML=`🆓 Free | AI: ${premiumData.ai_requests?.remaining??'?'}/${premiumData.ai_requests?.limit??'?'}`;
+      badge.style.background='var(--bg-card)';
+    }
+  }
+  // Обновить premium banner на вкладке миссий
+  renderPremiumBanner(premiumData);
+}
 
-  if(premiumData.premium){
-    badge.innerHTML=`⭐ Premium | AI: ${premiumData.ai_requests.remaining}/${premiumData.ai_requests.limit}`;
-    badge.style.background='linear-gradient(135deg, #8b5cf6, #06b6d4)';
-  }else{
-    badge.innerHTML=`🆓 Free | AI: ${premiumData.ai_requests.remaining}/${premiumData.ai_requests.limit}`;
-    badge.style.background='var(--bg-card)';
+function renderPremiumBanner(pd){
+  const el=document.getElementById('premiumBanner');
+  if(!el)return;
+  el.style.display='block';
+  if(pd.premium){
+    const until=pd.premium_until?new Date(pd.premium_until).toLocaleDateString('ru-RU'):'—';
+    el.innerHTML=`
+      <div class="premium-active-badge">⭐ Premium активен до ${until}</div>`;
+  } else {
+    const rem=pd.ai_requests?.remaining??0;
+    const lim=pd.ai_requests?.limit??5;
+    el.innerHTML=`
+    <div class="premium-banner">
+      <div class="premium-banner-title">⭐ Dota 2 Analyzer Premium</div>
+      <div class="premium-banner-sub">Разблокируй полный потенциал</div>
+      <div class="premium-features">
+        <div class="premium-feat">3 миссии в день вместо 1</div>
+        <div class="premium-feat">100 AI запросов/день (сейчас: ${rem}/${lim})</div>
+        <div class="premium-feat">Приоритетные обновления</div>
+        <div class="premium-feat">Эксклюзивные награды</div>
+      </div>
+      <button class="premium-buy-btn" onclick="buyPremium()">
+        ⭐ Купить Premium — 129 звёзд / мес
+      </button>
+    </div>`;
+  }
+}
+
+async function buyPremium(){
+  const tid=getTid();
+  if(!tid){
+    if(tg?.showAlert) tg.showAlert('Открой через Telegram бота!');
+    else alert('Открой через Telegram бота!');
+    return;
+  }
+  const ok = tg?.showConfirm
+    ? await tg.showConfirm('Купить Premium за 129 звёзд?\n\n• 3 миссии в день\n• 100 AI запросов/день\n• 30 дней')
+    : confirm('Купить Premium за 129 звёзд?\n\n• 3 миссии в день\n• 100 AI запросов/день\n• 30 дней');
+  if(!ok) return;
+
+  try{
+    // Ищем id премиум товара в магазине
+    const sr=await fetch(`${API}/shop`);
+    const sd=await sr.json();
+    const premItem=(sd.items||[]).find(i=>i.type==='premium');
+    if(!premItem){ alert('Товар не найден'); return; }
+
+    const r=await fetch(`${API}/shop/buy`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({telegram_id:tid, item_id:premItem.id})
+    });
+    const d=await r.json();
+    if(d.status==='ok'||d.item_name){
+      if(tg?.showAlert) tg.showAlert('✅ Premium активирован на 30 дней!\n\nПриятной игры!');
+      else alert('✅ Premium активирован на 30 дней!');
+      loadUserData(tid);
+      loadMissions();
+    } else {
+      throw new Error(d.detail||'Ошибка покупки');
+    }
+  }catch(e){
+    if(tg?.showAlert) tg.showAlert('❌ '+e.message);
+    else alert('❌ '+e.message);
   }
 }
 
@@ -1333,42 +1454,30 @@ function updateBalance(coins){
 async function loadMissions(){
   const el=document.getElementById('mList');
   const tid=getTid();
-  if(!tid&&!playerData){
-    el.innerHTML='<div class="empty"><span class="empty-icon">🔍</span><div class="empty-text">Сначала найди игрока<br>на вкладке Поиск</div></div>';
+  if(!tid){
+    el.innerHTML='<div class="empty"><span class="empty-icon">🔍</span><div class="empty-text">Открой через Telegram бота<br>или введи свой Telegram ID ниже</div></div>';
+    const panel=document.getElementById('testPanel');
+    if(panel) panel.style.display='block';
     return;
   }
-  el.innerHTML='<div class="empty"><span class="empty-icon" style="font-size:28px">⏳</span><div class="empty-text">Загрузка...</div></div>';
+  el.innerHTML='<div class="empty"><span class="empty-icon" style="font-size:28px">⏳</span><div class="empty-text">Загрузка миссий...</div></div>';
   try{
-    if(tid){
-      const r=await fetch(`${API}/missions?telegram_id=${tid}`);
-      if(r.ok){
-        const d=await r.json();
-        renderMissions(d.missions||[]);
-        return;
-      }
-      // Если API не работает, показываем локальные миссии
-      console.warn('API /missions failed, showing local missions');
+    const r=await fetch(`${API}/missions?telegram_id=${tid}`);
+    const d=await r.json();
+    if(r.ok && d.status==='ok'){
+      renderMissions(d.missions||[]);
+    } else {
+      el.innerHTML=`<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-text">Ошибка: ${d.detail||'не удалось загрузить'}</div></div>`;
     }
-    // Показываем локальные миссии если есть данные игрока
-    if(playerData) renderLocalMissions(playerData);
-    else el.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-text">Не удалось загрузить миссии.<br>Сначала найдите игрока на вкладке Поиск.</div></div>';
   }catch(e){
     console.error('Load missions error:', e);
-    if(playerData) renderLocalMissions(playerData);
-    else el.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-text">Ошибка загрузки миссий</div></div>';
+    el.innerHTML='<div class="empty"><span class="empty-icon">⚠️</span><div class="empty-text">Ошибка сети. Проверь подключение.</div></div>';
   }
 }
 
 function renderLocalMissions(data){
-  const s=data.stats,t=data.trend||{},rm=data.recent_matches||[];
-  const ms=[
-    {id:1,icon:'🏆',title:'Серия побед',desc:'Выиграй 3 матча подряд',progress:Math.min(t.streak?.type==='win'?t.streak.count:0,3),target:3,coins:50,xp:100,type:'daily',done:t.streak?.type==='win'&&t.streak.count>=3},
-    {id:2,icon:'⚔️',title:'Высокий KDA',desc:'Набери KDA 4+ в матче',progress:rm.filter(m=>m.kda>=4).length,target:1,coins:30,xp:60,type:'daily',done:rm.some(m=>m.kda>=4)},
-    {id:3,icon:'💰',title:'Фарм-мастер',desc:'Среднее GPM 600+',progress:Math.round(t.last5_avg_gpm||0),target:600,coins:80,xp:150,type:'weekly',done:(t.last5_avg_gpm||0)>=600},
-    {id:4,icon:'📈',title:'Стабильность',desc:'WR выше 50% за последние 20',progress:Math.round(s.winrate),target:50,coins:100,xp:200,type:'weekly',done:s.winrate>=50},
-    {id:5,icon:'🌟',title:'Мастер',desc:'Выиграй 50 матчей',progress:Math.min(s.wins,50),target:50,coins:200,xp:500,type:'monthly',done:s.wins>=50},
-  ];
-  renderMissions(ms);
+  // Локальные миссии отключены — только серверные (с реальными id для claim)
+  loadMissions();
 }
 
 function renderMissions(ms){
@@ -1411,48 +1520,44 @@ function renderMissions(ms){
   el.querySelectorAll('.claim-btn').forEach(btn=>{
     btn.addEventListener('click',function(){
       const missionId=parseInt(this.getAttribute('data-mission-id'));
-      claimM(missionId);
+      claimM(missionId, this);
     });
   });
 }
 
-async function claimM(id){
-  console.log('🎯 claimM called with id:', id);
+async function claimM(id, btn){
   const tid=getTid();
-  console.log('📱 Telegram ID:', tid);
+  if(!tid){ showTestPanel(); return; }
+  if(!id){ alert('❌ ID миссии не найден'); return; }
 
-  if(!tid){
-    // Показать тестовую панель чтобы пользователь мог ввести свой ID
-    showTestPanel();
-    return;
-  }
-
-  if(!id){
-    alert('❌ Ошибка: ID миссии не найден');
-    console.error('Mission ID is missing:', id);
-    return;
-  }
-
-  console.log('📤 Sending request to:', `${API}/missions/claim`);
-  console.log('📦 Payload:', {telegram_id:tid, mission_id:id});
+  // Блокируем кнопку чтобы не нажали дважды
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Загрузка...'; }
 
   try{
-    const r=await fetch(`${API}/missions/claim`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram_id:tid,mission_id:id})});
-    console.log('📥 Response status:', r.status);
-
+    const r=await fetch(`${API}/missions/claim`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({telegram_id:tid, mission_id:id})
+    });
     const d=await r.json();
-    console.log('📥 Response data:', d);
-
     if(r.ok && d.status==='ok'){
-      alert(`🎉 Награда получена!\n\n💰 +${d.reward?.coins||0} монет\n⭐ +${d.reward?.xp||0} XP`);
+      // Показать уведомление
+      if(tg?.showAlert){
+        tg.showAlert(`🎉 Награда получена!\n\n💰 +${d.reward?.coins||0} монет\n⭐ +${d.reward?.xp||0} XP`);
+      } else {
+        alert(`🎉 Награда получена!\n\n💰 +${d.reward?.coins||0} монет\n⭐ +${d.reward?.xp||0} XP`);
+      }
       loadUserData(tid);
       loadMissions();
-    }else{
-      alert('❌ Ошибка: '+(d.detail||'Не удалось получить награду'));
+    } else {
+      const msg = d.detail||'Не удалось получить награду';
+      if(tg?.showAlert) tg.showAlert('❌ '+msg);
+      else alert('❌ '+msg);
+      if(btn){ btn.disabled=false; btn.textContent='✅ Получить награду'; }
     }
   }catch(e){
-    console.error('❌ Claim error:',e);
     alert('❌ Ошибка сети: '+e.message);
+    if(btn){ btn.disabled=false; btn.textContent='✅ Получить награду'; }
   }
 }
 
